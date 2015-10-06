@@ -85,7 +85,6 @@ public class MovieDetailsFragment extends Fragment {
             Glide.with(this)
                     .load(imagePath)
                     .asBitmap()
-                    .centerCrop()
                     .into(new BitmapImageViewTarget(mImageViewPoster) {
                         @Override
                         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
