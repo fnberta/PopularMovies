@@ -1,10 +1,9 @@
 package ch.berta.fabio.popularmovies.ui;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +21,6 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 public class MovieDetailsFragment extends Fragment {
 
     private static final String BUNDLE_MOVIE = "bundle_movie";
-    private FragmentInteractionListener mListener;
     private ImageView mImageViewPoster;
     private TextView mTextViewPlot;
     private TextView mTextViewDate;
@@ -41,17 +39,6 @@ public class MovieDetailsFragment extends Fragment {
 
     public MovieDetailsFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (FragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement FragmentInteractionListener");
-        }
     }
 
     @Override
@@ -102,14 +89,4 @@ public class MovieDetailsFragment extends Fragment {
         mTextViewDate.setText(mMovie.getReleaseDateFormatted(true));
         mTextViewRating.setText(getString(R.string.details_rating, mMovie.getPopularity()));
     }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface FragmentInteractionListener {
-    }
-
 }

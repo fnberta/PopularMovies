@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
@@ -43,6 +44,7 @@ public class MainFragment extends Fragment implements
     private static final String STATE_MOVIE_PAGE = "state_movie_page";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
     private FragmentInteractionListener mListener;
+    private boolean mUseTwoPane;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private MoviesRecyclerAdapter mRecyclerAdapter;
@@ -75,6 +77,7 @@ public class MainFragment extends Fragment implements
 
         setHasOptionsMenu(true);
         setupSortOptions();
+        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
 
         if (savedInstanceState != null) {
             mMovies = savedInstanceState.getParcelableArrayList(STATE_MOVIES);
@@ -254,14 +257,23 @@ public class MainFragment extends Fragment implements
 
     @Override
     public void onMovieRowItemClick(int position, View sharedView) {
-        Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-        intent.putExtra(INTENT_MOVIE_SELECTED, mMovies.get(position));
+        Movie movie = mMovies.get(position);
 
-        String transitionName = getString(R.string.shared_transition_details_poster);
-        ViewCompat.setTransitionName(sharedView, transitionName);
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                getActivity(), sharedView, transitionName);
-        getActivity().startActivity(intent, options.toBundle());
+        if (!mUseTwoPane) {
+            Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+            intent.putExtra(INTENT_MOVIE_SELECTED, movie);
+            String transitionName = getString(R.string.shared_transition_details_poster);
+            ViewCompat.setTransitionName(sharedView, transitionName);
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    getActivity(), sharedView, transitionName);
+            getActivity().startActivity(intent, options.toBundle());
+        } else {
+            MovieDetailsFragment detailsFragment = MovieDetailsFragment.newInstance(movie);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.container, detailsFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .commit();
+        }
     }
 
     public void onSortOptionSelected(int sortOptionIndex) {

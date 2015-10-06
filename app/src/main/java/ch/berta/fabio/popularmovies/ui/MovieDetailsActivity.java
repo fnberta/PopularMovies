@@ -15,8 +15,7 @@ import com.bumptech.glide.Glide;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
-public class MovieDetailsActivity extends AppCompatActivity implements
-        MovieDetailsFragment.FragmentInteractionListener{
+public class MovieDetailsActivity extends AppCompatActivity {
 
     private static final String DETAILS_FRAGMENT = "details_fragment";
 
