@@ -1,0 +1,12 @@
+<resources>>
+
+    <style name="AppTheme.DrawStatusBar" parent="AppTheme">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme.DrawStatusBar.Explode" parent="AppTheme.DrawStatusBar">
+        <item name="android:windowEnterTransition">@transition/explode_main</item>
+    </style>
+
+</resources>

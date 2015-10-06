@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="font_fontFamily_regular" translatable="false" tools:ignore="UnusedResources">sans-serif</string>
+    <string name="font_fontFamily_medium" translatable="false">sans-serif-medium</string>
+    <string name="font_fontFamily_light" translatable="false" tools:ignore="UnusedResources">sans-serif-light</string>
+
+</resources>
