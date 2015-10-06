@@ -24,6 +24,7 @@ public class QueryMoviesTaskFragment extends Fragment {
     private static final String BUNDLE_PAGE = "bundle_page";
     private static final String BUNDLE_SORT = "bundle_sort";
     private TaskInteractionListener mListener;
+    private Call<MoviesPage> mLoadMoviePosters;
 
     public static QueryMoviesTaskFragment newInstance(int page, String sort) {
         QueryMoviesTaskFragment fragment = new QueryMoviesTaskFragment();
@@ -73,9 +74,9 @@ public class QueryMoviesTaskFragment extends Fragment {
     }
 
     private void queryMovies(int page, String sort) {
-        Call<MoviesPage> call = MovieDbClient.getService().loadMoviePosters(page, sort,
+        mLoadMoviePosters = MovieDbClient.getService().loadMoviePosters(page, sort,
                 MovieDbKey.MOVIE_DB_KEY);
-        call.enqueue(new Callback<MoviesPage>() {
+        mLoadMoviePosters.enqueue(new Callback<MoviesPage>() {
             @Override
             public void onResponse(Response<MoviesPage> response, Retrofit retrofit) {
                 MoviesPage page = response.body();
@@ -101,6 +102,12 @@ public class QueryMoviesTaskFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        mLoadMoviePosters.cancel();
+        super.onDestroy();
     }
 
     public interface TaskInteractionListener {
