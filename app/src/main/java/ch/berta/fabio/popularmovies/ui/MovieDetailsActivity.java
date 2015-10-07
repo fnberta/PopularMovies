@@ -1,9 +1,6 @@
 package ch.berta.fabio.popularmovies.ui;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.text.TextUtilsCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,8 +12,7 @@ import com.bumptech.glide.Glide;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
-public class MovieDetailsActivity extends AppCompatActivity implements
-        MovieDetailsFragment.FragmentInteractionListener{
+public class MovieDetailsActivity extends AppCompatActivity {
 
     private static final String DETAILS_FRAGMENT = "details_fragment";
 
