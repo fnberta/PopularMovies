@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -21,6 +22,8 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
  */
 public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
+    public static final int TYPE_ITEM = 0;
+    public static final int TYPE_PROGRESS = 1;
     private int mViewResource;
     private List<Movie> mMovies;
     private Fragment mLifecycleFragment;
@@ -36,17 +39,49 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(mViewResource, parent, false);
-        return new MovieRow(view, mListener);
+        switch (viewType) {
+            case TYPE_ITEM: {
+                View view = LayoutInflater.from(parent.getContext()).inflate(mViewResource, parent,
+                        false);
+                return new MovieRow(view, mListener);
+            }
+            case TYPE_PROGRESS: {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_progress,
+                        parent, false);
+                return new ProgressRow(view);
+            }
+            default:
+                throw new RuntimeException("there is no type that matches the type " + viewType +
+                        " + make sure your using types correctly");
+        }
+
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        MovieRow movieRow = (MovieRow) holder;
-        Movie movie = mMovies.get(position);
+        int viewType = getItemViewType(position);
 
-        movieRow.setMovie(movie.getTitle(), movie.getReleaseDateFormatted(false), movie.getPosterPath(),
-                mLifecycleFragment);
+        switch (viewType) {
+            case TYPE_ITEM:
+                MovieRow movieRow = (MovieRow) holder;
+                Movie movie = mMovies.get(position);
+
+                movieRow.setMovie(movie.getTitle(), movie.getReleaseDateFormatted(false),
+                        movie.getPosterPath(), mLifecycleFragment);
+                break;
+            case TYPE_PROGRESS:
+                // do nothing
+                break;
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mMovies.get(position) == null) {
+            return TYPE_PROGRESS;
+        }
+
+        return TYPE_ITEM;
     }
 
     @Override
@@ -94,6 +129,17 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
             }
             mTextViewTitle.setText(title);
             mTextViewDate.setText(date);
+        }
+    }
+
+    private static class ProgressRow extends RecyclerView.ViewHolder {
+
+        private ProgressBar mProgressBar;
+
+        public ProgressRow(View view) {
+            super(view);
+
+            mProgressBar = (ProgressBar) view.findViewById(R.id.pb_more);
         }
     }
 }

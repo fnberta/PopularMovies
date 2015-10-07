@@ -19,17 +19,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.mugen.Mugen;
+import com.mugen.MugenCallbacks;
+import com.mugen.attachers.BaseAttacher;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
+import ch.berta.fabio.popularmovies.data.MovieDbClient;
+import ch.berta.fabio.popularmovies.data.MovieDbKey;
 import ch.berta.fabio.popularmovies.data.models.Movie;
+import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import ch.berta.fabio.popularmovies.data.models.Sort;
 import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesRecyclerAdapter;
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -38,9 +49,12 @@ public class MainFragment extends Fragment implements
         MoviesRecyclerAdapter.AdapterInteractionListener {
 
     public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
+    private static final int MOVIE_DB_MAX_PAGE = 1000;
     private static final String STATE_MOVIES = "state_movies";
     private static final String STATE_SORT_SELECTED = "state_sort_selected";
     private static final String STATE_MOVIE_PAGE = "state_movie_page";
+    private static final String STATE_REFRESHING = "state_refreshing";
+    private static final String STATE_LOADING_MORE = "state_loading_more";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
     private FragmentInteractionListener mListener;
     private ProgressBar mProgressBar;
@@ -53,6 +67,8 @@ public class MainFragment extends Fragment implements
     private int mSortSelected;
     private int mMoviePage;
     private String[] mSortValues;
+    private boolean mIsRefreshing;
+    private boolean mIsLoadingMore;
 
     public MainFragment() {
     }
@@ -80,9 +96,11 @@ public class MainFragment extends Fragment implements
             mMovies = savedInstanceState.getParcelableArrayList(STATE_MOVIES);
             mSortSelected = savedInstanceState.getInt(STATE_SORT_SELECTED);
             mMoviePage = savedInstanceState.getInt(STATE_MOVIE_PAGE);
+            mIsRefreshing = savedInstanceState.getBoolean(STATE_REFRESHING);
+            mIsLoadingMore = savedInstanceState.getBoolean(STATE_LOADING_MORE);
         } else {
             mMovies = new ArrayList<>();
-            mMoviePage = 1;
+            mIsRefreshing = false;
         }
     }
 
@@ -93,6 +111,8 @@ public class MainFragment extends Fragment implements
         outState.putParcelableArrayList(STATE_MOVIES, mMovies);
         outState.putInt(STATE_SORT_SELECTED, mSortSelected);
         outState.putInt(STATE_MOVIE_PAGE, mMoviePage);
+        outState.putBoolean(STATE_REFRESHING, mSwipeRefreshLayout.isRefreshing());
+        outState.putBoolean(STATE_LOADING_MORE, mIsLoadingMore);
     }
 
     private void setupSortOptions() {
@@ -126,27 +146,85 @@ public class MainFragment extends Fragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        int spanCount = getResources().getInteger(R.integer.span_count);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), spanCount));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addItemDecoration(new PosterGridItemDecoration(getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(R.layout.row_movie, mMovies, this, this);
-        mRecyclerView.setAdapter(mRecyclerAdapter);
+        setupSwipeToRefresh();
+        setupRecyclerView();
 
+        final int moviesSize = mMovies.size();
+        if (moviesSize == 0) {
+            mMoviePage = 1;
+            queryMovies(true);
+        } else {
+            if (mIsLoadingMore) {
+                // scroll to last position to show load more indicator
+                mRecyclerView.scrollToPosition(moviesSize - 1);
+            }
+
+            toggleMainVisibility(false);
+        }
+    }
+
+    private void setupSwipeToRefresh() {
         mSwipeRefreshLayout.setColorSchemeColors(R.color.red_500, R.color.red_700,
                 R.color.amber_A400);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mMoviePage = 1;
                 queryMovies(false);
             }
         });
 
-        if (mMovies.isEmpty()) {
-            queryMovies(true);
-        } else {
-            toggleMainVisibility(false);
+        if (mIsRefreshing) {
+            // work around bug in SwipeRefreshLayout that prevents changing refresh state before it
+            // is laid out, TODO: change once bug is fixed
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
         }
+    }
+
+    private void setupRecyclerView() {
+        final int spanCount = getResources().getInteger(R.integer.span_count);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), spanCount);
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                int viewType = mRecyclerAdapter.getItemViewType(position);
+                return viewType == MoviesRecyclerAdapter.TYPE_PROGRESS ? spanCount : 1;
+            }
+        });
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
+                getResources().getDimensionPixelSize(R.dimen.grid_padding)));
+        mRecyclerAdapter = new MoviesRecyclerAdapter(R.layout.row_movie, mMovies, this, this);
+        mRecyclerView.setAdapter(mRecyclerAdapter);
+        Mugen.with(mRecyclerView, new MugenCallbacks() {
+            @Override
+            public void onLoadMore() {
+                mIsLoadingMore = true;
+                showLoadMoreIndicator(mMovies.size());
+                queryMovies(false);
+            }
+
+            @Override
+            public boolean isLoading() {
+                return mSwipeRefreshLayout.isRefreshing() || mIsLoadingMore;
+            }
+
+            @Override
+            public boolean hasLoadedAllItems() {
+                return mMoviePage >= MOVIE_DB_MAX_PAGE;
+            }
+        }).start();
+    }
+
+    private void showLoadMoreIndicator(int position) {
+        mMovies.add(null);
+        mRecyclerAdapter.notifyItemInserted(position);
     }
 
     public void queryMovies(boolean showProgressBar) {
@@ -174,19 +252,31 @@ public class MainFragment extends Fragment implements
         removeTaskFragment();
         setLoading(false);
 
-        mMovies.clear();
-        if (!movies.isEmpty()) {
+        if (mMoviePage == 1) {
+            mMovies.clear();
+            if (!movies.isEmpty()) {
+                mMovies.addAll(movies);
+            }
+
+            mRecyclerAdapter.notifyDataSetChanged();
+            mRecyclerView.scrollToPosition(0);
+            toggleMainVisibility(false);
+        } else {
+            int progressBarPosition = mMovies.size() - 1;
+            hideLoadMoreIndicator(progressBarPosition);
+
             mMovies.addAll(movies);
+            mRecyclerAdapter.notifyItemRangeInserted(progressBarPosition, movies.size());
+
+            mIsLoadingMore = false;
         }
 
-        mRecyclerAdapter.notifyDataSetChanged();
-        toggleMainVisibility(false);
+        mMoviePage++;
     }
 
     public void onMovieQueryFailed() {
         removeTaskFragment();
         setLoading(false);
-        toggleMainVisibility(false);
 
         Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView, getString(R.string.error_connection));
         snackbar.setAction(R.string.snackbar_retry, new View.OnClickListener() {
@@ -197,6 +287,20 @@ public class MainFragment extends Fragment implements
             }
         });
         snackbar.show();
+
+        if (mMoviePage == 1) {
+            toggleMainVisibility(false);
+        } else {
+            int progressBarPosition = mMovies.size() - 1;
+            hideLoadMoreIndicator(progressBarPosition);
+
+            mIsLoadingMore = false;
+        }
+    }
+
+    private void hideLoadMoreIndicator(int position) {
+        mMovies.remove(position);
+        mRecyclerAdapter.notifyItemRemoved(position);
     }
 
     private void removeTaskFragment() {
@@ -265,6 +369,7 @@ public class MainFragment extends Fragment implements
     }
 
     public void onSortOptionSelected(int sortOptionIndex) {
+        mMoviePage = 1;
         mSortSelected = sortOptionIndex;
         queryMovies(true);
     }

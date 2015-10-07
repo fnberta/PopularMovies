@@ -30,4 +30,5 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
     compile 'com.android.support:support-annotations:23.0.1'
+    compile 'com.vinaysshenoy:mugen:1.0.2'
 }
