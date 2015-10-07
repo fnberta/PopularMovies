@@ -1,5 +1,6 @@
 package ch.berta.fabio.popularmovies.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -336,14 +337,16 @@ public class MainFragment extends Fragment implements
 
     @Override
     public void onMovieRowItemClick(int position, View sharedView) {
-        Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+        Activity activity = getActivity();
+
+        Intent intent = new Intent(activity, MovieDetailsActivity.class);
         intent.putExtra(INTENT_MOVIE_SELECTED, mMovies.get(position));
 
         String transitionName = getString(R.string.shared_transition_details_poster);
         ViewCompat.setTransitionName(sharedView, transitionName);
         ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                getActivity(), sharedView, transitionName);
-        getActivity().startActivity(intent, options.toBundle());
+                activity, sharedView, transitionName);
+        activity.startActivity(intent, options.toBundle());
     }
 
     public void onSortOptionSelected(int sortOptionIndex) {
