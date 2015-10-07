@@ -1,6 +1,5 @@
 package ch.berta.fabio.popularmovies.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -21,7 +20,6 @@ import android.widget.ProgressBar;
 
 import com.mugen.Mugen;
 import com.mugen.MugenCallbacks;
-import com.mugen.attachers.BaseAttacher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,18 +27,11 @@ import java.util.List;
 import ch.berta.fabio.popularmovies.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
-import ch.berta.fabio.popularmovies.data.MovieDbClient;
-import ch.berta.fabio.popularmovies.data.MovieDbKey;
 import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import ch.berta.fabio.popularmovies.data.models.Sort;
 import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesRecyclerAdapter;
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -56,7 +47,6 @@ public class MainFragment extends Fragment implements
     private static final String STATE_REFRESHING = "state_refreshing";
     private static final String STATE_LOADING_MORE = "state_loading_more";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
-    private FragmentInteractionListener mListener;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private MoviesRecyclerAdapter mRecyclerAdapter;
@@ -71,18 +61,6 @@ public class MainFragment extends Fragment implements
     private boolean mIsLoadingMore;
 
     public MainFragment() {
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            mListener = (FragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement FragmentInteractionListener");
-        }
     }
 
     @Override
@@ -372,14 +350,5 @@ public class MainFragment extends Fragment implements
         mMoviePage = 1;
         mSortSelected = sortOptionIndex;
         queryMovies(true);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface FragmentInteractionListener {
     }
 }
