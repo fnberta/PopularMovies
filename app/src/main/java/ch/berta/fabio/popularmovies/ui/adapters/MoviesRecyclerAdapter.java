@@ -103,6 +103,36 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
         return mMovies.size();
     }
 
+    public int getLastPosition() {
+        return getItemCount() - 1;
+    }
+
+    public void setMovies(List<Movie> movies) {
+        mMovies.clear();
+
+        if (!movies.isEmpty()) {
+            mMovies.addAll(movies);
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public void addMovies(List<Movie> movies) {
+        mMovies.addAll(movies);
+        notifyItemRangeInserted(getItemCount(), movies.size());
+    }
+
+    public void showLoadMoreIndicator() {
+        mMovies.add(null);
+        notifyItemInserted(getLastPosition());
+    }
+
+    public void hideLoadMoreIndicator() {
+        int position = getLastPosition();
+        mMovies.remove(position);
+        notifyItemRemoved(position);
+    }
+
     public interface AdapterInteractionListener {
         void onMovieRowItemClick(int position, View sharedView);
     }
