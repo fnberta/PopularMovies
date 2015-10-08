@@ -2,7 +2,9 @@ package ch.berta.fabio.popularmovies.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -43,11 +45,12 @@ public class MainFragment extends Fragment implements
     public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
     private static final int MOVIE_DB_MAX_PAGE = 1000;
     private static final String STATE_MOVIES = "state_movies";
-    private static final String STATE_SORT_SELECTED = "state_sort_selected";
     private static final String STATE_MOVIE_PAGE = "state_movie_page";
     private static final String STATE_REFRESHING = "state_refreshing";
     private static final String STATE_LOADING_MORE = "state_loading_more";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
+    private static final String PERSIST_SORT = "persisted_sort";
+    private SharedPreferences mSharedPrefs;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private MoviesRecyclerAdapter mRecyclerAdapter;
@@ -69,11 +72,10 @@ public class MainFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-        setupSortOptions();
+        setupSorting();
 
         if (savedInstanceState != null) {
             mMovies = savedInstanceState.getParcelableArrayList(STATE_MOVIES);
-            mSortSelected = savedInstanceState.getInt(STATE_SORT_SELECTED);
             mMoviePage = savedInstanceState.getInt(STATE_MOVIE_PAGE);
             mIsRefreshing = savedInstanceState.getBoolean(STATE_REFRESHING);
             mIsLoadingMore = savedInstanceState.getBoolean(STATE_LOADING_MORE);
@@ -88,13 +90,12 @@ public class MainFragment extends Fragment implements
         super.onSaveInstanceState(outState);
 
         outState.putParcelableArrayList(STATE_MOVIES, mMovies);
-        outState.putInt(STATE_SORT_SELECTED, mSortSelected);
         outState.putInt(STATE_MOVIE_PAGE, mMoviePage);
         outState.putBoolean(STATE_REFRESHING, mSwipeRefreshLayout.isRefreshing());
         outState.putBoolean(STATE_LOADING_MORE, mIsLoadingMore);
     }
 
-    private void setupSortOptions() {
+    private void setupSorting() {
         mSortOptions = new Sort[]{
                 new Sort(Sort.SORT_POPULARITY, getString(R.string.sort_popularity)),
                 new Sort(Sort.SORT_RELEASE_DATE, getString(R.string.sort_release_date)),
@@ -106,6 +107,9 @@ public class MainFragment extends Fragment implements
             Sort sort = mSortOptions[i];
             mSortValues[i] = sort.getReadableValue();
         }
+
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
     }
 
     @Override
@@ -334,6 +338,8 @@ public class MainFragment extends Fragment implements
     public void onSortOptionSelected(int sortOptionIndex) {
         mMoviePage = 1;
         mSortSelected = sortOptionIndex;
+        mSharedPrefs.edit().putInt(PERSIST_SORT, sortOptionIndex).apply();
+
         queryMovies(true);
     }
 }
