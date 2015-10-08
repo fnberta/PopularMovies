@@ -27,7 +27,7 @@ import com.mugen.MugenCallbacks;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.PosterGridItemDecoration;
+import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;

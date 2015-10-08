@@ -1,4 +1,4 @@
-package ch.berta.fabio.popularmovies;
+package ch.berta.fabio.popularmovies.ui.adapters.decorators;
 
 import android.graphics.Rect;
 import android.support.v7.widget.GridLayoutManager;
