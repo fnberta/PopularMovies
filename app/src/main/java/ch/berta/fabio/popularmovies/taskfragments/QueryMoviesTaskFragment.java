@@ -7,8 +7,8 @@ import android.text.TextUtils;
 
 import java.util.List;
 
+import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.MovieDbClient;
-import ch.berta.fabio.popularmovies.data.MovieDbKey;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import retrofit.Call;
@@ -75,7 +75,7 @@ public class QueryMoviesTaskFragment extends Fragment {
 
     private void queryMovies(int page, String sort) {
         mLoadMoviePosters = MovieDbClient.getService().loadMoviePosters(page, sort,
-                MovieDbKey.MOVIE_DB_KEY);
+                getString(R.string.movie_db_key));
         mLoadMoviePosters.enqueue(new Callback<MoviesPage>() {
             @Override
             public void onResponse(Response<MoviesPage> response, Retrofit retrofit) {

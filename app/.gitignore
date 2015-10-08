@@ -1,2 +1,2 @@
 /build
-/src/main/java/ch/berta/fabio/popularmovies/data/MovieDbKey.java
+src/main/res/values/strings_private.xml
