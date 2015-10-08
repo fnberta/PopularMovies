@@ -12,7 +12,6 @@ import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
 public class MainActivity extends AppCompatActivity implements
-        MainFragment.FragmentInteractionListener,
         QueryMoviesTaskFragment.TaskInteractionListener,
         SortMoviesDialogFragment.DialogInteractionListener {
 

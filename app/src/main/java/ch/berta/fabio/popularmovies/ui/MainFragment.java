@@ -2,7 +2,9 @@ package ch.berta.fabio.popularmovies.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -20,10 +22,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.mugen.Mugen;
+import com.mugen.MugenCallbacks;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.PosterGridItemDecoration;
+import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
@@ -39,11 +44,14 @@ public class MainFragment extends Fragment implements
         MoviesRecyclerAdapter.AdapterInteractionListener {
 
     public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
+    private static final int MOVIE_DB_MAX_PAGE = 1000;
     private static final String STATE_MOVIES = "state_movies";
-    private static final String STATE_SORT_SELECTED = "state_sort_selected";
     private static final String STATE_MOVIE_PAGE = "state_movie_page";
+    private static final String STATE_REFRESHING = "state_refreshing";
+    private static final String STATE_LOADING_MORE = "state_loading_more";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
-    private FragmentInteractionListener mListener;
+    private static final String PERSIST_SORT = "persisted_sort";
+    private SharedPreferences mSharedPrefs;
     private boolean mUseTwoPane;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
@@ -55,20 +63,10 @@ public class MainFragment extends Fragment implements
     private int mSortSelected;
     private int mMoviePage;
     private String[] mSortValues;
+    private boolean mIsRefreshing;
+    private boolean mIsLoadingMore;
 
     public MainFragment() {
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        try {
-            mListener = (FragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement FragmentInteractionListener");
-        }
     }
 
     @Override
@@ -76,16 +74,17 @@ public class MainFragment extends Fragment implements
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-        setupSortOptions();
+        setupSorting();
         mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
 
         if (savedInstanceState != null) {
             mMovies = savedInstanceState.getParcelableArrayList(STATE_MOVIES);
-            mSortSelected = savedInstanceState.getInt(STATE_SORT_SELECTED);
             mMoviePage = savedInstanceState.getInt(STATE_MOVIE_PAGE);
+            mIsRefreshing = savedInstanceState.getBoolean(STATE_REFRESHING);
+            mIsLoadingMore = savedInstanceState.getBoolean(STATE_LOADING_MORE);
         } else {
             mMovies = new ArrayList<>();
-            mMoviePage = 1;
+            mIsRefreshing = false;
         }
     }
 
@@ -94,11 +93,12 @@ public class MainFragment extends Fragment implements
         super.onSaveInstanceState(outState);
 
         outState.putParcelableArrayList(STATE_MOVIES, mMovies);
-        outState.putInt(STATE_SORT_SELECTED, mSortSelected);
         outState.putInt(STATE_MOVIE_PAGE, mMoviePage);
+        outState.putBoolean(STATE_REFRESHING, mSwipeRefreshLayout.isRefreshing());
+        outState.putBoolean(STATE_LOADING_MORE, mIsLoadingMore);
     }
 
-    private void setupSortOptions() {
+    private void setupSorting() {
         mSortOptions = new Sort[]{
                 new Sort(Sort.SORT_POPULARITY, getString(R.string.sort_popularity)),
                 new Sort(Sort.SORT_RELEASE_DATE, getString(R.string.sort_release_date)),
@@ -110,6 +110,9 @@ public class MainFragment extends Fragment implements
             Sort sort = mSortOptions[i];
             mSortValues[i] = sort.getReadableValue();
         }
+
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
     }
 
     @Override
@@ -129,27 +132,85 @@ public class MainFragment extends Fragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        int spanCount = getResources().getInteger(R.integer.span_count);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), spanCount));
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.addItemDecoration(new PosterGridItemDecoration(getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(R.layout.row_movie, mMovies, this, this);
-        mRecyclerView.setAdapter(mRecyclerAdapter);
+        setupSwipeToRefresh();
+        setupRecyclerView();
 
+        final int moviesSize = mMovies.size();
+        if (moviesSize == 0) {
+            mMoviePage = 1;
+            queryMovies(true);
+        } else {
+            if (mIsLoadingMore) {
+                // scroll to last position to show load more indicator
+                mRecyclerView.scrollToPosition(moviesSize - 1);
+            }
+
+            toggleMainVisibility(false);
+        }
+    }
+
+    private void setupSwipeToRefresh() {
         mSwipeRefreshLayout.setColorSchemeColors(R.color.red_500, R.color.red_700,
                 R.color.amber_A400);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mMoviePage = 1;
                 queryMovies(false);
             }
         });
 
-        if (mMovies.isEmpty()) {
-            queryMovies(true);
-        } else {
-            toggleMainVisibility(false);
+        if (mIsRefreshing) {
+            // work around bug in SwipeRefreshLayout that prevents changing refresh state before it
+            // is laid out, TODO: change once bug is fixed
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    setRefreshing(true);
+                }
+            });
         }
+    }
+
+    private void setRefreshing(boolean isRefreshing) {
+        mSwipeRefreshLayout.setRefreshing(isRefreshing);
+    }
+
+    private void setupRecyclerView() {
+        final int spanCount = getResources().getInteger(R.integer.span_count);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), spanCount);
+        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                int viewType = mRecyclerAdapter.getItemViewType(position);
+                return viewType == MoviesRecyclerAdapter.TYPE_PROGRESS ? spanCount : 1;
+            }
+        });
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
+                getResources().getDimensionPixelSize(R.dimen.grid_padding)));
+        mRecyclerAdapter = new MoviesRecyclerAdapter(getActivity(), R.layout.row_movie, mMovies,
+                this, this);
+        mRecyclerView.setAdapter(mRecyclerAdapter);
+        Mugen.with(mRecyclerView, new MugenCallbacks() {
+            @Override
+            public void onLoadMore() {
+                mIsLoadingMore = true;
+                mRecyclerAdapter.showLoadMoreIndicator();
+                queryMovies(false);
+            }
+
+            @Override
+            public boolean isLoading() {
+                return mSwipeRefreshLayout.isRefreshing() || mIsLoadingMore;
+            }
+
+            @Override
+            public boolean hasLoadedAllItems() {
+                return mMoviePage >= MOVIE_DB_MAX_PAGE;
+            }
+        }).start();
     }
 
     public void queryMovies(boolean showProgressBar) {
@@ -175,30 +236,42 @@ public class MainFragment extends Fragment implements
 
     public void onMoviesQueried(List<Movie> movies) {
         removeTaskFragment();
-        setLoading(false);
 
-        mMovies.clear();
-        if (!movies.isEmpty()) {
-            mMovies.addAll(movies);
+        if (mMoviePage == 1) {
+            setRefreshing(false);
+            mRecyclerAdapter.setMovies(movies);
+            mRecyclerView.scrollToPosition(0);
+            toggleMainVisibility(false);
+        } else {
+            mRecyclerAdapter.hideLoadMoreIndicator();
+            mRecyclerAdapter.addMovies(movies);
+            mIsLoadingMore = false;
         }
 
-        mRecyclerAdapter.notifyDataSetChanged();
-        toggleMainVisibility(false);
+        mMoviePage++;
     }
 
     public void onMovieQueryFailed() {
         removeTaskFragment();
-        setLoading(false);
-        toggleMainVisibility(false);
+        Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView,
+                getString(R.string.error_connection));
 
-        Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView, getString(R.string.error_connection));
-        snackbar.setAction(R.string.snackbar_retry, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setLoading(true);
-                queryMovies(false);
-            }
-        });
+        if (mMoviePage == 1) {
+            setRefreshing(false);
+            toggleMainVisibility(false);
+
+            snackbar.setAction(R.string.snackbar_retry, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setRefreshing(true);
+                    queryMovies(false);
+                }
+            });
+        } else {
+            mRecyclerAdapter.hideLoadMoreIndicator();
+            mIsLoadingMore = false;
+        }
+
         snackbar.show();
     }
 
@@ -211,10 +284,6 @@ public class MainFragment extends Fragment implements
                     .remove(task)
                     .commitAllowingStateLoss();
         }
-    }
-
-    private void setLoading(boolean isLoading) {
-        mSwipeRefreshLayout.setRefreshing(isLoading);
     }
 
     private void toggleMainVisibility(boolean showProgress) {
@@ -260,13 +329,16 @@ public class MainFragment extends Fragment implements
         Movie movie = mMovies.get(position);
 
         if (!mUseTwoPane) {
-            Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
+            Activity activity = getActivity();
+
+            Intent intent = new Intent(activity, MovieDetailsActivity.class);
             intent.putExtra(INTENT_MOVIE_SELECTED, movie);
+
             String transitionName = getString(R.string.shared_transition_details_poster);
             ViewCompat.setTransitionName(sharedView, transitionName);
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    getActivity(), sharedView, transitionName);
-            getActivity().startActivity(intent, options.toBundle());
+                    activity, sharedView, transitionName);
+            activity.startActivity(intent, options.toBundle());
         } else {
             MovieDetailsFragment detailsFragment = MovieDetailsFragment.newInstance(movie);
             getFragmentManager().beginTransaction()
@@ -277,16 +349,10 @@ public class MainFragment extends Fragment implements
     }
 
     public void onSortOptionSelected(int sortOptionIndex) {
+        mMoviePage = 1;
         mSortSelected = sortOptionIndex;
+        mSharedPrefs.edit().putInt(PERSIST_SORT, sortOptionIndex).apply();
+
         queryMovies(true);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface FragmentInteractionListener {
     }
 }

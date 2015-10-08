@@ -9,7 +9,7 @@
     <!-- Movie Poster Grid -->
     <dimen name="grid_padding">4dp</dimen>
     <dimen name="grid_footer_two_line_height">68dp</dimen>
-    <dimen name="grid_poster_height">280dp</dimen>
+    <dimen name="detail_poster_width">150dp</dimen>
 
     <!-- Toolbar -->
     <dimen name="toolbar_height_x2">112dp</dimen>

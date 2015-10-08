@@ -1,6 +1,8 @@
 package ch.berta.fabio.popularmovies;
 
+import android.content.Context;
 import android.support.design.widget.Snackbar;
+import android.util.DisplayMetrics;
 import android.view.View;
 
 import java.text.DateFormat;
@@ -36,5 +38,10 @@ public class Utils {
 
     public static Snackbar getBasicSnackbar(View view, String message, int duration) {
         return Snackbar.make(view, message, duration);
+    }
+
+    public static int getScreenWidth(Context context) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        return metrics.widthPixels;
     }
 }

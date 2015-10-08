@@ -142,6 +142,10 @@ public class Movie implements Parcelable {
 
     public String getReleaseDateFormatted(boolean showLong) {
         Date date = getReleaseDate();
+        if (date == null) {
+            return "";
+        }
+
         return showLong ? Utils.formatDateLong(date) : Utils.formatDateShort(date);
     }
 
