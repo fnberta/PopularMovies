@@ -1,6 +1,8 @@
 package ch.berta.fabio.popularmovies.ui.adapters;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,6 +17,7 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
 /**
@@ -24,17 +27,28 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
     public static final int TYPE_ITEM = 0;
     public static final int TYPE_PROGRESS = 1;
+    private static final double POSTER_ASPECT_RATIO = 0.675;
     private int mViewResource;
     private List<Movie> mMovies;
     private Fragment mLifecycleFragment;
     private AdapterInteractionListener mListener;
+    private int mItemHeight;
 
-    public MoviesRecyclerAdapter(int viewResource, List<Movie> movies, Fragment fragment,
-                                 AdapterInteractionListener listener) {
+    public MoviesRecyclerAdapter(Context context, int viewResource, List<Movie> movies,
+                                 Fragment fragment, AdapterInteractionListener listener) {
         mViewResource = viewResource;
         mMovies = movies;
         mLifecycleFragment = fragment;
         mListener = listener;
+
+        calcPosterHeight(context);
+    }
+
+    private void calcPosterHeight(Context context) {
+        int columns = context.getResources().getInteger(R.integer.span_count);
+        int screenWidth = Utils.getScreenWidth(context);
+        int itemWidth = screenWidth / columns;
+        mItemHeight = (int) (itemWidth / POSTER_ASPECT_RATIO);
     }
 
     @Override
@@ -43,7 +57,7 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
             case TYPE_ITEM: {
                 View view = LayoutInflater.from(parent.getContext()).inflate(mViewResource, parent,
                         false);
-                return new MovieRow(view, mListener);
+                return new MovieRow(view, mItemHeight, mListener);
             }
             case TYPE_PROGRESS: {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_progress,
@@ -99,7 +113,8 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
         private TextView mTextViewTitle;
         private TextView mTextViewDate;
 
-        public MovieRow(final View itemView, final AdapterInteractionListener listener) {
+        public MovieRow(final View itemView, int itemHeight,
+                        final AdapterInteractionListener listener) {
             super(itemView);
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -109,9 +124,16 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
                 }
             });
 
+            setPosterHeight(itemView, itemHeight);
             mImageViewPoster = (ImageView) itemView.findViewById(R.id.iv_poster);
             mTextViewTitle = (TextView) itemView.findViewById(R.id.tv_title);
             mTextViewDate = (TextView) itemView.findViewById(R.id.tv_date);
+        }
+
+        private void setPosterHeight(View itemView, int itemHeight) {
+            ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
+            layoutParams.height = itemHeight;
+            itemView.setLayoutParams(layoutParams);
         }
 
         public void setMovie(String title, String date, String poster, Fragment fragment) {

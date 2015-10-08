@@ -179,7 +179,8 @@ public class MainFragment extends Fragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(R.layout.row_movie, mMovies, this, this);
+        mRecyclerAdapter = new MoviesRecyclerAdapter(getActivity(), R.layout.row_movie, mMovies,
+                this, this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         Mugen.with(mRecyclerView, new MugenCallbacks() {
             @Override

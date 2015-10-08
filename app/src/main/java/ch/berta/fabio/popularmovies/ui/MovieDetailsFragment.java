@@ -1,10 +1,9 @@
 package ch.berta.fabio.popularmovies.ui;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
