@@ -159,10 +159,14 @@ public class MainFragment extends Fragment implements
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
+                    setRefreshing(true);
                 }
             });
         }
+    }
+
+    private void setRefreshing(boolean isRefreshing) {
+        mSwipeRefreshLayout.setRefreshing(isRefreshing);
     }
 
     private void setupRecyclerView() {
@@ -225,9 +229,9 @@ public class MainFragment extends Fragment implements
 
     public void onMoviesQueried(List<Movie> movies) {
         removeTaskFragment();
-        setLoading(false);
 
         if (mMoviePage == 1) {
+            setRefreshing(false);
             mRecyclerAdapter.setMovies(movies);
             mRecyclerView.scrollToPosition(0);
             toggleMainVisibility(false);
@@ -242,24 +246,26 @@ public class MainFragment extends Fragment implements
 
     public void onMovieQueryFailed() {
         removeTaskFragment();
-        setLoading(false);
-
-        Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView, getString(R.string.error_connection));
-        snackbar.setAction(R.string.snackbar_retry, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setLoading(true);
-                queryMovies(false);
-            }
-        });
-        snackbar.show();
+        Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView,
+                getString(R.string.error_connection));
 
         if (mMoviePage == 1) {
+            setRefreshing(false);
             toggleMainVisibility(false);
+
+            snackbar.setAction(R.string.snackbar_retry, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    setRefreshing(true);
+                    queryMovies(false);
+                }
+            });
         } else {
             mRecyclerAdapter.hideLoadMoreIndicator();
             mIsLoadingMore = false;
         }
+
+        snackbar.show();
     }
 
     private void removeTaskFragment() {
@@ -271,10 +277,6 @@ public class MainFragment extends Fragment implements
                     .remove(task)
                     .commitAllowingStateLoss();
         }
-    }
-
-    private void setLoading(boolean isLoading) {
-        mSwipeRefreshLayout.setRefreshing(isLoading);
     }
 
     private void toggleMainVisibility(boolean showProgress) {
