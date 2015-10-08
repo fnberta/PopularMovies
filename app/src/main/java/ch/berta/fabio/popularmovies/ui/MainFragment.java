@@ -186,7 +186,7 @@ public class MainFragment extends Fragment implements
             @Override
             public void onLoadMore() {
                 mIsLoadingMore = true;
-                showLoadMoreIndicator(mMovies.size());
+                mRecyclerAdapter.showLoadMoreIndicator();
                 queryMovies(false);
             }
 
@@ -200,11 +200,6 @@ public class MainFragment extends Fragment implements
                 return mMoviePage >= MOVIE_DB_MAX_PAGE;
             }
         }).start();
-    }
-
-    private void showLoadMoreIndicator(int position) {
-        mMovies.add(null);
-        mRecyclerAdapter.notifyItemInserted(position);
     }
 
     public void queryMovies(boolean showProgressBar) {
@@ -233,21 +228,12 @@ public class MainFragment extends Fragment implements
         setLoading(false);
 
         if (mMoviePage == 1) {
-            mMovies.clear();
-            if (!movies.isEmpty()) {
-                mMovies.addAll(movies);
-            }
-
-            mRecyclerAdapter.notifyDataSetChanged();
+            mRecyclerAdapter.setMovies(movies);
             mRecyclerView.scrollToPosition(0);
             toggleMainVisibility(false);
         } else {
-            int progressBarPosition = mMovies.size() - 1;
-            hideLoadMoreIndicator(progressBarPosition);
-
-            mMovies.addAll(movies);
-            mRecyclerAdapter.notifyItemRangeInserted(progressBarPosition, movies.size());
-
+            mRecyclerAdapter.hideLoadMoreIndicator();
+            mRecyclerAdapter.addMovies(movies);
             mIsLoadingMore = false;
         }
 
@@ -271,16 +257,9 @@ public class MainFragment extends Fragment implements
         if (mMoviePage == 1) {
             toggleMainVisibility(false);
         } else {
-            int progressBarPosition = mMovies.size() - 1;
-            hideLoadMoreIndicator(progressBarPosition);
-
+            mRecyclerAdapter.hideLoadMoreIndicator();
             mIsLoadingMore = false;
         }
-    }
-
-    private void hideLoadMoreIndicator(int position) {
-        mMovies.remove(position);
-        mRecyclerAdapter.notifyItemRemoved(position);
     }
 
     private void removeTaskFragment() {
