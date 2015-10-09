@@ -44,6 +44,7 @@ public class MainFragment extends Fragment implements
 
     public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
     private static final int MOVIE_DB_MAX_PAGE = 1000;
+    private static final String LOG_TAG = MainFragment.class.getSimpleName();
     private static final String STATE_MOVIES = "state_movies";
     private static final String STATE_MOVIE_PAGE = "state_movie_page";
     private static final String STATE_REFRESHING = "state_refreshing";

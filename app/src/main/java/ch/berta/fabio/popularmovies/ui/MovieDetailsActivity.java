@@ -14,6 +14,7 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
 
     @Override

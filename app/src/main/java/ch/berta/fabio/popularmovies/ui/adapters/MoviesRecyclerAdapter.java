@@ -28,6 +28,7 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
     public static final int TYPE_ITEM = 0;
     public static final int TYPE_PROGRESS = 1;
     private static final double POSTER_ASPECT_RATIO = 0.675;
+    private static final String LOG_TAG = MoviesRecyclerAdapter.class.getSimpleName();
     private int mViewResource;
     private List<Movie> mMovies;
     private Fragment mLifecycleFragment;
