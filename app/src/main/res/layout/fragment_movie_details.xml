@@ -44,6 +44,8 @@
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginBottom="@dimen/small_space"
                 android:layout_gravity="bottom"
+                android:maxLines="2"
+                android:ellipsize="end"
                 style="@style/TextAppearance.AppCompat.Display2"
                 tools:text="Iron Man"
                 />
