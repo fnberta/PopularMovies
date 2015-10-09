@@ -21,6 +21,7 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 public class MovieDetailsFragment extends Fragment {
 
     private static final String BUNDLE_MOVIE = "bundle_movie";
+    private static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
     private ImageView mImageViewPoster;
     private TextView mTextViewPlot;
     private TextView mTextViewDate;
