@@ -99,7 +99,7 @@ public class MovieDetailsFragment extends Fragment {
         }
         mTextViewPlot.setText(mMovie.getOverview());
         mTextViewDate.setText(mMovie.getReleaseDateFormatted(true));
-        mTextViewRating.setText(getString(R.string.details_rating, mMovie.getPopularity()));
+        mTextViewRating.setText(getString(R.string.details_rating, mMovie.getVoteAverage()));
 
         if (mUseTwoPane) {
             mViewHeader.setVisibility(View.VISIBLE);
