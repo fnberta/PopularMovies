@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015 Fabio Berta
+ */
+
 package ch.berta.fabio.popularmovies.data.models;
 
 import android.support.annotation.StringDef;

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015 Fabio Berta
+ */
+
 package ch.berta.fabio.popularmovies.data;
 
 import com.google.gson.Gson;

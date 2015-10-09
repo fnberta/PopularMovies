@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 Fabio Berta
+  -->
+
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="font_fontFamily_regular" translatable="false" tools:ignore="UnusedResources">sans-serif</string>
     <string name="font_fontFamily_medium" translatable="false">sans-serif-medium</string>
