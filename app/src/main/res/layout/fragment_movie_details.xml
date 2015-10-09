@@ -59,7 +59,7 @@
             android:layout_toEndOf="@id/iv_details_poster"
             android:layout_marginStart="@dimen/key_line_1"
             android:layout_marginEnd="@dimen/key_line_1"
-            tools:text="4/10"
+            tools:text="Rating: 4/10"
             />
 
         <TextView

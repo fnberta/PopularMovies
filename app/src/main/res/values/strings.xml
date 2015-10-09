@@ -11,7 +11,7 @@
     <string name="title_activity_movie_details">Movie Details</string>
     <string name="action_sort">Sort</string>
     <string name="dialog_sort_title">Sort movies</string>
-    <string name="details_rating">"%1$s/10"</string>
+    <string name="details_rating">"Rating: %1$s/10"</string>
     <string name="error_connection">No connection</string>
     <string name="snackbar_retry">Retry</string>
     <string name="no_movies">No movies</string>
