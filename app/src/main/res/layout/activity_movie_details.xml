@@ -36,7 +36,7 @@
                 >
 
                 <ImageView
-                    android:id="@+id/iv_details_backdrop"
+                    android:id="@+id/iv_toolbar_details_backdrop"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/movie_backdrop"

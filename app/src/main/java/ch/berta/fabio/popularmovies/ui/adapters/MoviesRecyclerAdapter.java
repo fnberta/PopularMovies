@@ -1,8 +1,8 @@
 package ch.berta.fabio.popularmovies.ui.adapters;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -34,20 +34,19 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
     private AdapterInteractionListener mListener;
     private int mItemHeight;
 
-    public MoviesRecyclerAdapter(Context context, int viewResource, List<Movie> movies,
-                                 Fragment fragment, AdapterInteractionListener listener) {
+    public MoviesRecyclerAdapter(int viewResource, List<Movie> movies, int layoutWidth,
+                                 int columnCount, Fragment fragment,
+                                 AdapterInteractionListener listener) {
         mViewResource = viewResource;
         mMovies = movies;
         mLifecycleFragment = fragment;
         mListener = listener;
 
-        calcPosterHeight(context);
+        calcPosterHeight(columnCount, layoutWidth);
     }
 
-    private void calcPosterHeight(Context context) {
-        int columns = context.getResources().getInteger(R.integer.span_count);
-        int screenWidth = Utils.getScreenWidth(context);
-        int itemWidth = screenWidth / columns;
+    private void calcPosterHeight(int columns, int layoutWidth) {
+        int itemWidth = layoutWidth / columns;
         mItemHeight = (int) (itemWidth / POSTER_ASPECT_RATIO);
     }
 

@@ -28,13 +28,13 @@ import com.mugen.MugenCallbacks;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.Sort;
 import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesRecyclerAdapter;
+import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
 /**
@@ -190,8 +190,8 @@ public class MainFragment extends Fragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(getActivity(), R.layout.row_movie, mMovies,
-                this, this);
+        mRecyclerAdapter = new MoviesRecyclerAdapter(R.layout.row_movie, mMovies, getLayoutWidth(),
+                spanCount, this, this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         Mugen.with(mRecyclerView, new MugenCallbacks() {
             @Override
@@ -211,6 +211,12 @@ public class MainFragment extends Fragment implements
                 return mMoviePage >= MOVIE_DB_MAX_PAGE;
             }
         }).start();
+    }
+
+    private int getLayoutWidth() {
+        int screenWidth = Utils.getScreenWidth(getResources());
+        return mUseTwoPane ? screenWidth / 100 *
+                getResources().getInteger(R.integer.two_pane_list_width_percentage) : screenWidth;
     }
 
     public void queryMovies(boolean showProgressBar) {

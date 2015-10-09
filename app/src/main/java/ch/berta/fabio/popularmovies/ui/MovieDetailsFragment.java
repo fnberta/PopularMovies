@@ -22,10 +22,14 @@ public class MovieDetailsFragment extends Fragment {
 
     private static final String BUNDLE_MOVIE = "bundle_movie";
     private ImageView mImageViewPoster;
+    private View mViewHeader;
+    private ImageView mImageViewHeaderBackdrop;
+    private TextView mTextViewHeaderTitle;
     private TextView mTextViewPlot;
     private TextView mTextViewDate;
     private TextView mTextViewRating;
     private Movie mMovie;
+    private boolean mUseTwoPane;
 
     public static MovieDetailsFragment newInstance(Movie movie) {
         MovieDetailsFragment fragment = new MovieDetailsFragment();
@@ -47,6 +51,8 @@ public class MovieDetailsFragment extends Fragment {
         if (getArguments() != null) {
             mMovie = getArguments().getParcelable(BUNDLE_MOVIE);
         }
+
+        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
     }
 
     @Override
@@ -58,6 +64,12 @@ public class MovieDetailsFragment extends Fragment {
         mTextViewPlot = (TextView) rootView.findViewById(R.id.tv_details_plot);
         mTextViewDate = (TextView) rootView.findViewById(R.id.tv_details_release_date);
         mTextViewRating = (TextView) rootView.findViewById(R.id.tv_details_rating);
+
+        if (mUseTwoPane) {
+            mViewHeader = rootView.findViewById(R.id.fl_details_header);
+            mImageViewHeaderBackdrop = (ImageView) rootView.findViewById(R.id.iv_details_backdrop);
+            mTextViewHeaderTitle = (TextView) rootView.findViewById(R.id.tv_details_title);
+        }
 
         return rootView;
     }
@@ -87,5 +99,17 @@ public class MovieDetailsFragment extends Fragment {
         mTextViewPlot.setText(mMovie.getOverview());
         mTextViewDate.setText(mMovie.getReleaseDateFormatted(true));
         mTextViewRating.setText(getString(R.string.details_rating, mMovie.getPopularity()));
+
+        if (mUseTwoPane) {
+            mViewHeader.setVisibility(View.VISIBLE);
+            mTextViewHeaderTitle.setText(mMovie.getOriginalTitle());
+            String backdrop = mMovie.getBackdropPath();
+            if (!TextUtils.isEmpty(backdrop)) {
+                String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_BACKDROP_SIZE + backdrop;
+                Glide.with(this)
+                        .load(imagePath)
+                        .into(mImageViewHeaderBackdrop);
+            }
+        }
     }
 }
