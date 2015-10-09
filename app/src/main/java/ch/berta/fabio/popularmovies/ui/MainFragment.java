@@ -98,8 +98,8 @@ public class MainFragment extends Fragment implements
     private void setupSorting() {
         mSortOptions = new Sort[]{
                 new Sort(Sort.SORT_POPULARITY, getString(R.string.sort_popularity)),
-                new Sort(Sort.SORT_RELEASE_DATE, getString(R.string.sort_release_date)),
-                new Sort(Sort.SORT_RATING, getString(R.string.sort_rating))
+                new Sort(Sort.SORT_RATING, getString(R.string.sort_rating)),
+                new Sort(Sort.SORT_RELEASE_DATE, getString(R.string.sort_release_date))
         };
         int optionsLength = mSortOptions.length;
         mSortValues = new String[optionsLength];

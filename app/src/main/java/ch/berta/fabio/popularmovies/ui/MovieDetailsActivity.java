@@ -30,7 +30,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(movie.getTitle());
+            actionBar.setTitle(movie.getOriginalTitle());
         }
 
         ImageView ivBackdrop = (ImageView) findViewById(R.id.iv_details_backdrop);
