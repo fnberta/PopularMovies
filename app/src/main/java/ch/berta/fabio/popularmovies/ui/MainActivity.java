@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity implements
         QueryMoviesTaskFragment.TaskInteractionListener,
         SortMoviesDialogFragment.DialogInteractionListener {
 
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private MainFragment mMainFragment;
 
     @Override

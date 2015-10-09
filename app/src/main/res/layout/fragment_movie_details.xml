@@ -55,14 +55,15 @@
             android:id="@+id/iv_details_poster"
             android:layout_width="@dimen/detail_poster_width"
             android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            android:scaleType="fitXY"
             android:layout_alignParentStart="true"
             android:layout_below="@id/fl_details_header"
             android:layout_marginStart="@dimen/key_line_1"
             android:layout_marginTop="@dimen/normal_space"
+            android:adjustViewBounds="true"
             android:contentDescription="@string/movie_poster"
+            android:scaleType="fitXY"
             android:transitionName="@string/shared_transition_details_poster"
+            tools:layout_height="222dp"
             />
 
         <TextView
@@ -83,9 +84,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/tv_details_header_facts"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:layout_marginEnd="@dimen/key_line_1"
             android:layout_toEndOf="@id/iv_details_poster"
-            android:paddingEnd="@dimen/key_line_1"
-            android:paddingStart="@dimen/key_line_1"
             tools:text="27. September 2015"
             />
 
@@ -95,9 +96,9 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/tv_details_release_date"
             android:layout_toEndOf="@id/iv_details_poster"
-            android:paddingEnd="@dimen/key_line_1"
-            android:paddingStart="@dimen/key_line_1"
-            tools:text="Rating: 456.78"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:layout_marginEnd="@dimen/key_line_1"
+            tools:text="Rating: 4/10"
             />
 
         <TextView
@@ -118,8 +119,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/tv_details_header_plot"
-            android:paddingEnd="@dimen/key_line_1"
-            android:paddingStart="@dimen/key_line_1"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:layout_marginEnd="@dimen/key_line_1"
             tools:text="A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival."
             />
 

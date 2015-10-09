@@ -21,6 +21,7 @@ import retrofit.Retrofit;
  */
 public class QueryMoviesTaskFragment extends Fragment {
 
+    private static final String LOG_TAG = QueryMoviesTaskFragment.class.getSimpleName();
     private static final String BUNDLE_PAGE = "bundle_page";
     private static final String BUNDLE_SORT = "bundle_sort";
     private TaskInteractionListener mListener;

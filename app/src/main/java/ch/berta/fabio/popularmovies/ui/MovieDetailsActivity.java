@@ -14,6 +14,7 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
 
     @Override
@@ -30,7 +31,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(movie.getTitle());
+            actionBar.setTitle(movie.getOriginalTitle());
         }
 
         ImageView ivBackdrop = (ImageView) findViewById(R.id.iv_toolbar_details_backdrop);

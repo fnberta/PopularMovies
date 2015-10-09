@@ -14,8 +14,8 @@ public class Sort {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SortOption {}
     public static final String SORT_POPULARITY = "popularity.desc";
-    public static final String SORT_RELEASE_DATE = "release_date.desc";
     public static final String SORT_RATING = "vote_average.desc";
+    public static final String SORT_RELEASE_DATE = "release_date.desc";
 
     private String mOption;
     private String mReadableValue;
