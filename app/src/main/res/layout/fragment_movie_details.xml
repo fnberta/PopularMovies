@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/key_line_1"
                 android:layout_marginEnd="@dimen/key_line_1"
-                android:layout_marginBottom="@dimen/small_space"
+                android:layout_marginBottom="@dimen/normal_space"
                 android:layout_gravity="bottom"
                 android:maxLines="2"
                 android:ellipsize="end"
