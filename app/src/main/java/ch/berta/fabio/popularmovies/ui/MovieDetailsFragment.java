@@ -32,6 +32,10 @@ public class MovieDetailsFragment extends Fragment {
     private TextView mTextViewRating;
     private Movie mMovie;
 
+    public MovieDetailsFragment() {
+        // Required empty public constructor
+    }
+
     public static MovieDetailsFragment newInstance(Movie movie) {
         MovieDetailsFragment fragment = new MovieDetailsFragment();
 
@@ -42,13 +46,10 @@ public class MovieDetailsFragment extends Fragment {
         return fragment;
     }
 
-    public MovieDetailsFragment() {
-        // Required empty public constructor
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mMovie = getArguments().getParcelable(BUNDLE_MOVIE);
         }
@@ -57,20 +58,27 @@ public class MovieDetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_movie_details, container, false);
-
-        mImageViewPoster = (ImageView) rootView.findViewById(R.id.iv_details_poster);
-        mTextViewPlot = (TextView) rootView.findViewById(R.id.tv_details_plot);
-        mTextViewDate = (TextView) rootView.findViewById(R.id.tv_details_release_date);
-        mTextViewRating = (TextView) rootView.findViewById(R.id.tv_details_rating);
-
-        return rootView;
+        return inflater.inflate(R.layout.fragment_movie_details, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mImageViewPoster = (ImageView) view.findViewById(R.id.iv_details_poster);
+        loadPoster();
+
+        mTextViewPlot = (TextView) view.findViewById(R.id.tv_details_plot);
+        mTextViewPlot.setText(mMovie.getOverview());
+
+        mTextViewDate = (TextView) view.findViewById(R.id.tv_details_release_date);
+        loadDate();
+
+        mTextViewRating = (TextView) view.findViewById(R.id.tv_details_rating);
+        mTextViewRating.setText(getString(R.string.details_rating, mMovie.getVoteAverage()));
+    }
+
+    private void loadPoster() {
         String poster = mMovie.getPosterPath();
         if (!TextUtils.isEmpty(poster)) {
             String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_POSTER_SIZE + poster;
@@ -89,8 +97,14 @@ public class MovieDetailsFragment extends Fragment {
             mImageViewPoster.setImageResource(R.drawable.ic_movie_white_72dp);
             ActivityCompat.startPostponedEnterTransition(getActivity());
         }
-        mTextViewPlot.setText(mMovie.getOverview());
-        mTextViewDate.setText(mMovie.getReleaseDateFormatted(true));
-        mTextViewRating.setText(getString(R.string.details_rating, mMovie.getVoteAverage()));
+    }
+
+    private void loadDate() {
+        String date = mMovie.getReleaseDateFormatted(true);
+        if (!TextUtils.isEmpty(date)) {
+            mTextViewDate.setText(date);
+        } else {
+            mTextViewDate.setVisibility(View.GONE);
+        }
     }
 }
