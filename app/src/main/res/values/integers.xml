@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 Fabio Berta
+  -->
+
 <resources>
     <integer name="two_pane_list_width_percentage">40</integer>
     <integer name="two_pane_detail_width_percentage">60</integer>

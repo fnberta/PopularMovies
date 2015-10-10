@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015 Fabio Berta
+ */
+
 package ch.berta.fabio.popularmovies.ui;
 
 import android.app.Activity;
@@ -119,35 +123,23 @@ public class MainFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-
-        mProgressBar = (ProgressBar) rootView.findViewById(R.id.pb_base);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.rv_base);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.srl_base);
-        mViewEmpty = rootView.findViewById(R.id.empty_view);
-
-        return rootView;
+        return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mProgressBar = (ProgressBar) view.findViewById(R.id.pb_base);
+        mViewEmpty = view.findViewById(R.id.empty_view);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.srl_base);
         setupSwipeToRefresh();
+
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_base);
         setupRecyclerView();
 
-        final int moviesSize = mMovies.size();
-        if (moviesSize == 0) {
-            mMoviePage = 1;
-            queryMovies(true);
-        } else {
-            if (mIsLoadingMore) {
-                // scroll to last position to show load more indicator
-                mRecyclerView.scrollToPosition(moviesSize - 1);
-            }
-
-            toggleMainVisibility(false);
-        }
+        loadMovies();
     }
 
     private void setupSwipeToRefresh() {
@@ -218,6 +210,21 @@ public class MainFragment extends Fragment implements
         int screenWidth = Utils.getScreenWidth(getResources());
         return mUseTwoPane ? screenWidth / 100 *
                 getResources().getInteger(R.integer.two_pane_list_width_percentage) : screenWidth;
+    }
+
+    private void loadMovies() {
+        final int moviesSize = mMovies.size();
+        if (moviesSize == 0) {
+            mMoviePage = 1;
+            queryMovies(true);
+        } else {
+            if (mIsLoadingMore) {
+                // scroll to last position to show load more indicator
+                mRecyclerView.scrollToPosition(moviesSize - 1);
+            }
+
+            toggleMainVisibility(false);
+        }
     }
 
     public void queryMovies(boolean showProgressBar) {
