@@ -1,5 +1,17 @@
 /*
  * Copyright (c) 2015 Fabio Berta
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package ch.berta.fabio.popularmovies.ui;
@@ -16,6 +28,10 @@ import com.bumptech.glide.Glide;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
+/**
+ * Presents the backdrop image of a selected movie in a collapsing toolbar and hosts a
+ * {@link MovieDetailsFragment} that displays other information about the movie.
+ */
 public class MovieDetailsActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
@@ -30,7 +46,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Movie movie = getIntent().getParcelableExtra(MainFragment.INTENT_MOVIE_SELECTED);
+        Movie movie = getIntent().getParcelableExtra(MovieGridFragment.INTENT_MOVIE_SELECTED);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

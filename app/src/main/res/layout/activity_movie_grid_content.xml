@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (c) 2015 Fabio Berta
   ~
@@ -15,9 +14,14 @@
   ~ limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="font_fontFamily_regular" translatable="false" tools:ignore="UnusedResources">sans-serif</string>
-    <string name="font_fontFamily_medium" translatable="false">sans-serif-medium</string>
-    <string name="font_fontFamily_light" translatable="false" tools:ignore="UnusedResources">sans-serif-light</string>
-
-</resources>
+<fragment
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment"
+    android:name="ch.berta.fabio.popularmovies.ui.MovieGridFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:layout="@layout/fragment_movie_grid"
+    />

@@ -1,5 +1,17 @@
 /*
  * Copyright (c) 2015 Fabio Berta
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package ch.berta.fabio.popularmovies.ui;
@@ -42,20 +54,22 @@ import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecorat
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Displays a grid of movie poster images.
  */
-public class MainFragment extends Fragment implements
+public class MovieGridFragment extends Fragment implements
         MoviesRecyclerAdapter.AdapterInteractionListener {
 
     public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
     private static final int MOVIE_DB_MAX_PAGE = 1000;
-    private static final String LOG_TAG = MainFragment.class.getSimpleName();
+    private static final String LOG_TAG = MovieGridFragment.class.getSimpleName();
     private static final String STATE_MOVIES = "state_movies";
     private static final String STATE_MOVIE_PAGE = "state_movie_page";
     private static final String STATE_REFRESHING = "state_refreshing";
     private static final String STATE_LOADING_MORE = "state_loading_more";
+    private static final String STATE_LOADING_NEW_SORT = "state_loading_new_sort";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
     private static final String PERSIST_SORT = "persisted_sort";
+    private static final String SORT_DIALOG = "sort_dialog";
     private SharedPreferences mSharedPrefs;
     private boolean mUseTwoPane;
     private ProgressBar mProgressBar;
@@ -70,8 +84,10 @@ public class MainFragment extends Fragment implements
     private String[] mSortValues;
     private boolean mIsRefreshing;
     private boolean mIsLoadingMore;
+    private boolean mIsLoadingNewSort;
 
-    public MainFragment() {
+    public MovieGridFragment() {
+        // required empty constructor
     }
 
     @Override
@@ -87,9 +103,12 @@ public class MainFragment extends Fragment implements
             mMoviePage = savedInstanceState.getInt(STATE_MOVIE_PAGE);
             mIsRefreshing = savedInstanceState.getBoolean(STATE_REFRESHING);
             mIsLoadingMore = savedInstanceState.getBoolean(STATE_LOADING_MORE);
+            mIsLoadingNewSort = savedInstanceState.getBoolean(STATE_LOADING_NEW_SORT);
         } else {
             mMovies = new ArrayList<>();
             mIsRefreshing = false;
+            mIsLoadingMore = false;
+            mIsLoadingNewSort = false;
         }
     }
 
@@ -101,6 +120,7 @@ public class MainFragment extends Fragment implements
         outState.putInt(STATE_MOVIE_PAGE, mMoviePage);
         outState.putBoolean(STATE_REFRESHING, mSwipeRefreshLayout.isRefreshing());
         outState.putBoolean(STATE_LOADING_MORE, mIsLoadingMore);
+        outState.putBoolean(STATE_LOADING_NEW_SORT, mIsLoadingNewSort);
     }
 
     private void setupSorting() {
@@ -123,7 +143,7 @@ public class MainFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return inflater.inflate(R.layout.fragment_movie_grid, container, false);
     }
 
     @Override
@@ -183,8 +203,8 @@ public class MainFragment extends Fragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(R.layout.row_movie, mMovies, getLayoutWidth(),
-                spanCount, this, this);
+        mRecyclerAdapter = new MoviesRecyclerAdapter(mMovies, getLayoutWidth(), spanCount, this,
+                this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         Mugen.with(mRecyclerView, new MugenCallbacks() {
             @Override
@@ -196,7 +216,7 @@ public class MainFragment extends Fragment implements
 
             @Override
             public boolean isLoading() {
-                return mSwipeRefreshLayout.isRefreshing() || mIsLoadingMore;
+                return mSwipeRefreshLayout.isRefreshing() || mIsLoadingMore || mIsLoadingNewSort;
             }
 
             @Override
@@ -216,30 +236,41 @@ public class MainFragment extends Fragment implements
         final int moviesSize = mMovies.size();
         if (moviesSize == 0) {
             mMoviePage = 1;
-            queryMovies(true);
+            queryMovies(false);
         } else {
             if (mIsLoadingMore) {
                 // scroll to last position to show load more indicator
                 mRecyclerView.scrollToPosition(moviesSize - 1);
             }
 
-            toggleMainVisibility(false);
+            if (!mIsLoadingNewSort) {
+                toggleMainVisibility(true);
+            }
         }
     }
 
-    public void queryMovies(boolean showProgressBar) {
+    /**
+     * Creates a new {@link QueryMoviesTaskFragment} if it is not being retained across a
+     * configuration change to query movies from TheMovieDB.
+     *
+     * @param forceNewQuery whether to force a new query when there is already one going on
+     */
+    private void queryMovies(boolean forceNewQuery) {
         FragmentManager fragmentManager = getFragmentManager();
         QueryMoviesTaskFragment task = findTaskFragment(fragmentManager);
+        Sort sort = mSortOptions[mSortSelected];
 
         if (task == null) {
-            if (showProgressBar) {
-                toggleMainVisibility(true);
-            }
-
-            Sort sort = mSortOptions[mSortSelected];
             task = QueryMoviesTaskFragment.newInstance(mMoviePage, sort.getOption());
             fragmentManager.beginTransaction()
                     .add(task, QUERY_MOVIES_TASK)
+                    .commit();
+        } else if (forceNewQuery) {
+            QueryMoviesTaskFragment newTask = QueryMoviesTaskFragment.newInstance(mMoviePage,
+                    sort.getOption());
+            fragmentManager.beginTransaction()
+                    .remove(task)
+                    .add(newTask, QUERY_MOVIES_TASK)
                     .commit();
         }
     }
@@ -248,14 +279,21 @@ public class MainFragment extends Fragment implements
         return (QueryMoviesTaskFragment) fragmentManager.findFragmentByTag(QUERY_MOVIES_TASK);
     }
 
+    /**
+     * Removes {@link QueryMoviesTaskFragment} and updates the main {@link RecyclerView} grid
+     * with the queried movies.
+     *
+     * @param movies the newly queried movies
+     */
     public void onMoviesQueried(List<Movie> movies) {
         removeTaskFragment();
 
         if (mMoviePage == 1) {
+            mIsLoadingNewSort = false;
             setRefreshing(false);
             mRecyclerAdapter.setMovies(movies);
             mRecyclerView.scrollToPosition(0);
-            toggleMainVisibility(false);
+            toggleMainVisibility(true);
         } else {
             mRecyclerAdapter.hideLoadMoreIndicator();
             mRecyclerAdapter.addMovies(movies);
@@ -265,14 +303,19 @@ public class MainFragment extends Fragment implements
         mMoviePage++;
     }
 
+    /**
+     * Removes {@link QueryMoviesTaskFragment}, notifies the user that something went wrong by
+     * showing a snackbar and hides all loading or refreshing indicators
+     */
     public void onMovieQueryFailed() {
         removeTaskFragment();
         Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView,
                 getString(R.string.error_connection));
 
         if (mMoviePage == 1) {
+            mIsLoadingNewSort = false;
             setRefreshing(false);
-            toggleMainVisibility(false);
+            toggleMainVisibility(true);
 
             snackbar.setAction(R.string.snackbar_retry, new View.OnClickListener() {
                 @Override
@@ -300,14 +343,14 @@ public class MainFragment extends Fragment implements
         }
     }
 
-    private void toggleMainVisibility(boolean showProgress) {
-        if (showProgress) {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
-        } else {
+    private void toggleMainVisibility(boolean showMainGrid) {
+        if (showMainGrid) {
             mProgressBar.setVisibility(View.GONE);
             mRecyclerView.setVisibility(View.VISIBLE);
             toggleEmptyViewVisibility();
+        } else {
+            mProgressBar.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
         }
     }
 
@@ -317,7 +360,7 @@ public class MainFragment extends Fragment implements
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_main_fragment, menu);
+        inflater.inflate(R.menu.menu_movie_grid_fragment, menu);
     }
 
     @Override
@@ -335,7 +378,7 @@ public class MainFragment extends Fragment implements
     private void showSortDialog() {
         SortMoviesDialogFragment dialog = SortMoviesDialogFragment.newInstance(mSortValues,
                 mSortSelected);
-        dialog.show(getFragmentManager(), "sort_dialog");
+        dialog.show(getFragmentManager(), SORT_DIALOG);
     }
 
     @Override
@@ -362,11 +405,20 @@ public class MainFragment extends Fragment implements
         }
     }
 
+    /**
+     * Sets the global sort option field to the one selected.
+     *
+     * @param sortOptionIndex the index number of the selected sort option
+     */
     public void onSortOptionSelected(int sortOptionIndex) {
-        mMoviePage = 1;
         mSortSelected = sortOptionIndex;
         mSharedPrefs.edit().putInt(PERSIST_SORT, sortOptionIndex).apply();
 
+        toggleMainVisibility(false);
+        setRefreshing(false);
+        mIsLoadingMore = false;
+        mIsLoadingNewSort = true;
+        mMoviePage = 1;
         queryMovies(true);
     }
 }

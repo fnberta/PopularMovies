@@ -15,11 +15,11 @@
 
     <fragment
         android:id="@+id/fragment"
-        android:name="ch.berta.fabio.popularmovies.ui.MainFragment"
+        android:name="ch.berta.fabio.popularmovies.ui.MovieGridFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="@integer/two_pane_list_width_percentage"
-        tools:layout="@layout/fragment_main"
+        tools:layout="@layout/fragment_movie_grid"
         />
 
     <FrameLayout
