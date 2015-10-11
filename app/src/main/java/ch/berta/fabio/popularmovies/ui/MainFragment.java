@@ -68,6 +68,7 @@ public class MainFragment extends Fragment implements
     private static final String STATE_LOADING_NEW_SORT = "state_loading_new_sort";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
     private static final String PERSIST_SORT = "persisted_sort";
+    private static final String SORT_DIALOG = "sort_dialog";
     private SharedPreferences mSharedPrefs;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
@@ -368,7 +369,7 @@ public class MainFragment extends Fragment implements
     private void showSortDialog() {
         SortMoviesDialogFragment dialog = SortMoviesDialogFragment.newInstance(mSortValues,
                 mSortSelected);
-        dialog.show(getFragmentManager(), "sort_dialog");
+        dialog.show(getFragmentManager(), SORT_DIALOG);
     }
 
     @Override
