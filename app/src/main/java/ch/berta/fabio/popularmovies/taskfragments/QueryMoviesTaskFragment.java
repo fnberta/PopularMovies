@@ -109,10 +109,10 @@ public class QueryMoviesTaskFragment extends Fragment {
         mLoadMoviePosters.enqueue(new Callback<MoviesPage>() {
             @Override
             public void onResponse(Response<MoviesPage> response, Retrofit retrofit) {
-                MoviesPage page = response.body();
+                MoviesPage moviesPage = response.body();
                 if (mListener != null) {
-                    if (page != null) {
-                        mListener.onMoviesQueried(page.getMovies());
+                    if (moviesPage != null) {
+                        mListener.onMoviesQueried(moviesPage.getMovies());
                     } else {
                         mListener.onMovieQueryFailed();
                     }
