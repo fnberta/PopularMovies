@@ -43,10 +43,14 @@ public class MovieDetailsFragment extends Fragment {
     private static final String BUNDLE_MOVIE = "bundle_movie";
     private static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
     private ImageView mImageViewPoster;
+    private View mViewHeader;
+    private ImageView mImageViewHeaderBackdrop;
+    private TextView mTextViewHeaderTitle;
     private TextView mTextViewPlot;
     private TextView mTextViewDate;
     private TextView mTextViewRating;
     private Movie mMovie;
+    private boolean mUseTwoPane;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -75,6 +79,8 @@ public class MovieDetailsFragment extends Fragment {
         if (getArguments() != null) {
             mMovie = getArguments().getParcelable(BUNDLE_MOVIE);
         }
+
+        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
     }
 
     @Override
@@ -98,6 +104,14 @@ public class MovieDetailsFragment extends Fragment {
 
         mTextViewRating = (TextView) view.findViewById(R.id.tv_details_rating);
         mTextViewRating.setText(getString(R.string.details_rating, mMovie.getVoteAverage()));
+
+        if (mUseTwoPane) {
+            mViewHeader = view.findViewById(R.id.fl_details_header);
+            mViewHeader.setVisibility(View.VISIBLE);
+            mImageViewHeaderBackdrop = (ImageView) view.findViewById(R.id.iv_details_backdrop);
+            mTextViewHeaderTitle = (TextView) view.findViewById(R.id.tv_details_title);
+            loadTwoPaneHeader();
+        }
     }
 
     private void loadPoster() {
@@ -128,5 +142,17 @@ public class MovieDetailsFragment extends Fragment {
         } else {
             mTextViewDate.setVisibility(View.GONE);
         }
+    }
+
+    private void loadTwoPaneHeader() {
+        String backdrop = mMovie.getBackdropPath();
+        if (!TextUtils.isEmpty(backdrop)) {
+            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_BACKDROP_SIZE + backdrop;
+            Glide.with(this)
+                    .load(imagePath)
+                    .into(mImageViewHeaderBackdrop);
+        }
+
+        mTextViewHeaderTitle.setText(mMovie.getOriginalTitle());
     }
 }

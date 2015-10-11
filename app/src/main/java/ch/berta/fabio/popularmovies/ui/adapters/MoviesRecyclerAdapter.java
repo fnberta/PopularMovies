@@ -16,7 +16,6 @@
 
 package ch.berta.fabio.popularmovies.ui.adapters;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -24,7 +23,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -32,7 +30,6 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
 /**
@@ -51,19 +48,17 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
     private AdapterInteractionListener mListener;
     private int mItemHeight;
 
-    public MoviesRecyclerAdapter(Context context, List<Movie> movies, Fragment fragment,
-                                 AdapterInteractionListener listener) {
+    public MoviesRecyclerAdapter(List<Movie> movies, int layoutWidth, int columnCount,
+                                 Fragment fragment, AdapterInteractionListener listener) {
         mMovies = movies;
         mLifecycleFragment = fragment;
         mListener = listener;
 
-        calcPosterHeight(context);
+        calcPosterHeight(columnCount, layoutWidth);
     }
 
-    private void calcPosterHeight(Context context) {
-        int columns = context.getResources().getInteger(R.integer.span_count);
-        int screenWidth = Utils.getScreenWidth(context);
-        int itemWidth = screenWidth / columns;
+    private void calcPosterHeight(int columns, int layoutWidth) {
+        int itemWidth = layoutWidth / columns;
         mItemHeight = (int) (itemWidth / POSTER_ASPECT_RATIO);
     }
 

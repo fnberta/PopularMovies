@@ -16,5 +16,7 @@
   -->
 
 <resources>
+    <integer name="two_pane_list_width_percentage">40</integer>
+    <integer name="two_pane_detail_width_percentage">60</integer>
     <integer name="span_count">2</integer>
 </resources>

@@ -25,6 +25,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
@@ -70,6 +71,7 @@ public class MovieGridFragment extends Fragment implements
     private static final String PERSIST_SORT = "persisted_sort";
     private static final String SORT_DIALOG = "sort_dialog";
     private SharedPreferences mSharedPrefs;
+    private boolean mUseTwoPane;
     private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private MoviesRecyclerAdapter mRecyclerAdapter;
@@ -94,6 +96,7 @@ public class MovieGridFragment extends Fragment implements
 
         setHasOptionsMenu(true);
         setupSorting();
+        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
 
         if (savedInstanceState != null) {
             mMovies = savedInstanceState.getParcelableArrayList(STATE_MOVIES);
@@ -200,7 +203,8 @@ public class MovieGridFragment extends Fragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(getActivity(), mMovies, this, this);
+        mRecyclerAdapter = new MoviesRecyclerAdapter(mMovies, getLayoutWidth(), spanCount, this,
+                this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         Mugen.with(mRecyclerView, new MugenCallbacks() {
             @Override
@@ -220,6 +224,12 @@ public class MovieGridFragment extends Fragment implements
                 return mMoviePage >= MOVIE_DB_MAX_PAGE;
             }
         }).start();
+    }
+
+    private int getLayoutWidth() {
+        int screenWidth = Utils.getScreenWidth(getResources());
+        return mUseTwoPane ? screenWidth / 100 *
+                getResources().getInteger(R.integer.two_pane_list_width_percentage) : screenWidth;
     }
 
     private void loadMovies() {
@@ -373,16 +383,26 @@ public class MovieGridFragment extends Fragment implements
 
     @Override
     public void onMovieRowItemClick(int position, View sharedView) {
-        Activity activity = getActivity();
+        Movie movie = mMovies.get(position);
 
-        Intent intent = new Intent(activity, MovieDetailsActivity.class);
-        intent.putExtra(INTENT_MOVIE_SELECTED, mMovies.get(position));
+        if (!mUseTwoPane) {
+            Activity activity = getActivity();
 
-        String transitionName = getString(R.string.shared_transition_details_poster);
-        ViewCompat.setTransitionName(sharedView, transitionName);
-        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity, sharedView, transitionName);
-        activity.startActivity(intent, options.toBundle());
+            Intent intent = new Intent(activity, MovieDetailsActivity.class);
+            intent.putExtra(INTENT_MOVIE_SELECTED, movie);
+
+            String transitionName = getString(R.string.shared_transition_details_poster);
+            ViewCompat.setTransitionName(sharedView, transitionName);
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    activity, sharedView, transitionName);
+            activity.startActivity(intent, options.toBundle());
+        } else {
+            MovieDetailsFragment detailsFragment = MovieDetailsFragment.newInstance(movie);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.container, detailsFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .commit();
+        }
     }
 
     /**

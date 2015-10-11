@@ -17,6 +17,7 @@
 package ch.berta.fabio.popularmovies;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.design.widget.Snackbar;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -85,12 +86,11 @@ public class Utils {
 
     /**
      * Returns the width of the screen.
-     *
-     * @param context the {@link Context} to used to get the resources
+     * @param res the resources
      * @return the width of the screen
      */
-    public static int getScreenWidth(Context context) {
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+    public static int getScreenWidth(Resources res) {
+        DisplayMetrics metrics = res.getDisplayMetrics();
         return metrics.widthPixels;
     }
 }

@@ -54,7 +54,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
             actionBar.setTitle(movie.getOriginalTitle());
         }
 
-        ImageView ivBackdrop = (ImageView) findViewById(R.id.iv_details_backdrop);
+        ImageView ivBackdrop = (ImageView) findViewById(R.id.iv_toolbar_details_backdrop);
         String backdrop = movie.getBackdropPath();
         if (!TextUtils.isEmpty(backdrop)) {
             String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_BACKDROP_SIZE + backdrop;
