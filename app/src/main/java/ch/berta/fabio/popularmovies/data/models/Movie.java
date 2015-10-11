@@ -80,7 +80,7 @@ public class Movie implements Parcelable {
     protected Movie(Parcel in) {
         this.mAdult = in.readByte() != 0;
         this.mBackdropPath = in.readString();
-        this.mGenreIds = new ArrayList<Integer>();
+        this.mGenreIds = new ArrayList<>();
         in.readList(this.mGenreIds, List.class.getClassLoader());
         this.mId = in.readInt();
         this.mOriginalLanguage = in.readString();

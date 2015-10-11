@@ -200,8 +200,7 @@ public class MovieGridFragment extends Fragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(getActivity(), R.layout.row_movie, mMovies,
-                this, this);
+        mRecyclerAdapter = new MoviesRecyclerAdapter(getActivity(), mMovies, this, this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         Mugen.with(mRecyclerView, new MugenCallbacks() {
             @Override
@@ -246,7 +245,7 @@ public class MovieGridFragment extends Fragment implements
      *
      * @param forceNewQuery whether to force a new query when there is already one going on
      */
-    public void queryMovies(boolean forceNewQuery) {
+    private void queryMovies(boolean forceNewQuery) {
         FragmentManager fragmentManager = getFragmentManager();
         QueryMoviesTaskFragment task = findTaskFragment(fragmentManager);
         Sort sort = mSortOptions[mSortSelected];

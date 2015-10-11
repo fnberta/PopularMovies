@@ -42,17 +42,17 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
     public static final int TYPE_ITEM = 0;
     public static final int TYPE_PROGRESS = 1;
+    private static final int VIEW_RESOURCE_ITEM = R.layout.row_movie;
+    private static final int VIEW_RESOURCE_PROGRESS = R.layout.row_progress;
     private static final double POSTER_ASPECT_RATIO = 0.675;
     private static final String LOG_TAG = MoviesRecyclerAdapter.class.getSimpleName();
-    private int mViewResource;
     private List<Movie> mMovies;
     private Fragment mLifecycleFragment;
     private AdapterInteractionListener mListener;
     private int mItemHeight;
 
-    public MoviesRecyclerAdapter(Context context, int viewResource, List<Movie> movies,
-                                 Fragment fragment, AdapterInteractionListener listener) {
-        mViewResource = viewResource;
+    public MoviesRecyclerAdapter(Context context, List<Movie> movies, Fragment fragment,
+                                 AdapterInteractionListener listener) {
         mMovies = movies;
         mLifecycleFragment = fragment;
         mListener = listener;
@@ -71,12 +71,12 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_ITEM: {
-                View view = LayoutInflater.from(parent.getContext()).inflate(mViewResource, parent,
-                        false);
+                View view = LayoutInflater.from(parent.getContext()).inflate(VIEW_RESOURCE_ITEM,
+                        parent, false);
                 return new MovieRow(view, mItemHeight, mListener);
             }
             case TYPE_PROGRESS: {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_progress,
+                View view = LayoutInflater.from(parent.getContext()).inflate(VIEW_RESOURCE_PROGRESS,
                         parent, false);
                 return new ProgressRow(view);
             }
@@ -239,12 +239,8 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
     private static class ProgressRow extends RecyclerView.ViewHolder {
 
-        private ProgressBar mProgressBar;
-
         public ProgressRow(View view) {
             super(view);
-
-            mProgressBar = (ProgressBar) view.findViewById(R.id.pb_more);
         }
     }
 }

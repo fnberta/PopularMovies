@@ -66,7 +66,7 @@ public class MovieDbClient {
          * @param page   the page to query
          * @param sortBy the option to sort movies by
          * @param apiKey the api key for querying TheMovieDB.
-         * @return
+         * @return a {@link Call} object with the query
          */
         @GET("discover/movie")
         Call<MoviesPage> loadMoviePosters(@Query("page") int page, @Query("sort_by") String sortBy,
