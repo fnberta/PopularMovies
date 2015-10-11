@@ -46,7 +46,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Movie movie = getIntent().getParcelableExtra(MainFragment.INTENT_MOVIE_SELECTED);
+        Movie movie = getIntent().getParcelableExtra(MovieGridFragment.INTENT_MOVIE_SELECTED);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

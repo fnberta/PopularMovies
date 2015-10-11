@@ -55,12 +55,12 @@ import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 /**
  * Displays a grid of movie poster images.
  */
-public class MainFragment extends Fragment implements
+public class MovieGridFragment extends Fragment implements
         MoviesRecyclerAdapter.AdapterInteractionListener {
 
     public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
     private static final int MOVIE_DB_MAX_PAGE = 1000;
-    private static final String LOG_TAG = MainFragment.class.getSimpleName();
+    private static final String LOG_TAG = MovieGridFragment.class.getSimpleName();
     private static final String STATE_MOVIES = "state_movies";
     private static final String STATE_MOVIE_PAGE = "state_movie_page";
     private static final String STATE_REFRESHING = "state_refreshing";
@@ -84,7 +84,7 @@ public class MainFragment extends Fragment implements
     private boolean mIsLoadingMore;
     private boolean mIsLoadingNewSort;
 
-    public MainFragment() {
+    public MovieGridFragment() {
         // required empty constructor
     }
 
@@ -140,7 +140,7 @@ public class MainFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        return inflater.inflate(R.layout.fragment_movie_grid, container, false);
     }
 
     @Override
@@ -351,7 +351,7 @@ public class MainFragment extends Fragment implements
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_main_fragment, menu);
+        inflater.inflate(R.menu.menu_movie_grid_fragment, menu);
     }
 
     @Override

@@ -28,7 +28,7 @@
         android:theme="@style/AppTheme"
         >
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.MovieGridActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme"
             >
@@ -41,7 +41,7 @@
         <activity
             android:name=".ui.MovieDetailsActivity"
             android:label="@string/title_activity_movie_details"
-            android:parentActivityName=".ui.MainActivity"
+            android:parentActivityName=".ui.MovieGridActivity"
             android:theme="@style/AppTheme.DrawStatusBar.Explode"
             />
     </application>

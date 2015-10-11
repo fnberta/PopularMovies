@@ -28,38 +28,38 @@ import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
 /**
- * Provides the main entry point to the app and hosts a {@link MainFragment}.
+ * Provides the main entry point to the app and hosts a {@link MovieGridFragment}.
  */
-public class MainActivity extends AppCompatActivity implements
+public class MovieGridActivity extends AppCompatActivity implements
         QueryMoviesTaskFragment.TaskInteractionListener,
         SortMoviesDialogFragment.DialogInteractionListener {
 
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
-    private MainFragment mMainFragment;
+    private static final String LOG_TAG = MovieGridActivity.class.getSimpleName();
+    private MovieGridFragment mMovieGridFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_movie_grid);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mMainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+        mMovieGridFragment = (MovieGridFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
     }
 
     @Override
     public void onMoviesQueried(List<Movie> movies) {
-        mMainFragment.onMoviesQueried(movies);
+        mMovieGridFragment.onMoviesQueried(movies);
     }
 
     @Override
     public void onMovieQueryFailed() {
-        mMainFragment.onMovieQueryFailed();
+        mMovieGridFragment.onMovieQueryFailed();
     }
 
     @Override
     public void setSortOption(int optionIndex) {
-        mMainFragment.onSortOptionSelected(optionIndex);
+        mMovieGridFragment.onSortOptionSelected(optionIndex);
     }
 }
