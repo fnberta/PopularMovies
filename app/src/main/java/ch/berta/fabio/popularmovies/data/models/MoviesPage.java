@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by fabio on 03.10.15.
+ * Represents a results page from a /discover/movies query of TheMovieDB.
  */
 public class MoviesPage {
 

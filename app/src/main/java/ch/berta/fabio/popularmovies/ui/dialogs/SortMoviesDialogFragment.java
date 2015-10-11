@@ -18,15 +18,16 @@ package ch.berta.fabio.popularmovies.ui.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.support.v4.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 import ch.berta.fabio.popularmovies.R;
 
 /**
- * Created by fabio on 20.11.14.
+ * Shows the available sort options and lets the user choose one.
  */
 public class SortMoviesDialogFragment extends DialogFragment {
 
@@ -37,6 +38,18 @@ public class SortMoviesDialogFragment extends DialogFragment {
     private int mSortChecked;
     private int mSortSelected;
 
+    public SortMoviesDialogFragment() {
+        // required empty constructor
+    }
+
+    /**
+     * Instantiates and returns a new {@link SortMoviesDialogFragment} with list of sort options
+     * and the currently selected sort option.
+     *
+     * @param sortOptions the available sort options
+     * @param sortChecked the currently selected sort option
+     * @return a new instance of a {@link SortMoviesDialogFragment}
+     */
     public static SortMoviesDialogFragment newInstance(String[] sortOptions, int sortChecked) {
         SortMoviesDialogFragment dialog = new SortMoviesDialogFragment();
 
@@ -46,10 +59,6 @@ public class SortMoviesDialogFragment extends DialogFragment {
         dialog.setArguments(args);
 
         return dialog;
-    }
-
-    public SortMoviesDialogFragment() {
-        // required empty constructor
     }
 
     @Override
@@ -75,6 +84,7 @@ public class SortMoviesDialogFragment extends DialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());

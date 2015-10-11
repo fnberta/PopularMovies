@@ -43,17 +43,17 @@ import com.mugen.MugenCallbacks;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.Sort;
 import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesRecyclerAdapter;
+import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Displays a grid of movie poster images.
  */
 public class MainFragment extends Fragment implements
         MoviesRecyclerAdapter.AdapterInteractionListener {
@@ -82,6 +82,7 @@ public class MainFragment extends Fragment implements
     private boolean mIsLoadingMore;
 
     public MainFragment() {
+        // required empty constructor
     }
 
     @Override
@@ -230,6 +231,12 @@ public class MainFragment extends Fragment implements
         }
     }
 
+    /**
+     * Creates a new {@link QueryMoviesTaskFragment} if it is not being retained across a
+     * configuration change to query movies from TheMovieDB.
+     *
+     * @param showProgressBar whether to show a progress bar and hide the main movie grid
+     */
     public void queryMovies(boolean showProgressBar) {
         FragmentManager fragmentManager = getFragmentManager();
         QueryMoviesTaskFragment task = findTaskFragment(fragmentManager);
@@ -251,6 +258,12 @@ public class MainFragment extends Fragment implements
         return (QueryMoviesTaskFragment) fragmentManager.findFragmentByTag(QUERY_MOVIES_TASK);
     }
 
+    /**
+     * Removes {@link QueryMoviesTaskFragment} and updates the main {@link RecyclerView} grid
+     * with the queried movies.
+     *
+     * @param movies the list of newly queried movies containg {@link Movie} objects
+     */
     public void onMoviesQueried(List<Movie> movies) {
         removeTaskFragment();
 
@@ -268,6 +281,10 @@ public class MainFragment extends Fragment implements
         mMoviePage++;
     }
 
+    /**
+     * Removes {@link QueryMoviesTaskFragment}, notifies the user that something went wrong by
+     * showing a snackbar and hides loading or refreshing indicators
+     */
     public void onMovieQueryFailed() {
         removeTaskFragment();
         Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView,
@@ -355,6 +372,11 @@ public class MainFragment extends Fragment implements
         activity.startActivity(intent, options.toBundle());
     }
 
+    /**
+     * Sets the global sort option field to the one selected.
+     *
+     * @param sortOptionIndex the index number of the selected sort option
+     */
     public void onSortOptionSelected(int sortOptionIndex) {
         mMoviePage = 1;
         mSortSelected = sortOptionIndex;

@@ -28,6 +28,10 @@ import com.bumptech.glide.Glide;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
+/**
+ * Presents the backdrop image of a selected movie in a collapsing toolbar and hosts a
+ * {@link MovieDetailsFragment} that displays other information about the movie.
+ */
 public class MovieDetailsActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();

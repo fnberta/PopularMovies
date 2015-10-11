@@ -22,7 +22,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 /**
- * Created by fabio on 04.10.15.
+ * Draws the padding around the movie grid items.
+ * <p>
+ * Adjusts the padding depending on the position of an item.
+ * </p>
  */
 public class PosterGridItemDecoration extends RecyclerView.ItemDecoration {
 

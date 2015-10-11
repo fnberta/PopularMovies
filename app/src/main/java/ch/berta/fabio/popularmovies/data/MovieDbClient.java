@@ -27,7 +27,7 @@ import retrofit.http.GET;
 import retrofit.http.Query;
 
 /**
- * Created by fabio on 03.10.15.
+ * Provides a singleton {@link Retrofit} instance that queries TheMovieDB for movies.
  */
 public class MovieDbClient {
 
@@ -43,6 +43,11 @@ public class MovieDbClient {
         // class cannot be instantiated
     }
 
+    /**
+     * Returns the singleton instance of the {@link Retrofit} adapter.
+     *
+     * @return the {@link Retrofit} adapter
+     */
     public static MoviePosters getService() {
         return MOVIE_POSTERS_SERVICE;
     }
@@ -51,7 +56,18 @@ public class MovieDbClient {
         return new GsonBuilder().setDateFormat("yyyy-mm-dd").create();
     }
 
+    /**
+     * Provides the query calls to the TheMovieDB.
+     */
     public interface MoviePosters {
+        /**
+         * Queries TheMovieDB for movies based on the page number and sort option.
+         *
+         * @param page   the page to query
+         * @param sortBy the option to sort movies by
+         * @param apiKey the api key for querying TheMovieDB.
+         * @return
+         */
         @GET("discover/movie")
         Call<MoviesPage> loadMoviePosters(@Query("page") int page, @Query("sort_by") String sortBy,
                                           @Query("api_key") String apiKey);

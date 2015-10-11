@@ -28,7 +28,7 @@ import java.util.List;
 import ch.berta.fabio.popularmovies.Utils;
 
 /**
- * Created by fabio on 03.10.15.
+ * Represents a movie, queried from TheMovieDB.
  */
 public class Movie implements Parcelable {
 
@@ -156,6 +156,10 @@ public class Movie implements Parcelable {
         return mReleaseDate;
     }
 
+    public void setReleaseDate(Date releaseDate) {
+        mReleaseDate = releaseDate;
+    }
+
     public String getReleaseDateFormatted(boolean showLong) {
         Date date = getReleaseDate();
         if (date == null) {
@@ -163,10 +167,6 @@ public class Movie implements Parcelable {
         }
 
         return showLong ? Utils.formatDateLong(date) : Utils.formatDateShort(date);
-    }
-
-    public void setReleaseDate(Date releaseDate) {
-        mReleaseDate = releaseDate;
     }
 
     public String getPosterPath() {

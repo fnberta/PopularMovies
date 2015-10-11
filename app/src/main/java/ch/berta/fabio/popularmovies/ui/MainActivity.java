@@ -27,6 +27,9 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
+/**
+ * Provides the main entry point to the app and hosts a {@link MainFragment}.
+ */
 public class MainActivity extends AppCompatActivity implements
         QueryMoviesTaskFragment.TaskInteractionListener,
         SortMoviesDialogFragment.DialogInteractionListener {

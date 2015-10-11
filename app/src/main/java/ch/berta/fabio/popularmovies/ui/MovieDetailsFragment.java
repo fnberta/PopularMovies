@@ -34,6 +34,10 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
+/**
+ * Displays detail information about a movie, including poster image, release date, rating and
+ * an overview of the plot.
+ */
 public class MovieDetailsFragment extends Fragment {
 
     private static final String BUNDLE_MOVIE = "bundle_movie";
@@ -48,6 +52,13 @@ public class MovieDetailsFragment extends Fragment {
         // Required empty public constructor
     }
 
+    /**
+     * Instantiates and returns a new {@link MovieDetailsFragment} with a {@link Movie} object as
+     * an argument.
+     *
+     * @param movie the {@link Movie} object to be set as an argument
+     * @return a new instance of a {@link MovieDetailsFragment}
+     */
     public static MovieDetailsFragment newInstance(Movie movie) {
         MovieDetailsFragment fragment = new MovieDetailsFragment();
 

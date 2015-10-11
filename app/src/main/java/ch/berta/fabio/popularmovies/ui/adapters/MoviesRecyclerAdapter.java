@@ -18,7 +18,6 @@ package ch.berta.fabio.popularmovies.ui.adapters;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -37,7 +36,7 @@ import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
 /**
- * Created by fabio on 04.10.15.
+ * Provides the adapter for a movie poster images grid.
  */
 public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
@@ -120,10 +119,20 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
         return mMovies.size();
     }
 
+    /**
+     * Returns the position of the last movie in the adapter.
+     *
+     * @return the position of the last movie
+     */
     public int getLastPosition() {
         return getItemCount() - 1;
     }
 
+    /**
+     * Clears all movies from the adapter and sets new ones.
+     *
+     * @param movies the movies to be set
+     */
     public void setMovies(List<Movie> movies) {
         mMovies.clear();
 
@@ -134,23 +143,43 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
+    /**
+     * Adds movies to the adapter.
+     *
+     * @param movies the movies to be added
+     */
     public void addMovies(List<Movie> movies) {
         mMovies.addAll(movies);
         notifyItemRangeInserted(getItemCount(), movies.size());
     }
 
+    /**
+     * Shows a progressbar in the last row as an indicator that more objects are being fetched.
+     */
     public void showLoadMoreIndicator() {
         mMovies.add(null);
         notifyItemInserted(getLastPosition());
     }
 
+    /**
+     * Hides the progressbar in the last row.
+     */
     public void hideLoadMoreIndicator() {
         int position = getLastPosition();
         mMovies.remove(position);
         notifyItemRemoved(position);
     }
 
+    /**
+     * Handles the interaction of the adapter.
+     */
     public interface AdapterInteractionListener {
+        /**
+         * Handles the click on a movie.
+         *
+         * @param position   the adapter position of the clicked movie
+         * @param sharedView the view to be used for a shared element transition
+         */
         void onMovieRowItemClick(int position, View sharedView);
     }
 
@@ -183,6 +212,14 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
             itemView.setLayoutParams(layoutParams);
         }
 
+        /**
+         * Sets all information of a movie.
+         *
+         * @param title    the title of the movie
+         * @param date     the release date of the movie
+         * @param poster   the relative url of the movie poster
+         * @param fragment the fragment whose lifecycle the image loading should follow
+         */
         public void setMovie(String title, String date, String poster, Fragment fragment) {
             if (!TextUtils.isEmpty(poster)) {
                 mImageViewPoster.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -191,8 +228,7 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
                         .load(imageUrl)
                         .crossFade()
                         .into(mImageViewPoster);
-            }
-            else {
+            } else {
                 mImageViewPoster.setScaleType(ImageView.ScaleType.CENTER);
                 mImageViewPoster.setImageResource(R.drawable.ic_movie_white_72dp);
             }

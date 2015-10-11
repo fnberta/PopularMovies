@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Created by fabio on 04.10.15.
+ * Represents an option how to sort a movie poster images list or grid.
  */
 public class Sort {
 
@@ -32,9 +32,13 @@ public class Sort {
     public static final String SORT_POPULARITY = "popularity.desc";
     public static final String SORT_RATING = "vote_average.desc";
     public static final String SORT_RELEASE_DATE = "release_date.desc";
-
     private String mOption;
     private String mReadableValue;
+
+    public Sort(@SortOption String option, String readableValue) {
+        mOption = option;
+        mReadableValue = readableValue;
+    }
 
     public String getOption() {
         return mOption;
@@ -52,8 +56,5 @@ public class Sort {
         mReadableValue = readableValue;
     }
 
-    public Sort(@SortOption String option, String readableValue) {
-        mOption = option;
-        mReadableValue = readableValue;
-    }
+
 }

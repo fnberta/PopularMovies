@@ -33,7 +33,12 @@ import retrofit.Response;
 import retrofit.Retrofit;
 
 /**
- * Created by fabio on 04.10.15.
+ * Queries TheMoviesDB for movies.
+ * <p>
+ * A {@link Fragment} with a single task: to perform an online query for movies from the
+ * TheMovieDB. It is retained across configuration changes and reports back to its activity
+ * via the callback interface {@link ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment.TaskInteractionListener}.
+ * </p>
  */
 public class QueryMoviesTaskFragment extends Fragment {
 
@@ -43,6 +48,18 @@ public class QueryMoviesTaskFragment extends Fragment {
     private TaskInteractionListener mListener;
     private Call<MoviesPage> mLoadMoviePosters;
 
+    public QueryMoviesTaskFragment() {
+        // required empty constructor
+    }
+
+    /**
+     * Instantiates and returns a new {@link QueryMoviesTaskFragment} with a page and sort options
+     * as parameters.
+     *
+     * @param page the page number to be used for the movie query
+     * @param sort the sort option to be used for the movie query
+     * @return a new instance of a {@link QueryMoviesTaskFragment}
+     */
     public static QueryMoviesTaskFragment newInstance(int page, String sort) {
         QueryMoviesTaskFragment fragment = new QueryMoviesTaskFragment();
 
@@ -52,10 +69,6 @@ public class QueryMoviesTaskFragment extends Fragment {
         fragment.setArguments(args);
 
         return fragment;
-    }
-
-    public QueryMoviesTaskFragment() {
-
     }
 
     @Override
@@ -127,9 +140,20 @@ public class QueryMoviesTaskFragment extends Fragment {
         super.onDestroy();
     }
 
+    /**
+     * Handles the interaction of the TaskFragment.
+     */
     public interface TaskInteractionListener {
+        /**
+         * Handles the event when movie query finished.
+         *
+         * @param movies the {@link List<Movie>} containing the queried movies
+         */
         void onMoviesQueried(List<Movie> movies);
 
+        /**
+         * Handles the event when movie query failed.
+         */
         void onMovieQueryFailed();
     }
 }
