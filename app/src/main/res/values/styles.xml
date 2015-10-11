@@ -27,6 +27,7 @@
 
     <style name="AppTheme" parent="BaseTheme"/>
     <style name="AppTheme.DrawStatusBar" parent="AppTheme"/>
+    <style name="AppTheme.DrawStatusBar.Explode" parent="AppTheme.DrawStatusBar"/>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark"/>
