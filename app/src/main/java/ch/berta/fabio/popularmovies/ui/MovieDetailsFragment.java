@@ -53,8 +53,7 @@ public class MovieDetailsFragment extends Fragment {
     }
 
     /**
-     * Instantiates and returns a new {@link MovieDetailsFragment} with a {@link Movie} object as
-     * an argument.
+     * Returns a new instance of a {@link MovieDetailsFragment} with a {@link Movie} as an argument.
      *
      * @param movie the {@link Movie} object to be set as an argument
      * @return a new instance of a {@link MovieDetailsFragment}

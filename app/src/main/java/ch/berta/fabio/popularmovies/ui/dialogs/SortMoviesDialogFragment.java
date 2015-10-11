@@ -43,8 +43,8 @@ public class SortMoviesDialogFragment extends DialogFragment {
     }
 
     /**
-     * Instantiates and returns a new {@link SortMoviesDialogFragment} with list of sort options
-     * and the currently selected sort option.
+     * Returns a new instance of a {@link SortMoviesDialogFragment} with list of
+     * sort options and the currently selected sort option.
      *
      * @param sortOptions the available sort options
      * @param sortChecked the currently selected sort option

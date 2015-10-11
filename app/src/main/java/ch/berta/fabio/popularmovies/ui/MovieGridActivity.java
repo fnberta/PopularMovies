@@ -45,7 +45,8 @@ public class MovieGridActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mMovieGridFragment = (MovieGridFragment) getSupportFragmentManager().findFragmentById(R.id.fragment);
+        mMovieGridFragment = (MovieGridFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment);
     }
 
     @Override

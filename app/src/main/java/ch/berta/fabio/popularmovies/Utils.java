@@ -35,7 +35,7 @@ public class Utils {
     }
 
     /**
-     * Returns a formatted String using the short date format
+     * Returns a formatted String using the short date format.
      *
      * @param date the date to be formatted
      * @return a string with the formatted date
@@ -48,7 +48,7 @@ public class Utils {
     }
 
     /**
-     * Returns a formatted String using the long date format
+     * Returns a formatted String using the long date format.
      *
      * @param date the date to be formatted
      * @return a string with the formatted date
@@ -72,7 +72,7 @@ public class Utils {
     }
 
     /**
-     * Returns a basic snackbar
+     * Returns a basic snackbar.
      *
      * @param view     the view to whose layout the snackbar attaches itself
      * @param message  the message to be shown in the snackbar
@@ -84,7 +84,7 @@ public class Utils {
     }
 
     /**
-     * Returns the width of the screen
+     * Returns the width of the screen.
      *
      * @param context the {@link Context} to used to get the resources
      * @return the width of the screen

@@ -244,7 +244,7 @@ public class MovieGridFragment extends Fragment implements
      * Creates a new {@link QueryMoviesTaskFragment} if it is not being retained across a
      * configuration change to query movies from TheMovieDB.
      *
-     * @param forceNewQuery whether to force a new query when there is already on going on
+     * @param forceNewQuery whether to force a new query when there is already one going on
      */
     public void queryMovies(boolean forceNewQuery) {
         FragmentManager fragmentManager = getFragmentManager();
@@ -274,7 +274,7 @@ public class MovieGridFragment extends Fragment implements
      * Removes {@link QueryMoviesTaskFragment} and updates the main {@link RecyclerView} grid
      * with the queried movies.
      *
-     * @param movies the list of newly queried movies containg {@link Movie} objects
+     * @param movies the newly queried movies
      */
     public void onMoviesQueried(List<Movie> movies) {
         removeTaskFragment();
@@ -296,7 +296,7 @@ public class MovieGridFragment extends Fragment implements
 
     /**
      * Removes {@link QueryMoviesTaskFragment}, notifies the user that something went wrong by
-     * showing a snackbar and hides loading or refreshing indicators
+     * showing a snackbar and hides all loading or refreshing indicators
      */
     public void onMovieQueryFailed() {
         removeTaskFragment();

@@ -53,8 +53,8 @@ public class QueryMoviesTaskFragment extends Fragment {
     }
 
     /**
-     * Instantiates and returns a new {@link QueryMoviesTaskFragment} with a page and sort options
-     * as parameters.
+     * Returns a new instance of a {@link QueryMoviesTaskFragment} with a page and sort options
+     * as arguments.
      *
      * @param page the page number to be used for the movie query
      * @param sort the sort option to be used for the movie query
