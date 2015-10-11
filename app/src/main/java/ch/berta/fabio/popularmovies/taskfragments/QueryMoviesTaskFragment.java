@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2015 Fabio Berta
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.berta.fabio.popularmovies.taskfragments;
 
 import android.app.Activity;
@@ -7,8 +23,8 @@ import android.text.TextUtils;
 
 import java.util.List;
 
+import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.MovieDbClient;
-import ch.berta.fabio.popularmovies.data.MovieDbKey;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import retrofit.Call;
@@ -17,14 +33,33 @@ import retrofit.Response;
 import retrofit.Retrofit;
 
 /**
- * Created by fabio on 04.10.15.
+ * Queries TheMoviesDB for movies.
+ * <p>
+ * A {@link Fragment} with a single task: to perform an online query for movies from the
+ * TheMovieDB. It is retained across configuration changes and reports back to its activity
+ * via the callback interface {@link ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment.TaskInteractionListener}.
+ * </p>
  */
 public class QueryMoviesTaskFragment extends Fragment {
 
+    private static final String LOG_TAG = QueryMoviesTaskFragment.class.getSimpleName();
     private static final String BUNDLE_PAGE = "bundle_page";
     private static final String BUNDLE_SORT = "bundle_sort";
     private TaskInteractionListener mListener;
+    private Call<MoviesPage> mLoadMoviePosters;
 
+    public QueryMoviesTaskFragment() {
+        // required empty constructor
+    }
+
+    /**
+     * Returns a new instance of a {@link QueryMoviesTaskFragment} with a page and sort options
+     * as arguments.
+     *
+     * @param page the page number to be used for the movie query
+     * @param sort the sort option to be used for the movie query
+     * @return a new instance of a {@link QueryMoviesTaskFragment}
+     */
     public static QueryMoviesTaskFragment newInstance(int page, String sort) {
         QueryMoviesTaskFragment fragment = new QueryMoviesTaskFragment();
 
@@ -34,10 +69,6 @@ public class QueryMoviesTaskFragment extends Fragment {
         fragment.setArguments(args);
 
         return fragment;
-    }
-
-    public QueryMoviesTaskFragment() {
-
     }
 
     @Override
@@ -73,15 +104,15 @@ public class QueryMoviesTaskFragment extends Fragment {
     }
 
     private void queryMovies(int page, String sort) {
-        Call<MoviesPage> call = MovieDbClient.getService().loadMoviePosters(page, sort,
-                MovieDbKey.MOVIE_DB_KEY);
-        call.enqueue(new Callback<MoviesPage>() {
+        mLoadMoviePosters = MovieDbClient.getService().loadMoviePosters(page, sort,
+                getString(R.string.movie_db_key));
+        mLoadMoviePosters.enqueue(new Callback<MoviesPage>() {
             @Override
             public void onResponse(Response<MoviesPage> response, Retrofit retrofit) {
-                MoviesPage page = response.body();
+                MoviesPage moviesPage = response.body();
                 if (mListener != null) {
-                    if (page != null) {
-                        mListener.onMoviesQueried(page.getMovies());
+                    if (moviesPage != null) {
+                        mListener.onMoviesQueried(moviesPage.getMovies());
                     } else {
                         mListener.onMovieQueryFailed();
                     }
@@ -103,9 +134,26 @@ public class QueryMoviesTaskFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onDestroy() {
+        mLoadMoviePosters.cancel();
+        super.onDestroy();
+    }
+
+    /**
+     * Handles the interaction of the TaskFragment.
+     */
     public interface TaskInteractionListener {
+        /**
+         * Handles the event when movie query finished.
+         *
+         * @param movies the {@link List<Movie>} containing the queried movies
+         */
         void onMoviesQueried(List<Movie> movies);
 
+        /**
+         * Handles the event when movie query failed.
+         */
         void onMovieQueryFailed();
     }
 }

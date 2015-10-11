@@ -1,3 +1,19 @@
+<!--
+  ~ Copyright (c) 2015 Fabio Berta
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
 <android.support.v4.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -15,14 +31,17 @@
 
         <ImageView
             android:id="@+id/iv_details_poster"
-            android:layout_width="150dp"
-            android:layout_height="222dp"
+            android:layout_width="@dimen/detail_poster_width"
+            android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_marginStart="@dimen/key_line_1"
             android:layout_marginTop="@dimen/normal_space"
+            android:adjustViewBounds="true"
             android:contentDescription="@string/movie_poster"
+            android:scaleType="fitXY"
             android:transitionName="@string/shared_transition_details_poster"
+            tools:layout_height="222dp"
             />
 
         <TextView
@@ -42,9 +61,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/tv_details_header_facts"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:layout_marginEnd="@dimen/key_line_1"
             android:layout_toEndOf="@id/iv_details_poster"
-            android:paddingEnd="@dimen/key_line_1"
-            android:paddingStart="@dimen/key_line_1"
             tools:text="27. September 2015"
             />
 
@@ -54,9 +73,9 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/tv_details_release_date"
             android:layout_toEndOf="@id/iv_details_poster"
-            android:paddingEnd="@dimen/key_line_1"
-            android:paddingStart="@dimen/key_line_1"
-            tools:text="Rating: 456.78"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:layout_marginEnd="@dimen/key_line_1"
+            tools:text="Rating: 4/10"
             />
 
         <TextView
@@ -77,8 +96,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/tv_details_header_plot"
-            android:paddingEnd="@dimen/key_line_1"
-            android:paddingStart="@dimen/key_line_1"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:layout_marginEnd="@dimen/key_line_1"
             tools:text="A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival."
             />
 

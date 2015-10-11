@@ -1,9 +1,22 @@
+/*
+ * Copyright (c) 2015 Fabio Berta
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ch.berta.fabio.popularmovies.ui;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.text.TextUtilsCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,9 +28,13 @@ import com.bumptech.glide.Glide;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 
-public class MovieDetailsActivity extends AppCompatActivity implements
-        MovieDetailsFragment.FragmentInteractionListener{
+/**
+ * Presents the backdrop image of a selected movie in a collapsing toolbar and hosts a
+ * {@link MovieDetailsFragment} that displays other information about the movie.
+ */
+public class MovieDetailsActivity extends AppCompatActivity {
 
+    private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
 
     @Override
@@ -29,12 +46,12 @@ public class MovieDetailsActivity extends AppCompatActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Movie movie = getIntent().getParcelableExtra(MainFragment.INTENT_MOVIE_SELECTED);
+        Movie movie = getIntent().getParcelableExtra(MovieGridFragment.INTENT_MOVIE_SELECTED);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(movie.getTitle());
+            actionBar.setTitle(movie.getOriginalTitle());
         }
 
         ImageView ivBackdrop = (ImageView) findViewById(R.id.iv_details_backdrop);

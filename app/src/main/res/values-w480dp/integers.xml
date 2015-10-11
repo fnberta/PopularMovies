@@ -15,9 +15,6 @@
   ~ limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="font_fontFamily_regular" translatable="false" tools:ignore="UnusedResources">sans-serif</string>
-    <string name="font_fontFamily_medium" translatable="false">sans-serif-medium</string>
-    <string name="font_fontFamily_light" translatable="false" tools:ignore="UnusedResources">sans-serif-light</string>
-
+<resources>
+    <integer name="span_count">4</integer>
 </resources>
