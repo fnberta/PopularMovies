@@ -260,12 +260,12 @@ public class MovieDetailsFragment extends Fragment  implements
 
     @Override
     public void onInsertComplete(int token, Object cookie, Uri uri) {
-        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.added_to_favorites));
+        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.snackbar_added_to_favorites));
     }
 
     @Override
     public void onDeleteComplete(int token, Object cookie, int result) {
-        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.removed_from_favorites));
+        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.snackbar_removed_from_favorites));
 
         mListener.hideDetailsFragment();
     }
