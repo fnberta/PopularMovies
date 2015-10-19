@@ -16,27 +16,14 @@
 
 package ch.berta.fabio.popularmovies.ui;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.mugen.Mugen;
 import com.mugen.MugenCallbacks;
@@ -51,15 +38,13 @@ import ch.berta.fabio.popularmovies.data.models.Sort;
 import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesRecyclerAdapter;
 import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
-import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
 /**
  * Displays a grid of movie poster images.
  */
-public class MovieGridFragment extends Fragment implements
-        MoviesRecyclerAdapter.AdapterInteractionListener {
+public class MovieGridFragment extends BaseMovieGridFragment {
 
-    public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
+    private static final String KEY_SORT_SELECTED = "SORT_SELECTED";
     private static final int MOVIE_DB_MAX_PAGE = 1000;
     private static final String LOG_TAG = MovieGridFragment.class.getSimpleName();
     private static final String STATE_MOVIES = "state_movies";
@@ -68,35 +53,37 @@ public class MovieGridFragment extends Fragment implements
     private static final String STATE_LOADING_MORE = "state_loading_more";
     private static final String STATE_LOADING_NEW_SORT = "state_loading_new_sort";
     private static final String QUERY_MOVIES_TASK = "query_movies_task";
-    private static final String PERSIST_SORT = "persisted_sort";
-    private static final String SORT_DIALOG = "sort_dialog";
-    private SharedPreferences mSharedPrefs;
-    private boolean mUseTwoPane;
-    private ProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
     private MoviesRecyclerAdapter mRecyclerAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private View mViewEmpty;
     private ArrayList<Movie> mMovies;
-    private Sort[] mSortOptions;
-    private int mSortSelected;
     private int mMoviePage;
-    private String[] mSortValues;
     private boolean mIsRefreshing;
     private boolean mIsLoadingMore;
     private boolean mIsLoadingNewSort;
+    private Sort mSortSelected;
 
     public MovieGridFragment() {
         // required empty constructor
+    }
+
+    public static MovieGridFragment newInstance(Sort sortSelected) {
+        MovieGridFragment fragment = new MovieGridFragment();
+
+        Bundle args = new Bundle();
+        args.putParcelable(KEY_SORT_SELECTED, sortSelected);
+
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setHasOptionsMenu(true);
-        setupSorting();
-        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
+        Bundle args = getArguments();
+        if (args != null) {
+            mSortSelected = args.getParcelable(KEY_SORT_SELECTED);
+        }
 
         if (savedInstanceState != null) {
             mMovies = savedInstanceState.getParcelableArrayList(STATE_MOVIES);
@@ -123,41 +110,13 @@ public class MovieGridFragment extends Fragment implements
         outState.putBoolean(STATE_LOADING_NEW_SORT, mIsLoadingNewSort);
     }
 
-    private void setupSorting() {
-        mSortOptions = new Sort[]{
-                new Sort(Sort.SORT_POPULARITY, getString(R.string.sort_popularity)),
-                new Sort(Sort.SORT_RATING, getString(R.string.sort_rating)),
-                new Sort(Sort.SORT_RELEASE_DATE, getString(R.string.sort_release_date))
-        };
-        int optionsLength = mSortOptions.length;
-        mSortValues = new String[optionsLength];
-        for (int i = 0; i < optionsLength; i++) {
-            Sort sort = mSortOptions[i];
-            mSortValues[i] = sort.getReadableValue();
-        }
-
-        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mSortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_movie_grid, container, false);
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mProgressBar = (ProgressBar) view.findViewById(R.id.pb_base);
-        mViewEmpty = view.findViewById(R.id.empty_view);
-
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.srl_base);
         setupSwipeToRefresh();
-
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_base);
-        setupRecyclerView();
 
         loadMovies();
     }
@@ -189,7 +148,7 @@ public class MovieGridFragment extends Fragment implements
         mSwipeRefreshLayout.setRefreshing(isRefreshing);
     }
 
-    private void setupRecyclerView() {
+    protected void setupRecyclerView() {
         final int spanCount = getResources().getInteger(R.integer.span_count);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), spanCount);
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -203,8 +162,8 @@ public class MovieGridFragment extends Fragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(mMovies, getLayoutWidth(), spanCount, this,
-                this);
+        mRecyclerAdapter = new MoviesRecyclerAdapter(mMovies, mViewEmpty, getLayoutWidth(),
+                spanCount, this, this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
         Mugen.with(mRecyclerView, new MugenCallbacks() {
             @Override
@@ -224,12 +183,6 @@ public class MovieGridFragment extends Fragment implements
                 return mMoviePage >= MOVIE_DB_MAX_PAGE;
             }
         }).start();
-    }
-
-    private int getLayoutWidth() {
-        int screenWidth = Utils.getScreenWidth(getResources());
-        return mUseTwoPane ? screenWidth / 100 *
-                getResources().getInteger(R.integer.two_pane_list_width_percentage) : screenWidth;
     }
 
     private void loadMovies() {
@@ -258,16 +211,15 @@ public class MovieGridFragment extends Fragment implements
     private void queryMovies(boolean forceNewQuery) {
         FragmentManager fragmentManager = getFragmentManager();
         QueryMoviesTaskFragment task = findTaskFragment(fragmentManager);
-        Sort sort = mSortOptions[mSortSelected];
 
         if (task == null) {
-            task = QueryMoviesTaskFragment.newInstance(mMoviePage, sort.getOption());
+            task = QueryMoviesTaskFragment.newInstance(mMoviePage, mSortSelected.getOption());
             fragmentManager.beginTransaction()
                     .add(task, QUERY_MOVIES_TASK)
                     .commit();
         } else if (forceNewQuery) {
             QueryMoviesTaskFragment newTask = QueryMoviesTaskFragment.newInstance(mMoviePage,
-                    sort.getOption());
+                    mSortSelected.getOption());
             fragmentManager.beginTransaction()
                     .remove(task)
                     .add(newTask, QUERY_MOVIES_TASK)
@@ -316,6 +268,7 @@ public class MovieGridFragment extends Fragment implements
             mIsLoadingNewSort = false;
             setRefreshing(false);
             toggleMainVisibility(true);
+            mRecyclerAdapter.toggleEmptyViewVisibility();
 
             snackbar.setAction(R.string.snackbar_retry, new View.OnClickListener() {
                 @Override
@@ -343,76 +296,13 @@ public class MovieGridFragment extends Fragment implements
         }
     }
 
-    private void toggleMainVisibility(boolean showMainGrid) {
-        if (showMainGrid) {
-            mProgressBar.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
-            toggleEmptyViewVisibility();
-        } else {
-            mProgressBar.setVisibility(View.VISIBLE);
-            mRecyclerView.setVisibility(View.GONE);
-        }
-    }
-
-    private void toggleEmptyViewVisibility() {
-        mViewEmpty.setVisibility(mMovies.isEmpty() ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_movie_grid_fragment, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_sort:
-                showSortDialog();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void showSortDialog() {
-        SortMoviesDialogFragment dialog = SortMoviesDialogFragment.newInstance(mSortValues,
-                mSortSelected);
-        dialog.show(getFragmentManager(), SORT_DIALOG);
-    }
-
-    @Override
-    public void onMovieRowItemClick(int position, View sharedView) {
-        Movie movie = mMovies.get(position);
-
-        if (!mUseTwoPane) {
-            Activity activity = getActivity();
-
-            Intent intent = new Intent(activity, MovieDetailsActivity.class);
-            intent.putExtra(INTENT_MOVIE_SELECTED, movie);
-
-            String transitionName = getString(R.string.shared_transition_details_poster);
-            ViewCompat.setTransitionName(sharedView, transitionName);
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    activity, sharedView, transitionName);
-            activity.startActivity(intent, options.toBundle());
-        } else {
-            MovieDetailsFragment detailsFragment = MovieDetailsFragment.newInstance(movie);
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.container, detailsFragment)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .commit();
-        }
-    }
-
     /**
      * Sets the global sort option field to the one selected.
      *
-     * @param sortOptionIndex the index number of the selected sort option
+     * @param sortSelected the selected sort option
      */
-    public void onSortOptionSelected(int sortOptionIndex) {
-        mSortSelected = sortOptionIndex;
-        mSharedPrefs.edit().putInt(PERSIST_SORT, sortOptionIndex).apply();
+    public void onSortOptionSelected(Sort sortSelected) {
+        mSortSelected = sortSelected;
 
         toggleMainVisibility(false);
         setRefreshing(false);
@@ -420,5 +310,17 @@ public class MovieGridFragment extends Fragment implements
         mIsLoadingNewSort = true;
         mMoviePage = 1;
         queryMovies(true);
+    }
+
+    @Nullable
+    @Override
+    protected Movie getMovieSelected(int position) {
+        return mMovies.get(position);
+    }
+
+    @Override
+    protected long getMovieRowId(int position) {
+        // movies not queried from ContentProvider, thus no rowId available
+        return -1;
     }
 }

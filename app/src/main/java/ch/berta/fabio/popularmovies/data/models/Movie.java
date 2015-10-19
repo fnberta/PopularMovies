@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.data.models;
 
+import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.Utils;
+import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
 /**
  * Represents a movie, queried from TheMovieDB.
@@ -73,27 +75,41 @@ public class Movie implements Parcelable {
     private double mVoteAverage;
     @SerializedName("vote_count")
     private int mVoteCount;
+    private boolean mIsFavoured;
 
     public Movie() {
     }
 
+    public Movie(String backdropPath, int id, String overview, Date releaseDate, String posterPath,
+                 String title, double voteAverage, boolean isFavoured) {
+        mBackdropPath = backdropPath;
+        mId = id;
+        mOverview = overview;
+        mReleaseDate = releaseDate;
+        mPosterPath = posterPath;
+        mTitle = title;
+        mVoteAverage = voteAverage;
+        mIsFavoured = isFavoured;
+    }
+
     protected Movie(Parcel in) {
-        this.mAdult = in.readByte() != 0;
-        this.mBackdropPath = in.readString();
-        this.mGenreIds = new ArrayList<>();
-        in.readList(this.mGenreIds, List.class.getClassLoader());
-        this.mId = in.readInt();
-        this.mOriginalLanguage = in.readString();
-        this.mOriginalTitle = in.readString();
-        this.mOverview = in.readString();
+        mAdult = in.readByte() != 0;
+        mBackdropPath = in.readString();
+        mGenreIds = new ArrayList<>();
+        in.readList(mGenreIds, List.class.getClassLoader());
+        mId = in.readInt();
+        mOriginalLanguage = in.readString();
+        mOriginalTitle = in.readString();
+        mOverview = in.readString();
         long tmpMReleaseDate = in.readLong();
-        this.mReleaseDate = tmpMReleaseDate == -1 ? null : new Date(tmpMReleaseDate);
-        this.mPosterPath = in.readString();
-        this.mPopularity = in.readDouble();
-        this.mTitle = in.readString();
-        this.mVideo = in.readByte() != 0;
-        this.mVoteAverage = in.readDouble();
-        this.mVoteCount = in.readInt();
+        mReleaseDate = tmpMReleaseDate == -1 ? null : new Date(tmpMReleaseDate);
+        mPosterPath = in.readString();
+        mPopularity = in.readDouble();
+        mTitle = in.readString();
+        mVideo = in.readByte() != 0;
+        mVoteAverage = in.readDouble();
+        mVoteCount = in.readInt();
+        mIsFavoured = in.readByte() != 0;
     }
 
     public boolean isAdult() {
@@ -169,6 +185,10 @@ public class Movie implements Parcelable {
         return showLong ? Utils.formatDateLong(date) : Utils.formatDateShort(date);
     }
 
+    public long getReleaseDateAsLong() {
+        return mReleaseDate.getTime();
+    }
+
     public String getPosterPath() {
         return mPosterPath;
     }
@@ -217,6 +237,26 @@ public class Movie implements Parcelable {
         mVoteCount = voteCount;
     }
 
+    public boolean isFavoured() {
+        return mIsFavoured;
+    }
+
+    public void setIsFavoured(boolean isFavoured) {
+        mIsFavoured = isFavoured;
+    }
+
+    public ContentValues getContentValuesEntry() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MovieContract.Movie.COLUMN_DB_ID, mId);
+        contentValues.put(MovieContract.Movie.COLUMN_TITLE, mTitle);
+        contentValues.put(MovieContract.Movie.COLUMN_RELEASE_DATE, getReleaseDateAsLong());
+        contentValues.put(MovieContract.Movie.COLUMN_VOTE_AVERAGE, mVoteAverage);
+        contentValues.put(MovieContract.Movie.COLUMN_PLOT, mOverview);
+        contentValues.put(MovieContract.Movie.COLUMN_POSTER, mPosterPath);
+        contentValues.put(MovieContract.Movie.COLUMN_BACKDROP, mBackdropPath);
+        return contentValues;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -225,18 +265,19 @@ public class Movie implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeByte(mAdult ? (byte) 1 : (byte) 0);
-        dest.writeString(this.mBackdropPath);
-        dest.writeList(this.mGenreIds);
-        dest.writeInt(this.mId);
-        dest.writeString(this.mOriginalLanguage);
-        dest.writeString(this.mOriginalTitle);
-        dest.writeString(this.mOverview);
+        dest.writeString(mBackdropPath);
+        dest.writeList(mGenreIds);
+        dest.writeInt(mId);
+        dest.writeString(mOriginalLanguage);
+        dest.writeString(mOriginalTitle);
+        dest.writeString(mOverview);
         dest.writeLong(mReleaseDate != null ? mReleaseDate.getTime() : -1);
-        dest.writeString(this.mPosterPath);
-        dest.writeDouble(this.mPopularity);
-        dest.writeString(this.mTitle);
+        dest.writeString(mPosterPath);
+        dest.writeDouble(mPopularity);
+        dest.writeString(mTitle);
         dest.writeByte(mVideo ? (byte) 1 : (byte) 0);
-        dest.writeDouble(this.mVoteAverage);
-        dest.writeInt(this.mVoteCount);
+        dest.writeDouble(mVoteAverage);
+        dest.writeInt(mVoteCount);
+        dest.writeByte(mIsFavoured ? (byte) 1 : (byte) 0);
     }
 }

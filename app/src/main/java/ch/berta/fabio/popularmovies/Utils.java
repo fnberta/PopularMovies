@@ -16,7 +16,6 @@
 
 package ch.berta.fabio.popularmovies;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.support.design.widget.Snackbar;
 import android.util.DisplayMetrics;
@@ -62,6 +61,16 @@ public class Utils {
     }
 
     /**
+     * Displays a basic snackbar with text.
+     *
+     * @param view    the view to whose layout the snackbar attaches itself
+     * @param message the message to be shown in the snackbar
+     */
+    public static void showBasicSnackbar(View view, String message) {
+        getBasicSnackbar(view, message).show();
+    }
+
+    /**
      * Returns a basic snackbar
      *
      * @param view    the view to whose layout the snackbar attaches itself
@@ -86,6 +95,7 @@ public class Utils {
 
     /**
      * Returns the width of the screen.
+     *
      * @param res the resources
      * @return the width of the screen
      */

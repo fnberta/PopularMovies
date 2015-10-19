@@ -13,17 +13,17 @@
     tools:context=".ui.MainActivity"
     >
 
-    <fragment
-        android:id="@+id/fragment"
-        android:name="ch.berta.fabio.popularmovies.ui.MovieGridFragment"
+    <FrameLayout
+        android:id="@+id/container_main"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="@integer/two_pane_list_width_percentage"
+        tools:ignore="MergeRootFrame"
         tools:layout="@layout/fragment_movie_grid"
         />
 
     <FrameLayout
-        android:id="@+id/container"
+        android:id="@+id/container_details"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="@integer/two_pane_detail_width_percentage"
