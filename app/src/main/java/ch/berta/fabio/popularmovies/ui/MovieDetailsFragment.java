@@ -16,10 +16,17 @@
 
 package ch.berta.fabio.popularmovies.ui;
 
+import android.app.Activity;
+import android.content.AsyncQueryHandler;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,16 +39,30 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
+import ch.berta.fabio.popularmovies.data.storage.ContentProviderHandler;
+import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
 /**
  * Displays detail information about a movie, including poster image, release date, rating and
  * an overview of the plot.
  */
-public class MovieDetailsFragment extends Fragment {
+public class MovieDetailsFragment extends Fragment  implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        ContentProviderHandler.HandlerInteractionListener {
 
-    private static final String BUNDLE_MOVIE = "bundle_movie";
+    private static final String KEY_MOVIE = "MOVIE";
+    private static final String KEY_ROW_ID = "ROW_ID";
     private static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
+    private static final int FAV_MOVIES_LOADER = 0;
+    private static final String[] FAV_MOVIE_COLUMNS = new String[]{
+            MovieContract.Movie._ID,
+            MovieContract.Movie.COLUMN_DB_ID,
+    };
+    private static final int COL_INDEX_ROW_ID = 0;
+    private static final int COL_INDEX_DB_ID = 1;
+    private FragmentInteractionListener mListener;
     private ImageView mImageViewPoster;
     private View mViewHeader;
     private ImageView mImageViewHeaderBackdrop;
@@ -50,6 +71,8 @@ public class MovieDetailsFragment extends Fragment {
     private TextView mTextViewDate;
     private TextView mTextViewRating;
     private Movie mMovie;
+    private long mMovieRowId;
+    private AsyncQueryHandler mQueryHandler;
     private boolean mUseTwoPane;
 
     public MovieDetailsFragment() {
@@ -62,25 +85,40 @@ public class MovieDetailsFragment extends Fragment {
      * @param movie the {@link Movie} object to be set as an argument
      * @return a new instance of a {@link MovieDetailsFragment}
      */
-    public static MovieDetailsFragment newInstance(Movie movie) {
+    public static MovieDetailsFragment newInstance(Movie movie, long movieRowId) {
         MovieDetailsFragment fragment = new MovieDetailsFragment();
 
         Bundle args = new Bundle();
-        args.putParcelable(BUNDLE_MOVIE, movie);
+        args.putParcelable(KEY_MOVIE, movie);
+        args.putLong(KEY_ROW_ID, movieRowId);
         fragment.setArguments(args);
 
         return fragment;
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (FragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement FragmentInteractionListener");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mMovie = getArguments().getParcelable(BUNDLE_MOVIE);
+        Bundle args = getArguments();
+        if (args != null) {
+            mMovie = args.getParcelable(KEY_MOVIE);
+            mMovieRowId = args.getLong(KEY_ROW_ID, -1);
         }
 
         mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
+        mQueryHandler = new ContentProviderHandler(getActivity().getContentResolver(), this);
     }
 
     @Override
@@ -111,6 +149,7 @@ public class MovieDetailsFragment extends Fragment {
             mImageViewHeaderBackdrop = (ImageView) view.findViewById(R.id.iv_details_backdrop);
             mTextViewHeaderTitle = (TextView) view.findViewById(R.id.tv_details_title);
             loadTwoPaneHeader();
+            mListener.showFab();
         }
     }
 
@@ -153,6 +192,95 @@ public class MovieDetailsFragment extends Fragment {
                     .into(mImageViewHeaderBackdrop);
         }
 
-        mTextViewHeaderTitle.setText(mMovie.getOriginalTitle());
+        mTextViewHeaderTitle.setText(mMovie.getTitle());
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (mMovieRowId == -1) {
+            getLoaderManager().initLoader(FAV_MOVIES_LOADER, null, this);
+        } else {
+            setFavoured(true);
+        }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity(),
+                MovieContract.Movie.buildMovieByDbIdUri(mMovie.getId()),
+                FAV_MOVIE_COLUMNS,
+                null,
+                null,
+                MovieContract.Movie.SORT_DEFAULT);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        boolean isFavoured = data.moveToFirst();
+        setFavoured(isFavoured);
+
+        if (isFavoured) {
+            mMovieRowId = data.getLong(COL_INDEX_ROW_ID);
+        }
+    }
+
+    private void setFavoured(boolean isFavoured) {
+        mMovie.setIsFavoured(isFavoured);
+        mListener.toggleFabImage(isFavoured);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // do nothing
+    }
+
+    public void toggleFavorite() {
+        boolean newlyFavoured;
+        if (mMovie.isFavoured()) {
+            newlyFavoured = false;
+            mQueryHandler.startDelete(
+                    0,
+                    null,
+                    MovieContract.Movie.buildMovieUri(mMovieRowId),
+                    null,
+                    null);
+        } else {
+            newlyFavoured = true;
+            mQueryHandler.startInsert(
+                    0,
+                    null,
+                    MovieContract.Movie.CONTENT_URI,
+                    mMovie.getContentValuesEntry());
+        }
+
+        setFavoured(newlyFavoured);
+    }
+
+    @Override
+    public void onInsertComplete(int token, Object cookie, Uri uri) {
+        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.added_to_favorites));
+    }
+
+    @Override
+    public void onDeleteComplete(int token, Object cookie, int result) {
+        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.removed_from_favorites));
+
+        mListener.hideDetailsFragment();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public interface FragmentInteractionListener {
+        void toggleFabImage(boolean isFavoured);
+
+        void showFab();
+
+        void hideDetailsFragment();
     }
 }

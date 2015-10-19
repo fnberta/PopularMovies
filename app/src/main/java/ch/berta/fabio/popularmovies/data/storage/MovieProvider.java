@@ -37,6 +37,7 @@ public class MovieProvider extends ContentProvider {
 
     private static final int URI_TYPE_MOVIE = 100;
     private static final int URI_TYPE_MOVIE_ID = 101;
+    private static final int URI_TYPE_MOVIE_DB_ID = 200;
     private static final UriMatcher URI_MATCHER = buildUriMatcher();
 
     private static UriMatcher buildUriMatcher() {
@@ -44,6 +45,8 @@ public class MovieProvider extends ContentProvider {
 
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIES, URI_TYPE_MOVIE);
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIES + "/#", URI_TYPE_MOVIE_ID);
+        matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIES + "/" + Movie.COLUMN_DB_ID + "/#",
+                URI_TYPE_MOVIE_DB_ID);
 
         return matcher;
     }
@@ -67,6 +70,8 @@ public class MovieProvider extends ContentProvider {
                 return Movie.CONTENT_TYPE;
             case URI_TYPE_MOVIE_ID:
                 return Movie.CONTENT_ITEM_TYPE;
+            case URI_TYPE_MOVIE_DB_ID:
+                return Movie.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -86,6 +91,10 @@ public class MovieProvider extends ContentProvider {
             case URI_TYPE_MOVIE_ID:
                 queryBuilder.setTables(Movie.TABLE_NAME);
                 queryBuilder.appendWhere(Movie._ID + " = " + ContentUris.parseId(uri));
+                break;
+            case URI_TYPE_MOVIE_DB_ID:
+                queryBuilder.setTables(Movie.TABLE_NAME);
+                queryBuilder.appendWhere(Movie.COLUMN_DB_ID + " = " + ContentUris.parseId(uri));
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -168,13 +177,22 @@ public class MovieProvider extends ContentProvider {
             case URI_TYPE_MOVIE:
                 rowsUpdated = db.update(Movie.TABLE_NAME, values, selection, selectionArgs);
                 break;
-            case URI_TYPE_MOVIE_ID:
+            case URI_TYPE_MOVIE_ID: {
                 String where = Movie._ID + " = " + ContentUris.parseId(uri);
                 if (!TextUtils.isEmpty(selection)) {
                     where += " AND " + selection;
                 }
                 rowsUpdated = db.update(Movie.TABLE_NAME, values, where, selectionArgs);
                 break;
+            }
+            case URI_TYPE_MOVIE_DB_ID: {
+                String where = Movie.COLUMN_DB_ID + " = " + ContentUris.parseId(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsUpdated = db.update(Movie.TABLE_NAME, values, where, selectionArgs);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -195,13 +213,22 @@ public class MovieProvider extends ContentProvider {
             case URI_TYPE_MOVIE:
                 rowsDeleted = db.delete(Movie.TABLE_NAME, selection, selectionArgs);
                 break;
-            case URI_TYPE_MOVIE_ID:
+            case URI_TYPE_MOVIE_ID: {
                 String where = Movie._ID + " = " + ContentUris.parseId(uri);
                 if (!TextUtils.isEmpty(selection)) {
                     where += " AND " + selection;
                 }
                 rowsDeleted = db.delete(Movie.TABLE_NAME, where, selectionArgs);
                 break;
+            }
+            case URI_TYPE_MOVIE_DB_ID: {
+                String where = Movie.COLUMN_DB_ID + " = " + ContentUris.parseId(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsDeleted = db.delete(Movie.TABLE_NAME, where, selectionArgs);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

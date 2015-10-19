@@ -50,21 +50,19 @@ public class MovieContract {
         public static final String COLUMN_PLOT = "plot";
         public static final String COLUMN_POSTER = "poster";
         public static final String COLUMN_BACKDROP = "backdrop";
-        public static final String[] ALL_COLUMNS = new String[]{
-                _ID,
-                COLUMN_DB_ID,
-                COLUMN_TITLE,
-                COLUMN_RELEASE_DATE,
-                COLUMN_VOTE_AVERAGE,
-                COLUMN_PLOT,
-                COLUMN_POSTER,
-                COLUMN_BACKDROP
-        };
 
-        public static final String DEFAULT_SORT_ORDER = _ID + " DESC";
+        public static final String SORT_DEFAULT = _ID + " DESC";
+        public static final String SORT_BY_RELEASE_DATE = COLUMN_RELEASE_DATE + " DESC";
 
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildMovieByDbIdUri(int dbId) {
+            return CONTENT_URI.buildUpon()
+                    .appendPath(COLUMN_DB_ID)
+                    .appendPath(String.valueOf(dbId))
+                    .build();
         }
     }
 }

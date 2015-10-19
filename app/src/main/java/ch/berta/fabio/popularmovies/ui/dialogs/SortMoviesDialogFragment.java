@@ -97,7 +97,7 @@ public class SortMoviesDialogFragment extends DialogFragment {
                 })
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.setSortOption(mSortSelected);
+                        mListener.onSortOptionSelected(mSortSelected);
                         dismiss();
                     }
                 })
@@ -111,6 +111,10 @@ public class SortMoviesDialogFragment extends DialogFragment {
     }
 
     public interface DialogInteractionListener {
-        void setSortOption(int optionIndex);
+        /**
+         * Persist the chosen sort option to SharedPreferences and loads the appropriate fragment.
+         * @param optionIndex the index of the chosen sort option
+         */
+        void onSortOptionSelected(int optionIndex);
     }
 }

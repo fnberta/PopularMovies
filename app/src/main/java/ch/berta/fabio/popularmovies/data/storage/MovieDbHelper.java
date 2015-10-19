@@ -57,4 +57,8 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         db.execSQL(dropMovieTable);
         onCreate(db);
     }
+
+    public static void deleteDatabase(Context context) {
+        context.deleteDatabase(DATABASE_NAME);
+    }
 }
