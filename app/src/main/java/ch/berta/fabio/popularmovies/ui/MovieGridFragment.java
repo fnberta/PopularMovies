@@ -23,7 +23,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.mugen.Mugen;
 import com.mugen.MugenCallbacks;
@@ -110,12 +112,18 @@ public class MovieGridFragment extends BaseMovieGridFragment {
         outState.putBoolean(STATE_LOADING_NEW_SORT, mIsLoadingNewSort);
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_movie_grid, container, false);
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.srl_base);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.srl_grid);
         setupSwipeToRefresh();
 
         loadMovies();

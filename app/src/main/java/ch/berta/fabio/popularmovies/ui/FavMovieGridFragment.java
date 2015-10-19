@@ -24,6 +24,9 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
@@ -60,6 +63,13 @@ public class FavMovieGridFragment extends BaseMovieGridFragment implements
 
     public FavMovieGridFragment() {
         // required empty constructor
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_fav_movie_grid, container, false);
     }
 
     protected void setupRecyclerView() {

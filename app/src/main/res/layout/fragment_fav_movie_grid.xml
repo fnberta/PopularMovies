@@ -24,22 +24,14 @@
     tools:showIn="@layout/content_main"
     >
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/srl_grid"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_grid"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:scrollbars="vertical"
-            android:visibility="gone"
-            />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        android:visibility="gone"
+        />
 
     <include layout="@layout/include_pb_empty"/>
 

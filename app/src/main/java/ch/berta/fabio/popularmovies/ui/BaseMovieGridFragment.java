@@ -76,18 +76,12 @@ public abstract class BaseMovieGridFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_movie_grid, container, false);
-    }
-
-    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mProgressBar = (ProgressBar) view.findViewById(R.id.pb_base);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.pb_grid);
         mViewEmpty = view.findViewById(R.id.empty_view);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_base);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_grid);
         setupRecyclerView();
     }
 
