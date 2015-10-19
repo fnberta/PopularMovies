@@ -21,11 +21,13 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import java.util.List;
 
@@ -33,24 +35,19 @@ import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.Sort;
 import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
-import ch.berta.fabio.popularmovies.ui.dialogs.SortMoviesDialogFragment;
 
 /**
  * Provides the main entry point to the app and hosts a {@link MovieGridFragment}.
  */
 public class MovieGridActivity extends AppCompatActivity implements
         QueryMoviesTaskFragment.TaskInteractionListener,
-        SortMoviesDialogFragment.DialogInteractionListener,
         MovieDetailsFragment.FragmentInteractionListener {
 
     private static final String LOG_TAG = MovieGridActivity.class.getSimpleName();
     private static final String FRAGMENT_MOVIES = "FRAGMENT_MOVIES";
     private static final String PERSIST_SORT = "persisted_sort";
-    private static final String SORT_DIALOG = "sort_dialog";
     private SharedPreferences mSharedPrefs;
-    private Sort[] mSortOptions;
-    private String[] mSortValues;
-    private int mSortSelected;
+    private Spinner mSpinnerSort;
     private BaseMovieGridFragment mMovieGridFragment;
     private FloatingActionButton mFab;
     private boolean mUseTwoPane;
@@ -62,6 +59,10 @@ public class MovieGridActivity extends AppCompatActivity implements
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(null);
+        }
 
         mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
         if (mUseTwoPane) {
@@ -75,10 +76,11 @@ public class MovieGridActivity extends AppCompatActivity implements
             });
         }
 
+        mSpinnerSort = (Spinner) findViewById(R.id.sp_grid_sort);
         setupSorting();
 
         if (savedInstanceState == null) {
-            final Sort sort = mSortOptions[mSortSelected];
+            final Sort sort = (Sort) mSpinnerSort.getSelectedItem();
             BaseMovieGridFragment fragment = sort.getOption().equals(Sort.SORT_FAVORITE) ?
                     new FavMovieGridFragment() :
                     MovieGridFragment.newInstance(sort);
@@ -95,21 +97,49 @@ public class MovieGridActivity extends AppCompatActivity implements
     }
 
     private void setupSorting() {
-        mSortOptions = new Sort[]{
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int sortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
+
+        Sort[] sortOptions = new Sort[]{
                 new Sort(Sort.SORT_POPULARITY, getString(R.string.sort_popularity)),
                 new Sort(Sort.SORT_RATING, getString(R.string.sort_rating)),
                 new Sort(Sort.SORT_RELEASE_DATE, getString(R.string.sort_release_date)),
                 new Sort(Sort.SORT_FAVORITE, getString(R.string.sort_favorite))
         };
-        int optionsLength = mSortOptions.length;
-        mSortValues = new String[optionsLength];
-        for (int i = 0; i < optionsLength; i++) {
-            Sort sort = mSortOptions[i];
-            mSortValues[i] = sort.getReadableValue();
+        ArrayAdapter<Sort> spinnerAdapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item_toolbar, sortOptions);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinnerSort.setAdapter(spinnerAdapter);
+        mSpinnerSort.setSelection(sortSelected, false);
+        mSpinnerSort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                onSortOptionSelected((Sort) parent.getSelectedItem(), position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private void onSortOptionSelected(Sort sortSelected, int position) {
+        mSharedPrefs.edit().putInt(PERSIST_SORT, position).apply();
+
+        if (mUseTwoPane) {
+            hideDetailsFragment();
         }
 
-        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mSortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
+        if (!sortSelected.getOption().equals(Sort.SORT_FAVORITE)) {
+            if (mMovieGridFragment instanceof MovieGridFragment) {
+                ((MovieGridFragment) mMovieGridFragment).onSortOptionSelected(sortSelected);
+            } else {
+                showMovieFragment(sortSelected);
+            }
+        } else if (!(mMovieGridFragment instanceof FavMovieGridFragment)) {
+            showFavFragment();
+        }
     }
 
     @Override
@@ -121,30 +151,6 @@ public class MovieGridActivity extends AppCompatActivity implements
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_movie_grid_fragment, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_sort:
-                showSortDialog();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void showSortDialog() {
-        SortMoviesDialogFragment dialog = SortMoviesDialogFragment.newInstance(mSortValues,
-                mSortSelected);
-        dialog.show(getSupportFragmentManager(), SORT_DIALOG);
-    }
-
-    @Override
     public void onMoviesQueried(List<Movie> movies) {
         ((MovieGridFragment) mMovieGridFragment).onMoviesQueried(movies);
     }
@@ -152,28 +158,6 @@ public class MovieGridActivity extends AppCompatActivity implements
     @Override
     public void onMovieQueryFailed() {
         ((MovieGridFragment) mMovieGridFragment).onMovieQueryFailed();
-    }
-
-    @Override
-    public void onSortOptionSelected(int optionIndex) {
-        mSortSelected = optionIndex;
-        mSharedPrefs.edit().putInt(PERSIST_SORT, optionIndex).apply();
-
-        if (mUseTwoPane) {
-            hideDetailsFragment();
-        }
-
-        if (!mSortOptions[optionIndex].getOption().equals(Sort.SORT_FAVORITE)) {
-            final Sort sort = mSortOptions[optionIndex];
-
-            if (mMovieGridFragment instanceof MovieGridFragment) {
-                ((MovieGridFragment) mMovieGridFragment).onSortOptionSelected(sort);
-            } else {
-                showMovieFragment(sort);
-            }
-        } else if (!(mMovieGridFragment instanceof FavMovieGridFragment)) {
-            showFavFragment();
-        }
     }
 
     @Override

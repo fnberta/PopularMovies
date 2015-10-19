@@ -59,6 +59,10 @@ public class Sort implements Parcelable {
         mReadableValue = readableValue;
     }
 
+    @Override
+    public String toString() {
+        return mReadableValue;
+    }
 
     @Override
     public int describeContents() {
