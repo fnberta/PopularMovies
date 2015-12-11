@@ -16,10 +16,13 @@
 
 package ch.berta.fabio.popularmovies.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,10 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.Utils;
+import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.Sort;
-import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorker;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesRecyclerAdapter;
 import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 
@@ -46,6 +49,7 @@ import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecorat
  */
 public class MovieGridFragment extends BaseMovieGridFragment {
 
+    public static final String INTENT_MOVIE_SELECTED = "ch.berta.fabio.popularmovies.intents.MOVIE_SELECTED";
     private static final String KEY_SORT_SELECTED = "SORT_SELECTED";
     private static final int MOVIE_DB_MAX_PAGE = 1000;
     private static final String LOG_TAG = MovieGridFragment.class.getSimpleName();
@@ -136,7 +140,7 @@ public class MovieGridFragment extends BaseMovieGridFragment {
             @Override
             public void onRefresh() {
                 mMoviePage = 1;
-                queryMovies(false);
+                queryMoviesWithWorker(false);
             }
         });
 
@@ -178,7 +182,7 @@ public class MovieGridFragment extends BaseMovieGridFragment {
             public void onLoadMore() {
                 mIsLoadingMore = true;
                 mRecyclerAdapter.showLoadMoreIndicator();
-                queryMovies(false);
+                queryMoviesWithWorker(false);
             }
 
             @Override
@@ -197,7 +201,7 @@ public class MovieGridFragment extends BaseMovieGridFragment {
         final int moviesSize = mMovies.size();
         if (moviesSize == 0) {
             mMoviePage = 1;
-            queryMovies(false);
+            queryMoviesWithWorker(false);
         } else {
             if (mIsLoadingMore) {
                 // scroll to last position to show load more indicator
@@ -211,42 +215,37 @@ public class MovieGridFragment extends BaseMovieGridFragment {
     }
 
     /**
-     * Creates a new {@link QueryMoviesTaskFragment} if it is not being retained across a
+     * Creates a new {@link QueryMoviesWorker} if it is not being retained across a
      * configuration change to query movies from TheMovieDB.
      *
      * @param forceNewQuery whether to force a new query when there is already one going on
      */
-    private void queryMovies(boolean forceNewQuery) {
+    private void queryMoviesWithWorker(boolean forceNewQuery) {
         FragmentManager fragmentManager = getFragmentManager();
-        QueryMoviesTaskFragment task = findTaskFragment(fragmentManager);
+        Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIES_TASK);
 
-        if (task == null) {
-            task = QueryMoviesTaskFragment.newInstance(mMoviePage, mSortSelected.getOption());
+        if (worker == null) {
+            worker = QueryMoviesWorker.newInstance(mMoviePage, mSortSelected.getOption());
             fragmentManager.beginTransaction()
-                    .add(task, QUERY_MOVIES_TASK)
+                    .add(worker, QUERY_MOVIES_TASK)
                     .commit();
         } else if (forceNewQuery) {
-            QueryMoviesTaskFragment newTask = QueryMoviesTaskFragment.newInstance(mMoviePage,
-                    mSortSelected.getOption());
-            fragmentManager.beginTransaction()
-                    .remove(task)
-                    .add(newTask, QUERY_MOVIES_TASK)
-                    .commit();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.remove(worker);
+            worker = QueryMoviesWorker.newInstance(mMoviePage, mSortSelected.getOption());
+            transaction.add(worker, QUERY_MOVIES_TASK);
+            transaction.commit();
         }
     }
 
-    private QueryMoviesTaskFragment findTaskFragment(FragmentManager fragmentManager) {
-        return (QueryMoviesTaskFragment) fragmentManager.findFragmentByTag(QUERY_MOVIES_TASK);
-    }
-
     /**
-     * Removes {@link QueryMoviesTaskFragment} and updates the main {@link RecyclerView} grid
+     * Removes {@link QueryMoviesWorker} and updates the main {@link RecyclerView} grid
      * with the queried movies.
      *
      * @param movies the newly queried movies
      */
     public void onMoviesQueried(List<Movie> movies) {
-        removeTaskFragment();
+        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIES_TASK);
 
         if (mMoviePage == 1) {
             mIsLoadingNewSort = false;
@@ -264,13 +263,13 @@ public class MovieGridFragment extends BaseMovieGridFragment {
     }
 
     /**
-     * Removes {@link QueryMoviesTaskFragment}, notifies the user that something went wrong by
+     * Removes {@link QueryMoviesWorker}, notifies the user that something went wrong by
      * showing a snackbar and hides all loading or refreshing indicators
      */
     public void onMovieQueryFailed() {
-        removeTaskFragment();
-        Snackbar snackbar = Utils.getBasicSnackbar(mRecyclerView,
-                getString(R.string.error_connection));
+        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIES_TASK);
+        Snackbar snackbar = Snackbar.make(mRecyclerView,
+                getString(R.string.error_connection), Snackbar.LENGTH_LONG);
 
         if (mMoviePage == 1) {
             mIsLoadingNewSort = false;
@@ -282,7 +281,7 @@ public class MovieGridFragment extends BaseMovieGridFragment {
                 @Override
                 public void onClick(View v) {
                     setRefreshing(true);
-                    queryMovies(false);
+                    queryMoviesWithWorker(false);
                 }
             });
         } else {
@@ -291,17 +290,6 @@ public class MovieGridFragment extends BaseMovieGridFragment {
         }
 
         snackbar.show();
-    }
-
-    private void removeTaskFragment() {
-        FragmentManager fragmentManager = getFragmentManager();
-        QueryMoviesTaskFragment task = findTaskFragment(fragmentManager);
-
-        if (task != null) {
-            fragmentManager.beginTransaction()
-                    .remove(task)
-                    .commitAllowingStateLoss();
-        }
     }
 
     /**
@@ -317,18 +305,27 @@ public class MovieGridFragment extends BaseMovieGridFragment {
         mIsLoadingMore = false;
         mIsLoadingNewSort = true;
         mMoviePage = 1;
-        queryMovies(true);
+        queryMoviesWithWorker(true);
+    }
+
+    @Override
+    protected Intent setDetailsIntentExtras(Intent intent, int position) {
+        final Movie movie = mMovies.get(position);
+        intent.putExtra(INTENT_MOVIE_SELECTED, movie);
+
+        return intent;
     }
 
     @Nullable
     @Override
-    protected Movie getMovieSelected(int position) {
-        return mMovies.get(position);
-    }
+    protected BaseMovieDetailsFragment getDetailsFragment(int position) {
+        final Movie movie = mMovies.get(position);
+        final int movieDbId = movie.getDbId();
+        if (mMovieDbIdSelected == movieDbId) {
+            return null;
+        }
 
-    @Override
-    protected long getMovieRowId(int position) {
-        // movies not queried from ContentProvider, thus no rowId available
-        return -1;
+        mMovieDbIdSelected = movieDbId;
+        return MovieDetailsFragment.newInstance(movie);
     }
 }

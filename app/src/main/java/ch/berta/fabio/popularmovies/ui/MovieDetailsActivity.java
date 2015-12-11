@@ -16,16 +16,12 @@
 
 package ch.berta.fabio.popularmovies.ui;
 
-import android.app.LoaderManager;
-import android.content.AsyncQueryHandler;
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
@@ -34,22 +30,24 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.data.storage.ContentProviderHandler;
-import ch.berta.fabio.popularmovies.data.storage.MovieContract;
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
  * Presents the backdrop image of a selected movie in a collapsing toolbar and hosts a
  * {@link MovieDetailsFragment} that displays other information about the movie.
  */
 public class MovieDetailsActivity extends AppCompatActivity implements
-        MovieDetailsFragment.FragmentInteractionListener {
+        MovieDetailsFragment.FragmentInteractionListener,
+        QueryMovieDetailsWorker.TaskInteractionListener {
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
     private FloatingActionButton mFab;
-    private MovieDetailsFragment mMovieDetailsFragment;
+    private BaseMovieDetailsFragment mMovieDetailsFragment;
+    private ImageView mImageViewBackdrop;
+    private CollapsingToolbarLayout mCollapsToolbar;
 
 
     @Override
@@ -60,17 +58,14 @@ public class MovieDetailsActivity extends AppCompatActivity implements
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        Movie movie = getIntent().getParcelableExtra(MovieGridFragment.INTENT_MOVIE_SELECTED);
-
-        ActionBar actionBar = getSupportActionBar();
+        final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(movie.getTitle());
+            actionBar.setTitle(null);
         }
 
-        ImageView ivBackdrop = (ImageView) findViewById(R.id.iv_toolbar_details_backdrop);
-        setBackdrop(ivBackdrop, movie.getBackdropPath());
+        mCollapsToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        mImageViewBackdrop = (ImageView) findViewById(R.id.iv_toolbar_details_backdrop);
 
         mFab = (FloatingActionButton) findViewById(R.id.fab_details_favorite);
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -82,21 +77,21 @@ public class MovieDetailsActivity extends AppCompatActivity implements
         });
 
         if (savedInstanceState == null) {
-            final long rowId = getIntent()
-                    .getLongExtra(BaseMovieGridFragment.INTENT_MOVIE_SELECTED_ROW_ID, -1);
+            BaseMovieDetailsFragment fragment;
+
+            final long rowId = getIntent().getLongExtra(
+                    FavMovieGridFragment.INTENT_MOVIE_SELECTED_ROW_ID, RecyclerView.NO_ID);
+            if (rowId != RecyclerView.NO_ID) {
+                fragment = FavMovieDetailsFragment.newInstance(rowId);
+            } else {
+                final Movie movie = getIntent().getParcelableExtra(MovieGridFragment.INTENT_MOVIE_SELECTED);
+                fragment = MovieDetailsFragment.newInstance(movie);
+            }
+
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, MovieDetailsFragment.newInstance(movie, rowId),
+                    .add(R.id.container, fragment,
                             DETAILS_FRAGMENT)
                     .commit();
-        }
-    }
-
-    private void setBackdrop(ImageView ivBackdrop, String backdrop) {
-        if (!TextUtils.isEmpty(backdrop)) {
-            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_BACKDROP_SIZE + backdrop;
-            Glide.with(this)
-                    .load(imagePath)
-                    .into(ivBackdrop);
         }
     }
 
@@ -104,8 +99,23 @@ public class MovieDetailsActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
 
-        mMovieDetailsFragment = (MovieDetailsFragment) getSupportFragmentManager()
+        mMovieDetailsFragment = (BaseMovieDetailsFragment) getSupportFragmentManager()
                 .findFragmentByTag(DETAILS_FRAGMENT);
+    }
+
+    @Override
+    public void setOnePaneHeader(String title, String backdrop) {
+        mCollapsToolbar.setTitle(title);
+        setBackdrop(backdrop);
+    }
+
+    private void setBackdrop(String backdrop) {
+        if (!TextUtils.isEmpty(backdrop)) {
+            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_BACKDROP_SIZE + backdrop;
+            Glide.with(this)
+                    .load(imagePath)
+                    .into(mImageViewBackdrop);
+        }
     }
 
     @Override
@@ -116,12 +126,17 @@ public class MovieDetailsActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void showFab() {
-        // do nothing, only relevant for two pane view
+    public void onMovieDetailsQueried(MovieDetails movieDetails) {
+        ((MovieDetailsFragment) mMovieDetailsFragment).onMovieDetailsQueried(movieDetails);
     }
 
     @Override
-    public void hideDetailsFragment() {
+    public void onMovieDetailsQueryFailed() {
+        ((MovieDetailsFragment) mMovieDetailsFragment).onMovieDetailsQueryFailed();
+    }
+
+    @Override
+    public void showFab() {
         // do nothing, only relevant for two pane view
     }
 }

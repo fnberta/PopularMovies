@@ -19,10 +19,10 @@ package ch.berta.fabio.popularmovies.data.models;
 import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,125 +46,77 @@ public class Movie implements Parcelable {
             return new Movie[size];
         }
     };
-
-    @SerializedName("adult")
-    private boolean mAdult;
     @SerializedName("backdrop_path")
     private String mBackdropPath;
-    @SerializedName("genre_ids")
-    private List<Integer> mGenreIds = new ArrayList<>();
     @SerializedName("id")
-    private int mId;
-    @SerializedName("original_language")
-    private String mOriginalLanguage;
-    @SerializedName("original_title")
-    private String mOriginalTitle;
+    private int mDbId;
     @SerializedName("overview")
     private String mOverview;
     @SerializedName("release_date")
     private Date mReleaseDate;
     @SerializedName("poster_path")
     private String mPosterPath;
-    @SerializedName("popularity")
-    private double mPopularity;
     @SerializedName("title")
     private String mTitle;
-    @SerializedName("video")
-    private boolean mVideo;
     @SerializedName("vote_average")
     private double mVoteAverage;
-    @SerializedName("vote_count")
-    private int mVoteCount;
     private boolean mIsFavoured;
+    private List<Review> mReviews;
+    private List<Video> mVideos;
 
     public Movie() {
     }
 
-    public Movie(String backdropPath, int id, String overview, Date releaseDate, String posterPath,
-                 String title, double voteAverage, boolean isFavoured) {
+    public Movie(@NonNull List<Video> videos, @NonNull String backdropPath, int dbId,
+                 @NonNull String overview, @NonNull Date releaseDate,
+                 @NonNull String posterPath, @NonNull String title, double voteAverage,
+                 @NonNull List<Review> reviews) {
+        mVideos = videos;
         mBackdropPath = backdropPath;
-        mId = id;
+        mDbId = dbId;
         mOverview = overview;
         mReleaseDate = releaseDate;
         mPosterPath = posterPath;
         mTitle = title;
         mVoteAverage = voteAverage;
-        mIsFavoured = isFavoured;
+        mReviews = reviews;
     }
 
     protected Movie(Parcel in) {
-        mAdult = in.readByte() != 0;
         mBackdropPath = in.readString();
-        mGenreIds = new ArrayList<>();
-        in.readList(mGenreIds, List.class.getClassLoader());
-        mId = in.readInt();
-        mOriginalLanguage = in.readString();
-        mOriginalTitle = in.readString();
+        mDbId = in.readInt();
         mOverview = in.readString();
         long tmpMReleaseDate = in.readLong();
         mReleaseDate = tmpMReleaseDate == -1 ? null : new Date(tmpMReleaseDate);
         mPosterPath = in.readString();
-        mPopularity = in.readDouble();
         mTitle = in.readString();
-        mVideo = in.readByte() != 0;
         mVoteAverage = in.readDouble();
-        mVoteCount = in.readInt();
         mIsFavoured = in.readByte() != 0;
-    }
-
-    public boolean isAdult() {
-        return mAdult;
-    }
-
-    public void setAdult(boolean adult) {
-        mAdult = adult;
+        mReviews = in.createTypedArrayList(Review.CREATOR);
+        mVideos = in.createTypedArrayList(Video.CREATOR);
     }
 
     public String getBackdropPath() {
         return mBackdropPath;
     }
 
-    public void setBackdropPath(String backdropPath) {
+    public void setBackdropPath(@NonNull String backdropPath) {
         mBackdropPath = backdropPath;
     }
 
-    public List<Integer> getGenreIds() {
-        return mGenreIds;
+    public int getDbId() {
+        return mDbId;
     }
 
-    public void setGenreIds(List<Integer> genreIds) {
-        mGenreIds = genreIds;
-    }
-
-    public int getId() {
-        return mId;
-    }
-
-    public void setId(int id) {
-        mId = id;
-    }
-
-    public String getOriginalLanguage() {
-        return mOriginalLanguage;
-    }
-
-    public void setOriginalLanguage(String originalLanguage) {
-        mOriginalLanguage = originalLanguage;
-    }
-
-    public String getOriginalTitle() {
-        return mOriginalTitle;
-    }
-
-    public void setOriginalTitle(String originalTitle) {
-        mOriginalTitle = originalTitle;
+    public void setDbId(int dbId) {
+        mDbId = dbId;
     }
 
     public String getOverview() {
         return mOverview;
     }
 
-    public void setOverview(String overview) {
+    public void setOverview(@NonNull String overview) {
         mOverview = overview;
     }
 
@@ -172,8 +124,68 @@ public class Movie implements Parcelable {
         return mReleaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate) {
+    public void setReleaseDate(@NonNull Date releaseDate) {
         mReleaseDate = releaseDate;
+    }
+
+    public String getPosterPath() {
+        return mPosterPath;
+    }
+
+    public void setPosterPath(@NonNull String posterPath) {
+        mPosterPath = posterPath;
+    }
+
+    public String getTitle() {
+        return mTitle;
+    }
+
+    public void setTitle(String title) {
+        mTitle = title;
+    }
+
+    public double getVoteAverage() {
+        return mVoteAverage;
+    }
+
+    public void setVoteAverage(double voteAverage) {
+        mVoteAverage = voteAverage;
+    }
+
+    public boolean isFavoured() {
+        return mIsFavoured;
+    }
+
+    public void setIsFavoured(boolean isFavoured) {
+        mIsFavoured = isFavoured;
+    }
+
+    public List<Review> getReviews() {
+        return mReviews;
+    }
+
+    public void setReviews(@NonNull List<Review> reviews) {
+        mReviews = reviews;
+    }
+
+    public List<Video> getVideos() {
+        return mVideos;
+    }
+
+    public void setVideos(@NonNull List<Video> videos) {
+        mVideos = videos;
+    }
+
+    public ContentValues getContentValuesEntry() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MovieContract.Movie.COLUMN_DB_ID, mDbId);
+        contentValues.put(MovieContract.Movie.COLUMN_TITLE, mTitle);
+        contentValues.put(MovieContract.Movie.COLUMN_RELEASE_DATE, getReleaseDateAsLong());
+        contentValues.put(MovieContract.Movie.COLUMN_VOTE_AVERAGE, mVoteAverage);
+        contentValues.put(MovieContract.Movie.COLUMN_PLOT, mOverview);
+        contentValues.put(MovieContract.Movie.COLUMN_POSTER, mPosterPath);
+        contentValues.put(MovieContract.Movie.COLUMN_BACKDROP, mBackdropPath);
+        return contentValues;
     }
 
     public String getReleaseDateFormatted(boolean showLong) {
@@ -189,74 +201,6 @@ public class Movie implements Parcelable {
         return mReleaseDate.getTime();
     }
 
-    public String getPosterPath() {
-        return mPosterPath;
-    }
-
-    public void setPosterPath(String posterPath) {
-        mPosterPath = posterPath;
-    }
-
-    public double getPopularity() {
-        return mPopularity;
-    }
-
-    public void setPopularity(double popularity) {
-        mPopularity = popularity;
-    }
-
-    public String getTitle() {
-        return mTitle;
-    }
-
-    public void setTitle(String title) {
-        mTitle = title;
-    }
-
-    public boolean isVideo() {
-        return mVideo;
-    }
-
-    public void setVideo(boolean video) {
-        mVideo = video;
-    }
-
-    public double getVoteAverage() {
-        return mVoteAverage;
-    }
-
-    public void setVoteAverage(double voteAverage) {
-        mVoteAverage = voteAverage;
-    }
-
-    public int getVoteCount() {
-        return mVoteCount;
-    }
-
-    public void setVoteCount(int voteCount) {
-        mVoteCount = voteCount;
-    }
-
-    public boolean isFavoured() {
-        return mIsFavoured;
-    }
-
-    public void setIsFavoured(boolean isFavoured) {
-        mIsFavoured = isFavoured;
-    }
-
-    public ContentValues getContentValuesEntry() {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MovieContract.Movie.COLUMN_DB_ID, mId);
-        contentValues.put(MovieContract.Movie.COLUMN_TITLE, mTitle);
-        contentValues.put(MovieContract.Movie.COLUMN_RELEASE_DATE, getReleaseDateAsLong());
-        contentValues.put(MovieContract.Movie.COLUMN_VOTE_AVERAGE, mVoteAverage);
-        contentValues.put(MovieContract.Movie.COLUMN_PLOT, mOverview);
-        contentValues.put(MovieContract.Movie.COLUMN_POSTER, mPosterPath);
-        contentValues.put(MovieContract.Movie.COLUMN_BACKDROP, mBackdropPath);
-        return contentValues;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -264,20 +208,15 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte(mAdult ? (byte) 1 : (byte) 0);
         dest.writeString(mBackdropPath);
-        dest.writeList(mGenreIds);
-        dest.writeInt(mId);
-        dest.writeString(mOriginalLanguage);
-        dest.writeString(mOriginalTitle);
+        dest.writeInt(mDbId);
         dest.writeString(mOverview);
         dest.writeLong(mReleaseDate != null ? mReleaseDate.getTime() : -1);
         dest.writeString(mPosterPath);
-        dest.writeDouble(mPopularity);
         dest.writeString(mTitle);
-        dest.writeByte(mVideo ? (byte) 1 : (byte) 0);
         dest.writeDouble(mVoteAverage);
-        dest.writeInt(mVoteCount);
         dest.writeByte(mIsFavoured ? (byte) 1 : (byte) 0);
+        dest.writeTypedList(mReviews);
+        dest.writeTypedList(mVideos);
     }
 }

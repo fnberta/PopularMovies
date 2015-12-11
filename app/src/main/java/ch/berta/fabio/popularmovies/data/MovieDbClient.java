@@ -19,11 +19,14 @@ package ch.berta.fabio.popularmovies.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import ch.berta.fabio.popularmovies.data.models.Movie;
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import retrofit.Call;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 import retrofit.http.GET;
+import retrofit.http.Path;
 import retrofit.http.Query;
 
 /**
@@ -71,5 +74,9 @@ public class MovieDbClient {
         @GET("discover/movie")
         Call<MoviesPage> loadMoviePosters(@Query("page") int page, @Query("sort_by") String sortBy,
                                           @Query("api_key") String apiKey);
+
+        @GET("movie/{id}")
+        Call<MovieDetails> loadMovieDetails(@Path("id") int movieId, @Query("api_key") String apiKey,
+                                @Query("append_to_response") String appendTo);
     }
 }

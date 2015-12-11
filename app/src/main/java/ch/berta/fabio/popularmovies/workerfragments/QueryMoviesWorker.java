@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.taskfragments;
+package ch.berta.fabio.popularmovies.workerfragments;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -37,31 +37,31 @@ import retrofit.Retrofit;
  * <p>
  * A {@link Fragment} with a single task: to perform an online query for movies from the
  * TheMovieDB. It is retained across configuration changes and reports back to its activity
- * via the callback interface {@link ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment.TaskInteractionListener}.
+ * via the callback interface {@link QueryMoviesWorker.TaskInteractionListener}.
  * </p>
  */
-public class QueryMoviesTaskFragment extends Fragment {
+public class QueryMoviesWorker extends Fragment {
 
-    private static final String LOG_TAG = QueryMoviesTaskFragment.class.getSimpleName();
+    private static final String LOG_TAG = QueryMoviesWorker.class.getSimpleName();
     private static final String BUNDLE_PAGE = "bundle_page";
     private static final String BUNDLE_SORT = "bundle_sort";
     private TaskInteractionListener mListener;
     private Call<MoviesPage> mLoadMoviePosters;
 
-    public QueryMoviesTaskFragment() {
+    public QueryMoviesWorker() {
         // required empty constructor
     }
 
     /**
-     * Returns a new instance of a {@link QueryMoviesTaskFragment} with a page and sort options
+     * Returns a new instance of a {@link QueryMoviesWorker} with a page and sort options
      * as arguments.
      *
      * @param page the page number to be used for the movie query
      * @param sort the sort option to be used for the movie query
-     * @return a new instance of a {@link QueryMoviesTaskFragment}
+     * @return a new instance of a {@link QueryMoviesWorker}
      */
-    public static QueryMoviesTaskFragment newInstance(int page, String sort) {
-        QueryMoviesTaskFragment fragment = new QueryMoviesTaskFragment();
+    public static QueryMoviesWorker newInstance(int page, String sort) {
+        QueryMoviesWorker fragment = new QueryMoviesWorker();
 
         Bundle args = new Bundle();
         args.putInt(BUNDLE_PAGE, page);

@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 import ch.berta.fabio.popularmovies.ui.adapters.rows.MovieRow;
@@ -38,7 +39,6 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
     public static final int TYPE_PROGRESS = 1;
     private static final int VIEW_RESOURCE_ITEM = R.layout.row_movie;
     private static final int VIEW_RESOURCE_PROGRESS = R.layout.row_progress;
-    private static final double POSTER_ASPECT_RATIO = 0.675;
     private static final String LOG_TAG = MoviesRecyclerAdapter.class.getSimpleName();
     private List<Movie> mMovies;
     private View mViewEmpty;
@@ -53,12 +53,7 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
         mLifecycleFragment = fragment;
         mListener = listener;
 
-        mItemHeight = calcPosterHeight(columnCount, layoutWidth);
-    }
-
-    public static int calcPosterHeight(int columns, int layoutWidth) {
-        int itemWidth = layoutWidth / columns;
-        return (int) (itemWidth / POSTER_ASPECT_RATIO);
+        mItemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
     }
 
     @Override
@@ -78,12 +73,11 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
                 throw new RuntimeException("there is no type that matches the type " + viewType +
                         " + make sure your using types correctly");
         }
-
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        int viewType = getItemViewType(position);
+        final int viewType = getItemViewType(position);
 
         switch (viewType) {
             case TYPE_ITEM:

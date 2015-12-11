@@ -30,6 +30,8 @@ import java.util.Locale;
  */
 public class Utils {
 
+    private static final double POSTER_ASPECT_RATIO = 0.675;
+
     private Utils() {
         // class cannot be instantiated
     }
@@ -61,39 +63,6 @@ public class Utils {
     }
 
     /**
-     * Displays a basic snackbar with text.
-     *
-     * @param view    the view to whose layout the snackbar attaches itself
-     * @param message the message to be shown in the snackbar
-     */
-    public static void showBasicSnackbar(View view, String message) {
-        getBasicSnackbar(view, message).show();
-    }
-
-    /**
-     * Returns a basic snackbar
-     *
-     * @param view    the view to whose layout the snackbar attaches itself
-     * @param message the message to be shown in the snackbar
-     * @return a basic snackbar
-     */
-    public static Snackbar getBasicSnackbar(View view, String message) {
-        return getBasicSnackbar(view, message, Snackbar.LENGTH_LONG);
-    }
-
-    /**
-     * Returns a basic snackbar.
-     *
-     * @param view     the view to whose layout the snackbar attaches itself
-     * @param message  the message to be shown in the snackbar
-     * @param duration the duration the snackbar should be shown on screen
-     * @return a basic snackbar
-     */
-    public static Snackbar getBasicSnackbar(View view, String message, int duration) {
-        return Snackbar.make(view, message, duration);
-    }
-
-    /**
      * Returns the width of the screen.
      *
      * @param res the resources
@@ -102,5 +71,10 @@ public class Utils {
     public static int getScreenWidth(Resources res) {
         DisplayMetrics metrics = res.getDisplayMetrics();
         return metrics.widthPixels;
+    }
+
+    public static int calcPosterHeight(int columns, int layoutWidth) {
+        int itemWidth = layoutWidth / columns;
+        return (int) (itemWidth / POSTER_ASPECT_RATIO);
     }
 }

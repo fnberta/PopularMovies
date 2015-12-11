@@ -16,64 +16,31 @@
 
 package ch.berta.fabio.popularmovies.ui;
 
-import android.app.Activity;
-import android.content.AsyncQueryHandler;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
-
-import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.Utils;
+import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.data.storage.ContentProviderHandler;
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
  * Displays detail information about a movie, including poster image, release date, rating and
  * an overview of the plot.
  */
-public class MovieDetailsFragment extends Fragment  implements
-        LoaderManager.LoaderCallbacks<Cursor>,
-        ContentProviderHandler.HandlerInteractionListener {
+public class MovieDetailsFragment extends BaseMovieDetailsFragment {
 
-    private static final String KEY_MOVIE = "MOVIE";
-    private static final String KEY_ROW_ID = "ROW_ID";
+    private static final String KEY_MOVIE = "KEY_MOVIE";
+    private static final String QUERY_MOVIE_DETAILS_WORKER = "QUERY_MOVIE_DETAILS_WORKER";
+    private static final String STATE_MOVIE_DETAILS = "STATE_MOVIE_DETAILS";
     private static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
-    private static final int FAV_MOVIES_LOADER = 0;
-    private static final String[] FAV_MOVIE_COLUMNS = new String[]{
-            MovieContract.Movie._ID,
-            MovieContract.Movie.COLUMN_DB_ID,
-    };
-    private static final int COL_INDEX_ROW_ID = 0;
-    private static final int COL_INDEX_DB_ID = 1;
-    private FragmentInteractionListener mListener;
-    private ImageView mImageViewPoster;
-    private View mViewHeader;
-    private ImageView mImageViewHeaderBackdrop;
-    private TextView mTextViewHeaderTitle;
-    private TextView mTextViewPlot;
-    private TextView mTextViewDate;
-    private TextView mTextViewRating;
-    private Movie mMovie;
-    private long mMovieRowId;
-    private AsyncQueryHandler mQueryHandler;
-    private boolean mUseTwoPane;
+    private static final int LOADER_IS_FAV = 0;
+    private MovieDetails mMovieTrailersReviews;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -82,29 +49,17 @@ public class MovieDetailsFragment extends Fragment  implements
     /**
      * Returns a new instance of a {@link MovieDetailsFragment} with a {@link Movie} as an argument.
      *
-     * @param movie the {@link Movie} object to be set as an argument
+     * @param movie the selected {@link Movie}
      * @return a new instance of a {@link MovieDetailsFragment}
      */
-    public static MovieDetailsFragment newInstance(Movie movie, long movieRowId) {
+    public static MovieDetailsFragment newInstance(Movie movie) {
         MovieDetailsFragment fragment = new MovieDetailsFragment();
 
         Bundle args = new Bundle();
         args.putParcelable(KEY_MOVIE, movie);
-        args.putLong(KEY_ROW_ID, movieRowId);
         fragment.setArguments(args);
 
         return fragment;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (FragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement FragmentInteractionListener");
-        }
     }
 
     @Override
@@ -114,106 +69,52 @@ public class MovieDetailsFragment extends Fragment  implements
         Bundle args = getArguments();
         if (args != null) {
             mMovie = args.getParcelable(KEY_MOVIE);
-            mMovieRowId = args.getLong(KEY_ROW_ID, -1);
         }
 
-        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
-        mQueryHandler = new ContentProviderHandler(getActivity().getContentResolver(), this);
+        if (savedInstanceState != null) {
+            mMovieTrailersReviews = savedInstanceState.getParcelable(STATE_MOVIE_DETAILS);
+        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_movie_details, container, false);
-    }
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mImageViewPoster = (ImageView) view.findViewById(R.id.iv_details_poster);
-        loadPoster();
-
-        mTextViewPlot = (TextView) view.findViewById(R.id.tv_details_plot);
-        mTextViewPlot.setText(mMovie.getOverview());
-
-        mTextViewDate = (TextView) view.findViewById(R.id.tv_details_release_date);
-        loadDate();
-
-        mTextViewRating = (TextView) view.findViewById(R.id.tv_details_rating);
-        mTextViewRating.setText(getString(R.string.details_rating, mMovie.getVoteAverage()));
-
-        if (mUseTwoPane) {
-            mViewHeader = view.findViewById(R.id.fl_details_header);
-            mViewHeader.setVisibility(View.VISIBLE);
-            mImageViewHeaderBackdrop = (ImageView) view.findViewById(R.id.iv_details_backdrop);
-            mTextViewHeaderTitle = (TextView) view.findViewById(R.id.tv_details_title);
-            loadTwoPaneHeader();
-            mListener.showFab();
+        if (mMovieTrailersReviews != null) {
+            outState.putParcelable(STATE_MOVIE_DETAILS, mMovieTrailersReviews);
         }
-    }
-
-    private void loadPoster() {
-        String poster = mMovie.getPosterPath();
-        if (!TextUtils.isEmpty(poster)) {
-            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_POSTER_SIZE + poster;
-            Glide.with(this)
-                    .load(imagePath)
-                    .asBitmap()
-                    .into(new BitmapImageViewTarget(mImageViewPoster) {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            super.onResourceReady(resource, glideAnimation);
-                            ActivityCompat.startPostponedEnterTransition(getActivity());
-                        }
-                    });
-        } else {
-            mImageViewPoster.setScaleType(ImageView.ScaleType.CENTER);
-            mImageViewPoster.setImageResource(R.drawable.ic_movie_white_72dp);
-            ActivityCompat.startPostponedEnterTransition(getActivity());
-        }
-    }
-
-    private void loadDate() {
-        String date = mMovie.getReleaseDateFormatted(true);
-        if (!TextUtils.isEmpty(date)) {
-            mTextViewDate.setText(date);
-        } else {
-            mTextViewDate.setVisibility(View.GONE);
-        }
-    }
-
-    private void loadTwoPaneHeader() {
-        String backdrop = mMovie.getBackdropPath();
-        if (!TextUtils.isEmpty(backdrop)) {
-            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_BACKDROP_SIZE + backdrop;
-            Glide.with(this)
-                    .load(imagePath)
-                    .into(mImageViewHeaderBackdrop);
-        }
-
-        mTextViewHeaderTitle.setText(mMovie.getTitle());
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (mMovieRowId == -1) {
-            getLoaderManager().initLoader(FAV_MOVIES_LOADER, null, this);
+        setMovieInfo();
+        getLoaderManager().initLoader(LOADER_IS_FAV, null, this);
+
+        if (mMovieTrailersReviews != null) {
+            setReviewsAndTrailers();
         } else {
-            setFavoured(true);
+            fetchTrailersAndReviewsWithWorker();
         }
+    }
+
+    private void setReviewsAndTrailers() {
+        mMovie.setReviews(mMovieTrailersReviews.getReviewsPage().getReviews());
+        mMovie.setVideos(mMovieTrailersReviews.getVideosPage().getVideos());
+        // TODO: show review and trailers
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(),
-                MovieContract.Movie.buildMovieByDbIdUri(mMovie.getId()),
-                FAV_MOVIE_COLUMNS,
+        return new CursorLoader(
+                getActivity(),
+                MovieContract.Movie.buildMovieByDbIdUri(mMovie.getDbId()),
+                new String[]{MovieContract.Movie._ID},
                 null,
                 null,
-                MovieContract.Movie.SORT_DEFAULT);
+                MovieContract.Movie.SORT_DEFAULT
+        );
     }
 
     @Override
@@ -222,65 +123,28 @@ public class MovieDetailsFragment extends Fragment  implements
         setFavoured(isFavoured);
 
         if (isFavoured) {
-            mMovieRowId = data.getLong(COL_INDEX_ROW_ID);
+            mMovieRowId = data.getLong(0);
         }
     }
 
-    private void setFavoured(boolean isFavoured) {
-        mMovie.setIsFavoured(isFavoured);
-        mListener.toggleFabImage(isFavoured);
-    }
+    private void fetchTrailersAndReviewsWithWorker() {
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIE_DETAILS_WORKER);
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        // do nothing
-    }
-
-    public void toggleFavorite() {
-        boolean newlyFavoured;
-        if (mMovie.isFavoured()) {
-            newlyFavoured = false;
-            mQueryHandler.startDelete(
-                    0,
-                    null,
-                    MovieContract.Movie.buildMovieUri(mMovieRowId),
-                    null,
-                    null);
-        } else {
-            newlyFavoured = true;
-            mQueryHandler.startInsert(
-                    0,
-                    null,
-                    MovieContract.Movie.CONTENT_URI,
-                    mMovie.getContentValuesEntry());
+        if (worker == null) {
+            worker = QueryMovieDetailsWorker.newInstance(mMovie.getDbId());
+            fragmentManager.beginTransaction()
+                    .add(worker, QUERY_MOVIE_DETAILS_WORKER)
+                    .commit();
         }
-
-        setFavoured(newlyFavoured);
     }
 
-    @Override
-    public void onInsertComplete(int token, Object cookie, Uri uri) {
-        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.snackbar_added_to_favorites));
+    public void onMovieDetailsQueried(MovieDetails movieDetails) {
+        mMovieTrailersReviews = movieDetails;
+        setReviewsAndTrailers();
     }
 
-    @Override
-    public void onDeleteComplete(int token, Object cookie, int result) {
-        Utils.showBasicSnackbar(mTextViewPlot, getString(R.string.snackbar_removed_from_favorites));
-
-        mListener.hideDetailsFragment();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    public interface FragmentInteractionListener {
-        void toggleFabImage(boolean isFavoured);
-
-        void showFab();
-
-        void hideDetailsFragment();
+    public void onMovieDetailsQueryFailed() {
+        // TODO: do something
     }
 }

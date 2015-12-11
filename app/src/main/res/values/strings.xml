@@ -32,4 +32,6 @@
     <string name="sort_favorite">Favorites</string>
     <string name="snackbar_added_to_favorites">Added movie to favorites</string>
     <string name="snackbar_removed_from_favorites">Removed movie from favorites</string>
+    <string name="header_reviews">Reviews</string>
+    <string name="header_trailers">Trailers</string>
 </resources>

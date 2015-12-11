@@ -25,14 +25,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
-import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 
 /**
@@ -41,16 +38,14 @@ import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListen
 public abstract class BaseMovieGridFragment extends Fragment implements
         MovieInteractionListener {
 
-    public static final String INTENT_MOVIE_SELECTED = "intent_movie_selected";
-    public static final String INTENT_MOVIE_SELECTED_ROW_ID = "intent_movie_selected_row_id";
     public static final String FRAGMENT_TWO_PANE_DETAILS = "FRAGMENT_TWO_PANE_DETAILS";
     private static final String LOG_TAG = BaseMovieGridFragment.class.getSimpleName();
     private static final String STATE_MOVIE_SELECTED = "STATE_MOVIE_SELECTED";
-    private int mMovieSelected;
     boolean mUseTwoPane;
     ProgressBar mProgressBar;
     RecyclerView mRecyclerView;
     View mViewEmpty;
+    int mMovieDbIdSelected;
 
     public BaseMovieGridFragment() {
         // required empty constructor
@@ -62,7 +57,7 @@ public abstract class BaseMovieGridFragment extends Fragment implements
 
         mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
         if (savedInstanceState != null && mUseTwoPane) {
-            mMovieSelected = savedInstanceState.getInt(STATE_MOVIE_SELECTED);
+            mMovieDbIdSelected = savedInstanceState.getInt(STATE_MOVIE_SELECTED);
         }
     }
 
@@ -71,7 +66,7 @@ public abstract class BaseMovieGridFragment extends Fragment implements
         super.onSaveInstanceState(outState);
 
         if (mUseTwoPane) {
-            outState.putInt(STATE_MOVIE_SELECTED, mMovieSelected);
+            outState.putInt(STATE_MOVIE_SELECTED, mMovieDbIdSelected);
         }
     }
 
@@ -105,38 +100,33 @@ public abstract class BaseMovieGridFragment extends Fragment implements
 
     @Override
     public void onMovieRowItemClick(int position, View sharedView) {
-        Movie movie = getMovieSelected(position);
-        if (movie == null) {
-            // TODO: show user error message
-            return;
-        }
-
-        final long rowId = getMovieRowId(position);
         if (!mUseTwoPane) {
             Activity activity = getActivity();
 
             Intent intent = new Intent(activity, MovieDetailsActivity.class);
-            intent.putExtra(INTENT_MOVIE_SELECTED, movie);
-            intent.putExtra(INTENT_MOVIE_SELECTED_ROW_ID, rowId);
+            setDetailsIntentExtras(intent, position);
 
             String transitionName = getString(R.string.shared_transition_details_poster);
             ViewCompat.setTransitionName(sharedView, transitionName);
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
                     activity, sharedView, transitionName);
             activity.startActivity(intent, options.toBundle());
-        } else if (mMovieSelected != movie.getId()){
-            mMovieSelected = movie.getId();
-
-            MovieDetailsFragment detailsFragment = MovieDetailsFragment.newInstance(movie, rowId);
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.container_details, detailsFragment, FRAGMENT_TWO_PANE_DETAILS)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .commit();
+        } else {
+            Fragment fragment = getDetailsFragment(position);
+            // if fragment is null, user selected the one that is currently displayed, hence we
+            // don't want to reload it
+            if (fragment != null) {
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.container_details, fragment, FRAGMENT_TWO_PANE_DETAILS)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .commit();
+            }
         }
     }
 
-    @Nullable
-    protected abstract Movie getMovieSelected(int position);
+    protected abstract Intent setDetailsIntentExtras(Intent intent, int position);
 
-    protected abstract long getMovieRowId(int position);
+    @Nullable
+    protected abstract BaseMovieDetailsFragment getDetailsFragment(int position);
+
 }

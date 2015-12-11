@@ -18,7 +18,6 @@ package ch.berta.fabio.popularmovies.ui.adapters;
 
 import android.database.Cursor;
 import android.provider.BaseColumns;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -29,7 +28,6 @@ import java.util.Date;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
-import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.ui.FavMovieGridFragment;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 import ch.berta.fabio.popularmovies.ui.adapters.rows.MovieRow;
@@ -60,7 +58,7 @@ public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
         mLifecycleFragment = fragment;
         mListener = listener;
 
-        mItemHeight = MoviesRecyclerAdapter.calcPosterHeight(columnCount, layoutWidth);
+        mItemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
     }
 
     @Override
@@ -72,10 +70,6 @@ public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (!mDataIsValid) {
-            throw new IllegalStateException("this should only be called when the cursor is valid");
-        }
-
         if (!mCursor.moveToPosition(position)) {
             throw new IllegalStateException("couldn't move cursor to position " + position);
         }
@@ -96,7 +90,7 @@ public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
 
     @Override
     public long getItemId(int position) {
-        if (hasStableIds() && mDataIsValid) {
+        if (mDataIsValid) {
             return mCursor.moveToPosition(position) ?
                     mCursor.getLong(mRowIdColumn) :
                     RecyclerView.NO_ID;
@@ -105,29 +99,18 @@ public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
         }
     }
 
-    @Nullable
-    public Movie getMovieAtPosition(int position) {
-        if (!mCursor.moveToPosition(position)) {
-            return null;
-        }
-
-        int db = mCursor.getInt(FavMovieGridFragment.COL_INDEX_DB_ID);
-        String title = mCursor.getString(FavMovieGridFragment.COL_INDEX_TITLE);
-        long date = mCursor.getLong(FavMovieGridFragment.COL_INDEX_RELEASE_DATE);
-        String poster = mCursor.getString(FavMovieGridFragment.COL_INDEX_POSTER);
-        String backdrop = mCursor.getString(FavMovieGridFragment.COL_INDEX_BACKDROP);
-        String plot = mCursor.getString(FavMovieGridFragment.COL_INDEX_PLOT);
-        double vote = mCursor.getDouble(FavMovieGridFragment.COL_INDEX_VOTE_AVERAGE);
-
-        return new Movie(backdrop, db, plot, new Date(date), poster, title, vote, true);
-    }
-
-    public long getRowIdAtPosition(int position) {
+    /**
+     * Returns the TheMovieDB id for the movie at position.
+     *
+     * @param position the position of the movie
+     * @return the TheMovieDB id
+     */
+    public int getMovieDbIdForPosition(int position) {
         if (!mCursor.moveToPosition(position)) {
             return -1;
         }
 
-        return mCursor.getLong(FavMovieGridFragment.COL_INDEX_ROW_ID);
+        return mCursor.getInt(FavMovieGridFragment.COL_INDEX_DB_ID);
     }
 
     /**

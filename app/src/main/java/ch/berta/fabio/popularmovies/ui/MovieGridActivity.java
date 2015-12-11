@@ -33,14 +33,17 @@ import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.models.Sort;
-import ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorker;
 
 /**
  * Provides the main entry point to the app and hosts a {@link MovieGridFragment}.
  */
 public class MovieGridActivity extends AppCompatActivity implements
-        QueryMoviesTaskFragment.TaskInteractionListener,
+        QueryMoviesWorker.TaskInteractionListener,
+        QueryMovieDetailsWorker.TaskInteractionListener,
         MovieDetailsFragment.FragmentInteractionListener {
 
     private static final String LOG_TAG = MovieGridActivity.class.getSimpleName();
@@ -70,8 +73,7 @@ public class MovieGridActivity extends AppCompatActivity implements
             mFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    MovieDetailsFragment fragment = getMovieDetailsFragment();
-                    fragment.toggleFavorite();
+                    getMovieDetailsFragment().toggleFavorite();
                 }
             });
         }
@@ -91,9 +93,9 @@ public class MovieGridActivity extends AppCompatActivity implements
         }
     }
 
-    private MovieDetailsFragment getMovieDetailsFragment() {
-        return (MovieDetailsFragment) getSupportFragmentManager()
-                                .findFragmentByTag(BaseMovieGridFragment.FRAGMENT_TWO_PANE_DETAILS);
+    private BaseMovieDetailsFragment getMovieDetailsFragment() {
+        return (BaseMovieDetailsFragment) getSupportFragmentManager()
+                .findFragmentByTag(BaseMovieGridFragment.FRAGMENT_TWO_PANE_DETAILS);
     }
 
     private void setupSorting() {
@@ -160,18 +162,6 @@ public class MovieGridActivity extends AppCompatActivity implements
         ((MovieGridFragment) mMovieGridFragment).onMovieQueryFailed();
     }
 
-    @Override
-    public void hideDetailsFragment() {
-        MovieDetailsFragment fragment = getMovieDetailsFragment();
-        if (fragment != null) {
-            mFab.hide();
-            getSupportFragmentManager().beginTransaction()
-                    .remove(getMovieDetailsFragment())
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
-                    .commit();
-        }
-    }
-
     private void showMovieFragment(Sort sortSelected) {
         mMovieGridFragment = MovieGridFragment.newInstance(sortSelected);
 
@@ -198,5 +188,31 @@ public class MovieGridActivity extends AppCompatActivity implements
         mFab.setImageResource(isFavoured ?
                 R.drawable.ic_favorite_white_24dp :
                 R.drawable.ic_favorite_outline_white_24dp);
+    }
+
+    private void hideDetailsFragment() {
+        BaseMovieDetailsFragment fragment = getMovieDetailsFragment();
+        if (fragment != null) {
+            mFab.hide();
+            getSupportFragmentManager().beginTransaction()
+                    .remove(getMovieDetailsFragment())
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
+                    .commit();
+        }
+    }
+
+    @Override
+    public void onMovieDetailsQueried(MovieDetails movieDetails) {
+        ((MovieDetailsFragment) getMovieDetailsFragment()).onMovieDetailsQueried(movieDetails);
+    }
+
+    @Override
+    public void onMovieDetailsQueryFailed() {
+        ((MovieDetailsFragment) getMovieDetailsFragment()).onMovieDetailsQueryFailed();
+    }
+
+    @Override
+    public void setOnePaneHeader(String title, String backdrop) {
+        // do nothing, only relevant for one pane view
     }
 }
