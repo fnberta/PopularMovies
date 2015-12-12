@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -160,16 +161,18 @@ public class Movie implements Parcelable {
         mIsFavoured = isFavoured;
     }
 
+    @NonNull
     public List<Review> getReviews() {
-        return mReviews;
+        return mReviews != null ? mReviews : Collections.<Review>emptyList();
     }
 
     public void setReviews(@NonNull List<Review> reviews) {
         mReviews = reviews;
     }
 
+    @NonNull
     public List<Video> getVideos() {
-        return mVideos;
+        return mVideos != null ? mVideos : Collections.<Video>emptyList();
     }
 
     public void setVideos(@NonNull List<Video> videos) {

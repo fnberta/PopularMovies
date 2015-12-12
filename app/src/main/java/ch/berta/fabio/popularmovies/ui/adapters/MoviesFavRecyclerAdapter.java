@@ -28,17 +28,17 @@ import java.util.Date;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
-import ch.berta.fabio.popularmovies.ui.FavMovieGridFragment;
+import ch.berta.fabio.popularmovies.ui.MovieGridFavFragment;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 import ch.berta.fabio.popularmovies.ui.adapters.rows.MovieRow;
 
 /**
  * Provides the adapter for a movie poster images grid.
  */
-public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
+public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
 
     private static final int VIEW_RESOURCE = R.layout.row_movie;
-    private static final String LOG_TAG = FavMoviesRecyclerAdapter.class.getSimpleName();
+    private static final String LOG_TAG = MoviesFavRecyclerAdapter.class.getSimpleName();
     private Cursor mCursor;
     private View mViewEmpty;
     private int mRowIdColumn;
@@ -47,7 +47,7 @@ public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
     private MovieInteractionListener mListener;
     private int mItemHeight;
 
-    public FavMoviesRecyclerAdapter(Cursor cursor, View emptyView, int layoutWidth, int columnCount,
+    public MoviesFavRecyclerAdapter(Cursor cursor, View emptyView, int layoutWidth, int columnCount,
                                     Fragment fragment, MovieInteractionListener listener) {
         mCursor = cursor;
         mViewEmpty = emptyView;
@@ -76,9 +76,9 @@ public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
 
         MovieRow movieRow = (MovieRow) holder;
 
-        String title = mCursor.getString(FavMovieGridFragment.COL_INDEX_TITLE);
-        long date = mCursor.getLong(FavMovieGridFragment.COL_INDEX_RELEASE_DATE);
-        String poster = mCursor.getString(FavMovieGridFragment.COL_INDEX_POSTER);
+        String title = mCursor.getString(MovieGridFavFragment.COL_INDEX_TITLE);
+        long date = mCursor.getLong(MovieGridFavFragment.COL_INDEX_RELEASE_DATE);
+        String poster = mCursor.getString(MovieGridFavFragment.COL_INDEX_POSTER);
 
         movieRow.setMovie(title, Utils.formatDateShort(new Date(date)), poster, mLifecycleFragment);
     }
@@ -110,7 +110,7 @@ public class FavMoviesRecyclerAdapter extends RecyclerView.Adapter {
             return -1;
         }
 
-        return mCursor.getInt(FavMovieGridFragment.COL_INDEX_DB_ID);
+        return mCursor.getInt(MovieGridFavFragment.COL_INDEX_DB_ID);
     }
 
     /**

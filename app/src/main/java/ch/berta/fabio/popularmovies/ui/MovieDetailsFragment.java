@@ -18,29 +18,35 @@ package ch.berta.fabio.popularmovies.ui;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
+import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
+import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
 import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
- * Displays detail information about a movie, including poster image, release date, rating and
- * an overview of the plot.
+ * Displays detail information about a movie, including poster image, release date, rating, an
+ * overview of the plot, reviews and trailers. Uses info from the passed {@link Movie} object and
+ * downloads additional information from TheMovieDB.
+ * <p/>
+ * Queries the local content provider to check if the movie is favoured and displays the according
+ * drawable in the FAB.
  */
-public class MovieDetailsFragment extends BaseMovieDetailsFragment {
+public class MovieDetailsFragment extends MovieDetailsBaseFragment {
 
     private static final String KEY_MOVIE = "KEY_MOVIE";
     private static final String QUERY_MOVIE_DETAILS_WORKER = "QUERY_MOVIE_DETAILS_WORKER";
-    private static final String STATE_MOVIE_DETAILS = "STATE_MOVIE_DETAILS";
     private static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
     private static final int LOADER_IS_FAV = 0;
-    private MovieDetails mMovieTrailersReviews;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -70,39 +76,27 @@ public class MovieDetailsFragment extends BaseMovieDetailsFragment {
         if (args != null) {
             mMovie = args.getParcelable(KEY_MOVIE);
         }
-
-        if (savedInstanceState != null) {
-            mMovieTrailersReviews = savedInstanceState.getParcelable(STATE_MOVIE_DETAILS);
-        }
     }
 
+    @NonNull
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        if (mMovieTrailersReviews != null) {
-            outState.putParcelable(STATE_MOVIE_DETAILS, mMovieTrailersReviews);
-        }
+    protected MovieDetailsRecyclerAdapter getRecyclerAdapter() {
+        return new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mUseTwoPane, this, this);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        setMovieInfo();
         getLoaderManager().initLoader(LOADER_IS_FAV, null, this);
 
-        if (mMovieTrailersReviews != null) {
-            setReviewsAndTrailers();
-        } else {
-            fetchTrailersAndReviewsWithWorker();
+        if (!mUseTwoPane) {
+            mListener.setOnePaneHeader(mMovie.getTitle(), mMovie.getBackdropPath());
         }
-    }
 
-    private void setReviewsAndTrailers() {
-        mMovie.setReviews(mMovieTrailersReviews.getReviewsPage().getReviews());
-        mMovie.setVideos(mMovieTrailersReviews.getVideosPage().getVideos());
-        // TODO: show review and trailers
+        if (mMovie.getReviews().isEmpty() && mMovie.getVideos().isEmpty()) {
+            fetchReviewsAndVideosWithWorker();
+        }
     }
 
     @Override
@@ -127,7 +121,7 @@ public class MovieDetailsFragment extends BaseMovieDetailsFragment {
         }
     }
 
-    private void fetchTrailersAndReviewsWithWorker() {
+    private void fetchReviewsAndVideosWithWorker() {
         FragmentManager fragmentManager = getFragmentManager();
         Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIE_DETAILS_WORKER);
 
@@ -140,11 +134,21 @@ public class MovieDetailsFragment extends BaseMovieDetailsFragment {
     }
 
     public void onMovieDetailsQueried(MovieDetails movieDetails) {
-        mMovieTrailersReviews = movieDetails;
-        setReviewsAndTrailers();
+        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
+
+        mMovie.setReviews(movieDetails.getReviewsPage().getReviews());
+        mMovie.setVideos(movieDetails.getVideosPage().getVideos());
+        mRecyclerAdapter.notifyReviewsAndVideosLoaded();
     }
 
     public void onMovieDetailsQueryFailed() {
-        // TODO: do something
+        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
+        Snackbar.make(mRecyclerView, R.string.snackbar_error_reviews_videos, Snackbar.LENGTH_LONG).show();
+        // TODO: hide progress bar
+    }
+
+    @Override
+    protected void onMovieDeletedOnePane() {
+        Snackbar.make(mRecyclerView, getString(R.string.snackbar_removed_from_favorites), Snackbar.LENGTH_LONG).show();
     }
 }

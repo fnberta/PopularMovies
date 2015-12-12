@@ -17,12 +17,13 @@
 <resources>
     <string name="app_name">Popular Movies</string>
     <string name="movie_poster">Movie poster image</string>
+    <string name="movie_video_thumb">Movie video thumbnail image</string>
     <string name="sort_popularity">Most popular</string>
     <string name="sort_rating">Highest rated</string>
     <string name="sort_release_date">Most recent</string>
     <string name="movie_backdrop">Movie backdrop image</string>
     <string name="header_plot">Plot</string>
-    <string name="header_facts">Facts</string>
+    <string name="header_info">Info</string>
     <string name="shared_transition_details_poster">shared_poster</string>
     <string name="title_activity_movie_details">Movie Details</string>
     <string name="details_rating">"Rating: %1$s/10"</string>
@@ -34,4 +35,8 @@
     <string name="snackbar_removed_from_favorites">Removed movie from favorites</string>
     <string name="header_reviews">Reviews</string>
     <string name="header_trailers">Trailers</string>
+    <string name="youtube_thumb_url">https://img.youtube.com/vi/%1$s/default.jpg"</string>
+    <string name="no_movie_selected">No movie selected</string>
+    <string name="snackbar_no_movie_data">No data for this movie</string>
+    <string name="snackbar_error_reviews_videos">Failed to load reviews and trailers</string>
 </resources>

@@ -19,4 +19,6 @@
     <integer name="two_pane_list_width_percentage">40</integer>
     <integer name="two_pane_detail_width_percentage">60</integer>
     <integer name="span_count">2</integer>
+    <integer name="review_content_max_lines">5</integer>
+    <integer name="plot_max_lines">8</integer>
 </resources>

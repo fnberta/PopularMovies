@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
@@ -35,20 +36,33 @@ import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListen
 /**
  * Displays a grid of movie poster images.
  */
-public abstract class BaseMovieGridFragment extends Fragment implements
+public abstract class MovieGridBaseFragment extends Fragment implements
         MovieInteractionListener {
 
     public static final String FRAGMENT_TWO_PANE_DETAILS = "FRAGMENT_TWO_PANE_DETAILS";
-    private static final String LOG_TAG = BaseMovieGridFragment.class.getSimpleName();
+    public static final int REQUEST_MOVIE_DETAILS = 1;
+    private static final String LOG_TAG = MovieGridBaseFragment.class.getSimpleName();
     private static final String STATE_MOVIE_SELECTED = "STATE_MOVIE_SELECTED";
     boolean mUseTwoPane;
     ProgressBar mProgressBar;
     RecyclerView mRecyclerView;
     View mViewEmpty;
     int mMovieDbIdSelected;
+    private FragmentInteractionListener mListener;
 
-    public BaseMovieGridFragment() {
+    public MovieGridBaseFragment() {
         // required empty constructor
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (FragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement FragmentInteractionListener");
+        }
     }
 
     @Override
@@ -101,18 +115,18 @@ public abstract class BaseMovieGridFragment extends Fragment implements
     @Override
     public void onMovieRowItemClick(int position, View sharedView) {
         if (!mUseTwoPane) {
-            Activity activity = getActivity();
+            final FragmentActivity activity = getActivity();
 
-            Intent intent = new Intent(activity, MovieDetailsActivity.class);
+            final Intent intent = new Intent(activity, MovieDetailsActivity.class);
             setDetailsIntentExtras(intent, position);
 
-            String transitionName = getString(R.string.shared_transition_details_poster);
+            final String transitionName = getString(R.string.shared_transition_details_poster);
             ViewCompat.setTransitionName(sharedView, transitionName);
             ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
                     activity, sharedView, transitionName);
-            activity.startActivity(intent, options.toBundle());
+            activity.startActivityForResult(intent, REQUEST_MOVIE_DETAILS, options.toBundle());
         } else {
-            Fragment fragment = getDetailsFragment(position);
+            final Fragment fragment = getDetailsFragment(position);
             // if fragment is null, user selected the one that is currently displayed, hence we
             // don't want to reload it
             if (fragment != null) {
@@ -120,6 +134,8 @@ public abstract class BaseMovieGridFragment extends Fragment implements
                         .replace(R.id.container_details, fragment, FRAGMENT_TWO_PANE_DETAILS)
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
+
+                mListener.setTwoPaneEmptyViewVisibility(false);
             }
         }
     }
@@ -127,6 +143,19 @@ public abstract class BaseMovieGridFragment extends Fragment implements
     protected abstract Intent setDetailsIntentExtras(Intent intent, int position);
 
     @Nullable
-    protected abstract BaseMovieDetailsFragment getDetailsFragment(int position);
+    protected abstract MovieDetailsBaseFragment getDetailsFragment(int position);
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        mListener = null;
+    }
+
+    /**
+     * Defines the interaction with the hosting activity
+     */
+    public interface FragmentInteractionListener {
+        void setTwoPaneEmptyViewVisibility(boolean show);
+    }
 }

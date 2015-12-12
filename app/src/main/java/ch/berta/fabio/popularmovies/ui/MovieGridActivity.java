@@ -16,10 +16,13 @@
 
 package ch.berta.fabio.popularmovies.ui;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -42,18 +45,20 @@ import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorker;
  * Provides the main entry point to the app and hosts a {@link MovieGridFragment}.
  */
 public class MovieGridActivity extends AppCompatActivity implements
+        MovieGridBaseFragment.FragmentInteractionListener,
         QueryMoviesWorker.TaskInteractionListener,
         QueryMovieDetailsWorker.TaskInteractionListener,
         MovieDetailsFragment.FragmentInteractionListener {
 
     private static final String LOG_TAG = MovieGridActivity.class.getSimpleName();
     private static final String FRAGMENT_MOVIES = "FRAGMENT_MOVIES";
-    private static final String PERSIST_SORT = "persisted_sort";
+    private static final String PERSIST_SORT = "PERSIST_SORT";
     private SharedPreferences mSharedPrefs;
     private Spinner mSpinnerSort;
-    private BaseMovieGridFragment mMovieGridFragment;
+    private MovieGridBaseFragment mMovieGridFragment;
     private FloatingActionButton mFab;
     private boolean mUseTwoPane;
+    private View mTwoPaneEmptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,26 +81,43 @@ public class MovieGridActivity extends AppCompatActivity implements
                     getMovieDetailsFragment().toggleFavorite();
                 }
             });
+
+            mTwoPaneEmptyView = findViewById(R.id.empty_view);
         }
 
         mSpinnerSort = (Spinner) findViewById(R.id.sp_grid_sort);
         setupSorting();
 
+        final FragmentManager fragmentManager = getSupportFragmentManager();
         if (savedInstanceState == null) {
             final Sort sort = (Sort) mSpinnerSort.getSelectedItem();
-            BaseMovieGridFragment fragment = sort.getOption().equals(Sort.SORT_FAVORITE) ?
-                    new FavMovieGridFragment() :
+            mMovieGridFragment = sort.getOption().equals(Sort.SORT_FAVORITE) ?
+                    new MovieGridFavFragment() :
                     MovieGridFragment.newInstance(sort);
 
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container_main, fragment, FRAGMENT_MOVIES)
+            fragmentManager.beginTransaction()
+                    .add(R.id.container_main, mMovieGridFragment, FRAGMENT_MOVIES)
                     .commit();
+
+            if (mUseTwoPane) {
+                setTwoPaneEmptyViewVisibility(true);
+            }
+        } else {
+            mMovieGridFragment = (MovieGridBaseFragment)
+                    fragmentManager.getFragment(savedInstanceState, FRAGMENT_MOVIES);
         }
     }
 
-    private BaseMovieDetailsFragment getMovieDetailsFragment() {
-        return (BaseMovieDetailsFragment) getSupportFragmentManager()
-                .findFragmentByTag(BaseMovieGridFragment.FRAGMENT_TWO_PANE_DETAILS);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        getSupportFragmentManager().putFragment(outState, FRAGMENT_MOVIES, mMovieGridFragment);
+    }
+
+    private MovieDetailsBaseFragment getMovieDetailsFragment() {
+        return (MovieDetailsBaseFragment) getSupportFragmentManager()
+                .findFragmentByTag(MovieGridBaseFragment.FRAGMENT_TWO_PANE_DETAILS);
     }
 
     private void setupSorting() {
@@ -139,17 +161,29 @@ public class MovieGridActivity extends AppCompatActivity implements
             } else {
                 showMovieFragment(sortSelected);
             }
-        } else if (!(mMovieGridFragment instanceof FavMovieGridFragment)) {
+        } else if (!(mMovieGridFragment instanceof MovieGridFavFragment)) {
             showFavFragment();
         }
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    public void setTwoPaneEmptyViewVisibility(boolean show) {
+        if (show) {
+            mTwoPaneEmptyView.setVisibility(View.VISIBLE);
+        } else {
+            mTwoPaneEmptyView.setVisibility(View.GONE);
+        }
+    }
 
-        mMovieGridFragment = (BaseMovieGridFragment) getSupportFragmentManager()
-                .findFragmentByTag(FRAGMENT_MOVIES);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == MovieGridBaseFragment.REQUEST_MOVIE_DETAILS &&
+                resultCode == MovieDetailsFavFragment.RESULT_UNFAOUVRED) {
+            Snackbar.make(mSpinnerSort, getString(R.string.snackbar_removed_from_favorites),
+                    Snackbar.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -164,17 +198,18 @@ public class MovieGridActivity extends AppCompatActivity implements
 
     private void showMovieFragment(Sort sortSelected) {
         mMovieGridFragment = MovieGridFragment.newInstance(sortSelected);
-
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container_main, mMovieGridFragment, FRAGMENT_MOVIES)
-                .commit();
+        replaceFragment();
     }
 
     private void showFavFragment() {
-        mMovieGridFragment = new FavMovieGridFragment();
+        mMovieGridFragment = new MovieGridFavFragment();
+        replaceFragment();
+    }
 
+    private void replaceFragment() {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container_main, mMovieGridFragment, FRAGMENT_MOVIES)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
     }
 
@@ -190,8 +225,9 @@ public class MovieGridActivity extends AppCompatActivity implements
                 R.drawable.ic_favorite_outline_white_24dp);
     }
 
-    private void hideDetailsFragment() {
-        BaseMovieDetailsFragment fragment = getMovieDetailsFragment();
+    @Override
+    public void hideDetailsFragment() {
+        MovieDetailsBaseFragment fragment = getMovieDetailsFragment();
         if (fragment != null) {
             mFab.hide();
             getSupportFragmentManager().beginTransaction()
@@ -199,6 +235,8 @@ public class MovieGridActivity extends AppCompatActivity implements
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
                     .commit();
         }
+
+        setTwoPaneEmptyViewVisibility(true);
     }
 
     @Override

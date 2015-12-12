@@ -16,17 +16,37 @@
 
 package ch.berta.fabio.popularmovies.data.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
  * Created by fabio on 09.12.15.
  */
-public class Genre {
+public class Genre implements Parcelable {
 
+    public static final Parcelable.Creator<Genre> CREATOR = new Parcelable.Creator<Genre>() {
+        public Genre createFromParcel(Parcel source) {
+            return new Genre(source);
+        }
+
+        public Genre[] newArray(int size) {
+            return new Genre[size];
+        }
+    };
     @SerializedName("id")
     public int mId;
     @SerializedName("name")
     public String mName;
+
+    public Genre() {
+    }
+
+    protected Genre(Parcel in) {
+        this.mId = in.readInt();
+        this.mName = in.readString();
+    }
 
     public int getId() {
         return mId;
@@ -42,5 +62,16 @@ public class Genre {
 
     public void setName(String name) {
         mName = name;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.mId);
+        dest.writeString(this.mName);
     }
 }
