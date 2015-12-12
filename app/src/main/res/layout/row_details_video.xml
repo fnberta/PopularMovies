@@ -21,9 +21,9 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/detail_video_row_height"
     android:background="?attr/selectableItemBackground"
-    android:paddingStart="@dimen/key_line_1"
-    android:paddingEnd="@dimen/key_line_1"
     android:orientation="horizontal"
+    android:paddingEnd="@dimen/key_line_1"
+    android:paddingStart="@dimen/key_line_1"
     >
 
     <ImageView
@@ -51,7 +51,7 @@
             style="@style/TextAppearance.AppCompat.Body2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:maxLines="1"
             tools:text="Trailer 1"
             />
@@ -61,7 +61,7 @@
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:maxLines="1"
             tools:text="YouTube"
             />
@@ -71,7 +71,7 @@
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+            android:ellipsize="end"
             android:maxLines="1"
             tools:text="720p"
             />

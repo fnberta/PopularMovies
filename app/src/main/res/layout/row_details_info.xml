@@ -81,8 +81,8 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/key_line_1"
             android:layout_marginStart="@dimen/key_line_1"
-            android:maxLines="@integer/plot_max_lines"
             android:ellipsize="end"
+            android:maxLines="@integer/plot_max_lines"
             tools:text="A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival."
             />
 
