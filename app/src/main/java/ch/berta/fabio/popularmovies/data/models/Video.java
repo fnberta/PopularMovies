@@ -29,6 +29,9 @@ import ch.berta.fabio.popularmovies.data.storage.MovieContract;
  */
 public class Video implements Parcelable {
 
+    public static final String YOUTUBE_THUMB_BASE_URL = "https://img.youtube.com/vi/";
+    public static final String YOUTUBE_THUMB_DEFAULT = "/default.jpg";
+    public static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
     public static final Parcelable.Creator<Video> CREATOR = new Parcelable.Creator<Video>() {
         public Video createFromParcel(Parcel source) {
             return new Video(source);
@@ -74,6 +77,14 @@ public class Video implements Parcelable {
 
     public void setName(String name) {
         mName = name;
+    }
+
+    public String getKey() {
+        return mKey;
+    }
+
+    public void setKey(String key) {
+        mKey = key;
     }
 
     public String getSite() {

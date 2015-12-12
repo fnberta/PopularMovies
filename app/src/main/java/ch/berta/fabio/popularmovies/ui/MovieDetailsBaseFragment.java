@@ -21,66 +21,57 @@ import android.content.AsyncQueryHandler;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.text.TextUtils;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.Review;
 import ch.berta.fabio.popularmovies.data.models.Video;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
+import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
 
 /**
- * Displays detail information about a movie, including poster image, release date, rating and
- * an overview of the plot.
+ * Provides a base class for the display of detail information about a movie, including poster
+ * image, release date, rating, an overview of the plot, reviews and trailers.
  */
-public abstract class BaseMovieDetailsFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+public abstract class MovieDetailsBaseFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        MovieDetailsRecyclerAdapter.AdapterInteractionListener {
 
-    private static final String LOG_TAG = BaseMovieDetailsFragment.class.getSimpleName();
-
-    private static final String CRUD_HELPER = "CRUD_HELPER";
+    private static final String LOG_TAG = MovieDetailsBaseFragment.class.getSimpleName();
     private static final int TOKEN_DELETE = 0;
     FragmentInteractionListener mListener;
     long mMovieRowId;
     boolean mUseTwoPane;
     Movie mMovie;
-    private ImageView mImageViewPoster;
-    private View mViewHeader;
-    private ImageView mImageViewHeaderBackdrop;
-    private TextView mTextViewHeaderTitle;
-    private TextView mTextViewPlot;
-    private TextView mTextViewDate;
-    private TextView mTextViewRating;
+    MovieDetailsRecyclerAdapter mRecyclerAdapter;
+    RecyclerView mRecyclerView;
     private InsertMovieTask mInsertMovieTask;
     private QueryHandler mDeleteMovieHandler;
 
-    public BaseMovieDetailsFragment() {
+    public MovieDetailsBaseFragment() {
         // Required empty public constructor
     }
 
@@ -112,81 +103,20 @@ public abstract class BaseMovieDetailsFragment extends Fragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mImageViewPoster = (ImageView) view.findViewById(R.id.iv_details_poster);
-        mTextViewPlot = (TextView) view.findViewById(R.id.tv_details_plot);
-        mTextViewDate = (TextView) view.findViewById(R.id.tv_details_release_date);
-        mTextViewRating = (TextView) view.findViewById(R.id.tv_details_rating);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.rv_details);
+        mRecyclerAdapter = getRecyclerAdapter();
+        mRecyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(mRecyclerAdapter);
 
         if (mUseTwoPane) {
-            mViewHeader = view.findViewById(R.id.fl_details_header);
-            mViewHeader.setVisibility(View.VISIBLE);
-            mImageViewHeaderBackdrop = (ImageView) view.findViewById(R.id.iv_details_backdrop);
-            mTextViewHeaderTitle = (TextView) view.findViewById(R.id.tv_details_title);
             mListener.showFab();
         }
     }
 
-    final void setMovieInfo() {
-        setPoster(mMovie.getPosterPath());
-        setDate(mMovie.getReleaseDate());
-        setPlot(mMovie.getOverview());
-        setRating(mMovie.getVoteAverage());
-        final String title = mMovie.getTitle();
-        final String backdropPath = mMovie.getBackdropPath();
-        if (mUseTwoPane) {
-            setTwoPaneHeader(title, backdropPath);
-        } else {
-            mListener.setOnePaneHeader(title, backdropPath);
-        }
-    }
-
-    private void setPoster(String poster) {
-        if (!TextUtils.isEmpty(poster)) {
-            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_POSTER_SIZE + poster;
-            Glide.with(this)
-                    .load(imagePath)
-                    .asBitmap()
-                    .into(new BitmapImageViewTarget(mImageViewPoster) {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            super.onResourceReady(resource, glideAnimation);
-                            ActivityCompat.startPostponedEnterTransition(getActivity());
-                        }
-                    });
-        } else {
-            mImageViewPoster.setScaleType(ImageView.ScaleType.CENTER);
-            mImageViewPoster.setImageResource(R.drawable.ic_movie_white_72dp);
-            ActivityCompat.startPostponedEnterTransition(getActivity());
-        }
-    }
-
-    private void setDate(Date date) {
-        String dateFormatted = Utils.formatDateLong(date);
-        if (!TextUtils.isEmpty(dateFormatted)) {
-            mTextViewDate.setText(dateFormatted);
-        } else {
-            mTextViewDate.setVisibility(View.GONE);
-        }
-    }
-
-    private void setPlot(String plot) {
-        mTextViewPlot.setText(plot);
-    }
-
-    private void setRating(double rating) {
-        mTextViewRating.setText(getString(R.string.details_rating, rating));
-    }
-
-    private void setTwoPaneHeader(String title, String backdrop) {
-        mTextViewHeaderTitle.setText(title);
-
-        if (!TextUtils.isEmpty(backdrop)) {
-            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_BACKDROP_SIZE + backdrop;
-            Glide.with(this)
-                    .load(imagePath)
-                    .into(mImageViewHeaderBackdrop);
-        }
-    }
+    @NonNull
+    protected abstract MovieDetailsRecyclerAdapter getRecyclerAdapter();
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -220,12 +150,35 @@ public abstract class BaseMovieDetailsFragment extends Fragment implements
     }
 
     private void onMovieInserted() {
-        Snackbar.make(mTextViewPlot, getString(R.string.snackbar_added_to_favorites), Snackbar.LENGTH_LONG).show();
+        Snackbar.make(mRecyclerView, getString(R.string.snackbar_added_to_favorites), Snackbar.LENGTH_LONG).show();
     }
 
     private void onMovieDeleted() {
-        Snackbar.make(mTextViewPlot, getString(R.string.snackbar_removed_from_favorites),
-                Snackbar.LENGTH_LONG).show();
+        if (mUseTwoPane) {
+            Snackbar.make(mRecyclerView, getString(R.string.snackbar_removed_from_favorites), Snackbar.LENGTH_LONG).show();
+            mListener.hideDetailsFragment();
+        } else {
+            onMovieDeletedOnePane();
+        }
+    }
+
+    protected abstract void onMovieDeletedOnePane();
+
+    @Override
+    public void onVideoRowItemClick(int position) {
+        Video video = mRecyclerAdapter.getVideoAtPosition(position);
+        final Uri uri = Uri.parse(Video.YOUTUBE_BASE_URL + video.getKey());
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onPosterLoaded() {
+        startPostponedEnterTransition();
+    }
+
+    final void startPostponedEnterTransition() {
+        ActivityCompat.startPostponedEnterTransition(getActivity());
     }
 
     @Override
@@ -248,14 +201,42 @@ public abstract class BaseMovieDetailsFragment extends Fragment implements
         mListener = null;
     }
 
+    /**
+     * Defines the interaction with the hosting activity.
+     */
     public interface FragmentInteractionListener {
+        /**
+         * Toggles the drawable shown in the FAB, either an empty or filled heart depending on
+         * whether the movie is favoured or not.
+         *
+         * @param isFavoured whether the movies is favoured or not
+         */
         void toggleFabImage(boolean isFavoured);
 
+        /**
+         * Shows the FAB.
+         */
         void showFab();
 
+        /**
+         * Sets the title and backdrop image of the header shown in {@link AppBarLayout} of the
+         * hosting activity.
+         *
+         * @param title    the title to show
+         * @param backdrop the backdrop image to show
+         */
         void setOnePaneHeader(String title, String backdrop);
+
+        /**
+         * Hides the details fragment in a two pane layout (on tablets).
+         */
+        void hideDetailsFragment();
     }
 
+    /**
+     * Handles content provider batch insert operation on a background thread. To avoid a leak, the
+     * process needs to be canceled in the fragment's onPause().
+     */
     private class InsertMovieTask extends AsyncTask<Movie, Integer, ContentProviderResult[]> {
 
         @Override
@@ -270,7 +251,7 @@ public abstract class BaseMovieDetailsFragment extends Fragment implements
             );
 
             List<Review> reviews = movie.getReviews();
-            if (reviews != null && !reviews.isEmpty()) {
+            if (!reviews.isEmpty()) {
                 for (Review review : reviews) {
                     ops.add(ContentProviderOperation
                                     .newInsert(MovieContract.Review.CONTENT_URI)
@@ -282,14 +263,17 @@ public abstract class BaseMovieDetailsFragment extends Fragment implements
             }
 
             List<Video> videos = movie.getVideos();
-            if (videos != null && !videos.isEmpty()) {
+            if (!videos.isEmpty()) {
                 for (Video video : videos) {
-                    ops.add(ContentProviderOperation
-                                    .newInsert(MovieContract.Video.CONTENT_URI)
-                                    .withValueBackReference(MovieContract.Video.COLUMN_MOVIE_ID, 0)
-                                    .withValues(video.getContentValuesEntry())
-                                    .build()
-                    );
+                    // only add youtube videos
+                    if (video.getSite().equals("YouTube")) {
+                        ops.add(ContentProviderOperation
+                                        .newInsert(MovieContract.Video.CONTENT_URI)
+                                        .withValueBackReference(MovieContract.Video.COLUMN_MOVIE_ID, 0)
+                                        .withValues(video.getContentValuesEntry())
+                                        .build()
+                        );
+                    }
                 }
             }
 
@@ -311,6 +295,11 @@ public abstract class BaseMovieDetailsFragment extends Fragment implements
         }
     }
 
+    /**
+     * Handles content provider delete operation on a background thread. To avoid a leak, the
+     * process needs to be canceled in the fragment's onPause().
+     */
+    @SuppressWarnings("HandlerLeak")
     private class QueryHandler extends AsyncQueryHandler {
 
         public QueryHandler(ContentResolver cr) {

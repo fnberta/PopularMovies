@@ -15,9 +15,53 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    >
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/small_space"
+        android:paddingBottom="@dimen/small_space"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:id="@+id/tv_details_review_author"
+            style="@style/TextAppearance.AppCompat.Subhead"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/key_line_1"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:ellipsize="marquee"
+            android:maxLines="1"
+            tools:text="Fabio"
+            />
+
+        <TextView
+            android:id="@+id/tv_details_review_content"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/key_line_1"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:ellipsize="end"
+            android:maxLines="@integer/review_content_max_lines"
+            tools:text="Dies ist ein Review. Dies ist ein Review. Dies ist ein Review. Dies ist ein Review. Dies ist ein Review. Dies ist ein Review. Dies ist ein Review. Dies ist ein Review. Dies ist ein Review."
+            />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/v_details_review_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:background="?android:listDivider"
+        />
+
+</FrameLayout>

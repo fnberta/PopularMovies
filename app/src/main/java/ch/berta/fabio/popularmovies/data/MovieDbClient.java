@@ -19,7 +19,6 @@ package ch.berta.fabio.popularmovies.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import retrofit.Call;
@@ -39,8 +38,9 @@ public class MovieDbClient {
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(getGsonObject()))
             .build();
-    private static final MoviePosters MOVIE_POSTERS_SERVICE =
-            REST_ADAPTER.create(MoviePosters.class);
+    private static final PopularMovies POPULAR_MOVIES_SERVICE =
+            REST_ADAPTER.create(PopularMovies.class);
+    private static final String DATE_FORMAT = "yyyy-mm-dd";
 
     private MovieDbClient() {
         // class cannot be instantiated
@@ -51,18 +51,18 @@ public class MovieDbClient {
      *
      * @return the {@link Retrofit} adapter
      */
-    public static MoviePosters getService() {
-        return MOVIE_POSTERS_SERVICE;
+    public static PopularMovies getService() {
+        return POPULAR_MOVIES_SERVICE;
     }
 
     private static Gson getGsonObject() {
-        return new GsonBuilder().setDateFormat("yyyy-mm-dd").create();
+        return new GsonBuilder().setDateFormat(DATE_FORMAT).create();
     }
 
     /**
      * Provides the query calls to the TheMovieDB.
      */
-    public interface MoviePosters {
+    public interface PopularMovies {
         /**
          * Queries TheMovieDB for movies based on the page number and sort option.
          *

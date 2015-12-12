@@ -17,9 +17,65 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:layout_height="@dimen/detail_video_row_height"
+    android:background="?attr/selectableItemBackground"
+    android:paddingStart="@dimen/key_line_1"
+    android:paddingEnd="@dimen/key_line_1"
+    android:orientation="horizontal"
     >
+
+    <ImageView
+        android:id="@+id/iv_details_video_thumb"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/small_space"
+        android:layout_marginTop="@dimen/small_space"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/movie_video_thumb"
+        android:scaleType="fitXY"
+        tools:layout_width="88dp"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="@dimen/normal_space"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:id="@+id/tv_details_video_name"
+            style="@style/TextAppearance.AppCompat.Body2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:maxLines="1"
+            tools:text="Trailer 1"
+            />
+
+        <TextView
+            android:id="@+id/tv_details_video_site"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:maxLines="1"
+            tools:text="YouTube"
+            />
+
+        <TextView
+            android:id="@+id/tv_details_video_size"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:maxLines="1"
+            tools:text="720p"
+            />
+
+    </LinearLayout>
 
 </LinearLayout>

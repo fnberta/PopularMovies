@@ -19,6 +19,7 @@ package ch.berta.fabio.popularmovies.ui;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -45,15 +46,16 @@ public class MovieDetailsActivity extends AppCompatActivity implements
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
     private FloatingActionButton mFab;
-    private BaseMovieDetailsFragment mMovieDetailsFragment;
+    private MovieDetailsBaseFragment mMovieDetailsFragment;
     private ImageView mImageViewBackdrop;
-    private CollapsingToolbarLayout mCollapsToolbar;
-
+    private CollapsingToolbarLayout mCollapseToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_details);
+
+        // enter transition will start when movie poster is loaded
         supportPostponeEnterTransition();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -64,7 +66,7 @@ public class MovieDetailsActivity extends AppCompatActivity implements
             actionBar.setTitle(null);
         }
 
-        mCollapsToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        mCollapseToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         mImageViewBackdrop = (ImageView) findViewById(R.id.iv_toolbar_details_backdrop);
 
         mFab = (FloatingActionButton) findViewById(R.id.fab_details_favorite);
@@ -76,36 +78,37 @@ public class MovieDetailsActivity extends AppCompatActivity implements
             }
         });
 
+        final FragmentManager fragmentManager = getSupportFragmentManager();
         if (savedInstanceState == null) {
-            BaseMovieDetailsFragment fragment;
-
             final long rowId = getIntent().getLongExtra(
-                    FavMovieGridFragment.INTENT_MOVIE_SELECTED_ROW_ID, RecyclerView.NO_ID);
+                    MovieGridFavFragment.INTENT_MOVIE_SELECTED_ROW_ID, RecyclerView.NO_ID);
             if (rowId != RecyclerView.NO_ID) {
-                fragment = FavMovieDetailsFragment.newInstance(rowId);
+                mMovieDetailsFragment = MovieDetailsFavFragment.newInstance(rowId);
             } else {
                 final Movie movie = getIntent().getParcelableExtra(MovieGridFragment.INTENT_MOVIE_SELECTED);
-                fragment = MovieDetailsFragment.newInstance(movie);
+                mMovieDetailsFragment = MovieDetailsFragment.newInstance(movie);
             }
 
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment,
+            fragmentManager.beginTransaction()
+                    .add(R.id.container, mMovieDetailsFragment,
                             DETAILS_FRAGMENT)
                     .commit();
+        } else {
+            mMovieDetailsFragment = (MovieDetailsBaseFragment)
+                    fragmentManager.getFragment(savedInstanceState, DETAILS_FRAGMENT);
         }
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-        mMovieDetailsFragment = (BaseMovieDetailsFragment) getSupportFragmentManager()
-                .findFragmentByTag(DETAILS_FRAGMENT);
+        getSupportFragmentManager().putFragment(outState, DETAILS_FRAGMENT, mMovieDetailsFragment);
     }
 
     @Override
     public void setOnePaneHeader(String title, String backdrop) {
-        mCollapsToolbar.setTitle(title);
+        mCollapseToolbar.setTitle(title);
         setBackdrop(backdrop);
     }
 
@@ -137,6 +140,11 @@ public class MovieDetailsActivity extends AppCompatActivity implements
 
     @Override
     public void showFab() {
+        // do nothing, only relevant for two pane view
+    }
+
+    @Override
+    public void hideDetailsFragment() {
         // do nothing, only relevant for two pane view
     }
 }

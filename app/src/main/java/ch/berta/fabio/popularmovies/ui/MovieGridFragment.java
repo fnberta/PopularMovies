@@ -47,7 +47,7 @@ import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecorat
 /**
  * Displays a grid of movie poster images.
  */
-public class MovieGridFragment extends BaseMovieGridFragment {
+public class MovieGridFragment extends MovieGridBaseFragment {
 
     public static final String INTENT_MOVIE_SELECTED = "ch.berta.fabio.popularmovies.intents.MOVIE_SELECTED";
     private static final String KEY_SORT_SELECTED = "SORT_SELECTED";
@@ -318,7 +318,7 @@ public class MovieGridFragment extends BaseMovieGridFragment {
 
     @Nullable
     @Override
-    protected BaseMovieDetailsFragment getDetailsFragment(int position) {
+    protected MovieDetailsBaseFragment getDetailsFragment(int position) {
         final Movie movie = mMovies.get(position);
         final int movieDbId = movie.getDbId();
         if (mMovieDbIdSelected == movieDbId) {

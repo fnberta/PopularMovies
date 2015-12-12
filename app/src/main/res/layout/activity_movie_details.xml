@@ -78,6 +78,14 @@
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:ignore="MergeRootFrame"
+        />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_details_favorite"
         android:layout_width="wrap_content"
@@ -86,14 +94,6 @@
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
         tools:src="@drawable/ic_favorite_outline_white_24dp"
-        />
-
-    <FrameLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:ignore="MergeRootFrame"
         />
 
 </android.support.design.widget.CoordinatorLayout>

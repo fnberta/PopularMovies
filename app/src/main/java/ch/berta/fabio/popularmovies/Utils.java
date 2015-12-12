@@ -16,10 +16,11 @@
 
 package ch.berta.fabio.popularmovies;
 
+import android.animation.ObjectAnimator;
 import android.content.res.Resources;
-import android.support.design.widget.Snackbar;
+import android.os.Build;
 import android.util.DisplayMetrics;
-import android.view.View;
+import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -31,9 +32,20 @@ import java.util.Locale;
 public class Utils {
 
     private static final double POSTER_ASPECT_RATIO = 0.675;
+    private static final long COLLAPSE_EXPAND_ANIM_TIME = 300;
+    private static final int MAX_LINES_EXPANDED = 500;
 
     private Utils() {
         // class cannot be instantiated
+    }
+
+    /**
+     * Returns whether the running Android version is lollipop and higher or an older version.
+     *
+     * @return whether the running Android version is lollipop and higher or an older version
+     */
+    public static boolean isRunningLollipopAndHigher() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 
     /**
@@ -73,8 +85,35 @@ public class Utils {
         return metrics.widthPixels;
     }
 
+    /**
+     * Returns the correct poster height for a given width and number of columns, respecting the
+     * default aspect ratio.
+     *
+     * @param columns     the number of columns displayed
+     * @param layoutWidth the width of the whole layout
+     * @return the correct poster height in pixels
+     */
     public static int calcPosterHeight(int columns, int layoutWidth) {
         int itemWidth = layoutWidth / columns;
         return (int) (itemWidth / POSTER_ASPECT_RATIO);
+    }
+
+    /**
+     * Expands or collapses a {@link TextView} by increasing or decreasing its maxLines setting.
+     *
+     * @param textView the {@link TextView} to expand or collapse
+     * @param maxLines the number of lines in the collapsed state
+     */
+    public static void expandOrCollapseTextView(TextView textView, int maxLines) {
+        int value;
+        if (textView.getMaxLines() == maxLines) {
+            value = MAX_LINES_EXPANDED;
+        } else {
+            value = maxLines;
+        }
+
+        ObjectAnimator anim = ObjectAnimator.ofInt(textView, "maxLines", value);
+        anim.setDuration(COLLAPSE_EXPAND_ANIM_TIME);
+        anim.start();
     }
 }

@@ -31,13 +31,13 @@ import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
-import ch.berta.fabio.popularmovies.ui.adapters.FavMoviesRecyclerAdapter;
+import ch.berta.fabio.popularmovies.ui.adapters.MoviesFavRecyclerAdapter;
 import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 
 /**
  * Displays a grid of movie poster images.
  */
-public class FavMovieGridFragment extends BaseMovieGridFragment implements
+public class MovieGridFavFragment extends MovieGridBaseFragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String INTENT_MOVIE_SELECTED_ROW_ID = "ch.berta.fabio.popularmovies.intents.MOVIE_SELECTED_ROW_ID";
@@ -54,9 +54,9 @@ public class FavMovieGridFragment extends BaseMovieGridFragment implements
             MovieContract.Movie.COLUMN_POSTER,
     };
     private static final int FAV_MOVIES_LOADER = 0;
-    private FavMoviesRecyclerAdapter mRecyclerAdapter;
+    private MoviesFavRecyclerAdapter mRecyclerAdapter;
 
-    public FavMovieGridFragment() {
+    public MovieGridFavFragment() {
         // required empty constructor
     }
 
@@ -74,7 +74,7 @@ public class FavMovieGridFragment extends BaseMovieGridFragment implements
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new FavMoviesRecyclerAdapter(null, mViewEmpty, getLayoutWidth(),
+        mRecyclerAdapter = new MoviesFavRecyclerAdapter(null, mViewEmpty, getLayoutWidth(),
                 spanCount, this, this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
     }
@@ -116,7 +116,7 @@ public class FavMovieGridFragment extends BaseMovieGridFragment implements
 
     @Nullable
     @Override
-    protected BaseMovieDetailsFragment getDetailsFragment(int position) {
+    protected MovieDetailsBaseFragment getDetailsFragment(int position) {
         final int dbId = mRecyclerAdapter.getMovieDbIdForPosition(position);
         if (mMovieDbIdSelected == dbId) {
             return null;
@@ -124,6 +124,6 @@ public class FavMovieGridFragment extends BaseMovieGridFragment implements
 
         mMovieDbIdSelected = dbId;
         final long rowId = mRecyclerAdapter.getItemId(position);
-        return FavMovieDetailsFragment.newInstance(rowId);
+        return MovieDetailsFavFragment.newInstance(rowId);
     }
 }
