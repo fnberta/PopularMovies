@@ -351,7 +351,8 @@ public class MovieRepository {
      */
     public void insertMovieLocal(@NonNull Context context, @NonNull Movie movie,
                                  @NonNull LocalOperationsListener listener) {
-        mInsertMovieTask = new InsertMovieTask(context.getContentResolver(), listener);
+        final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+        mInsertMovieTask = new InsertMovieTask(contentResolver, listener);
         mInsertMovieTask.execute(movie);
     }
 
@@ -364,7 +365,8 @@ public class MovieRepository {
      */
     public void deleteMovieLocal(@NonNull Context context, long movieRowId,
                                  @NonNull LocalOperationsListener listener) {
-        mDeleteMovieHandler = new DeleteMovieHandler(context.getContentResolver(), listener);
+        final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+        mDeleteMovieHandler = new DeleteMovieHandler(contentResolver, listener);
         mDeleteMovieHandler.startDelete(
                 TOKEN_DELETE,
                 null,
