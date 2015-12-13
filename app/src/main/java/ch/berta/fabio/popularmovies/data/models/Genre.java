@@ -22,7 +22,7 @@ import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by fabio on 09.12.15.
+ * Represents a genre, obtained from TheMovieDb.
  */
 public class Genre implements Parcelable {
 

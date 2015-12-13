@@ -26,10 +26,10 @@ import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 
 /**
- * Queries TheMoviesDB for movies.
+ * Queries TheMoviesDB for movie details.
  * <p>
- * A {@link Fragment} with a single task: to perform an online query for movies from the
- * TheMovieDB. It is retained across configuration changes and reports back to its activity
+ * A {@link Fragment} with a single task: to perform an online query for the details of a movie
+ * from the TheMovieDB. It is retained across configuration changes and reports back to its activity
  * via the callback interface {@link QueryMovieDetailsWorker.TaskInteractionListener}.
  * </p>
  */

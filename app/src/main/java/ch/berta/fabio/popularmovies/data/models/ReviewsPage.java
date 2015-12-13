@@ -25,10 +25,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by fabio on 09.12.15.
+ * Represents a result page of reviews obtained from TheMovieDb.
  */
 public class ReviewsPage implements Parcelable {
 
+    public static final Parcelable.Creator<ReviewsPage> CREATOR = new Parcelable.Creator<ReviewsPage>() {
+        public ReviewsPage createFromParcel(Parcel source) {
+            return new ReviewsPage(source);
+        }
+
+        public ReviewsPage[] newArray(int size) {
+            return new ReviewsPage[size];
+        }
+    };
     @SerializedName("page")
     private int mPage;
     @SerializedName("results")
@@ -39,6 +48,13 @@ public class ReviewsPage implements Parcelable {
     private int mTotalResults;
 
     public ReviewsPage() {
+    }
+
+    protected ReviewsPage(Parcel in) {
+        this.mPage = in.readInt();
+        this.mReviews = in.createTypedArrayList(Review.CREATOR);
+        this.mTotalPages = in.readInt();
+        this.mTotalResults = in.readInt();
     }
 
     public int getPage() {
@@ -85,21 +101,4 @@ public class ReviewsPage implements Parcelable {
         dest.writeInt(this.mTotalPages);
         dest.writeInt(this.mTotalResults);
     }
-
-    protected ReviewsPage(Parcel in) {
-        this.mPage = in.readInt();
-        this.mReviews = in.createTypedArrayList(Review.CREATOR);
-        this.mTotalPages = in.readInt();
-        this.mTotalResults = in.readInt();
-    }
-
-    public static final Parcelable.Creator<ReviewsPage> CREATOR = new Parcelable.Creator<ReviewsPage>() {
-        public ReviewsPage createFromParcel(Parcel source) {
-            return new ReviewsPage(source);
-        }
-
-        public ReviewsPage[] newArray(int size) {
-            return new ReviewsPage[size];
-        }
-    };
 }

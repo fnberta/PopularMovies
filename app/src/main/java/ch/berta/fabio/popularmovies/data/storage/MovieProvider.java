@@ -38,6 +38,9 @@ import static ch.berta.fabio.popularmovies.data.storage.MovieContract.PATH_MOVIE
 import static ch.berta.fabio.popularmovies.data.storage.MovieContract.PATH_REVIEW;
 import static ch.berta.fabio.popularmovies.data.storage.MovieContract.PATH_VIDEO;
 
+/**
+ * Provides a local content provider, backed by sqlite database.
+ */
 public class MovieProvider extends ContentProvider {
 
     private static final int URI_TYPE_MOVIE = 100;

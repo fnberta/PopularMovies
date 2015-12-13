@@ -25,10 +25,19 @@ import com.google.gson.annotations.SerializedName;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
 /**
- * Created by fabio on 09.12.15.
+ * Represents a review of a movie, obtained from TheMovieDb.
  */
 public class Review implements Parcelable {
 
+    public static final Parcelable.Creator<Review> CREATOR = new Parcelable.Creator<Review>() {
+        public Review createFromParcel(Parcel source) {
+            return new Review(source);
+        }
+
+        public Review[] newArray(int size) {
+            return new Review[size];
+        }
+    };
     @SerializedName("author")
     private String mAuthor;
     @SerializedName("content")
@@ -43,6 +52,12 @@ public class Review implements Parcelable {
         mAuthor = author;
         mContent = content;
         mUrl = url;
+    }
+
+    protected Review(Parcel in) {
+        mAuthor = in.readString();
+        mContent = in.readString();
+        mUrl = in.readString();
     }
 
     public String getAuthor() {
@@ -93,20 +108,4 @@ public class Review implements Parcelable {
         dest.writeString(mContent);
         dest.writeString(mUrl);
     }
-
-    protected Review(Parcel in) {
-        mAuthor = in.readString();
-        mContent = in.readString();
-        mUrl = in.readString();
-    }
-
-    public static final Parcelable.Creator<Review> CREATOR = new Parcelable.Creator<Review>() {
-        public Review createFromParcel(Parcel source) {
-            return new Review(source);
-        }
-
-        public Review[] newArray(int size) {
-            return new Review[size];
-        }
-    };
 }

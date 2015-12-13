@@ -34,7 +34,7 @@ import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 
 /**
- * Displays a grid of movie poster images.
+ * Provides an abstract base class for the display of movies in a grid of posters.
  */
 public abstract class MovieGridBaseFragment extends Fragment implements
         MovieInteractionListener {

@@ -35,12 +35,26 @@ public class Sort implements Parcelable {
     public static final String SORT_RATING = "vote_average.desc";
     public static final String SORT_RELEASE_DATE = "release_date.desc";
     public static final String SORT_FAVORITE = "favorite";
+    public static final Parcelable.Creator<Sort> CREATOR = new Parcelable.Creator<Sort>() {
+        public Sort createFromParcel(Parcel source) {
+            return new Sort(source);
+        }
+
+        public Sort[] newArray(int size) {
+            return new Sort[size];
+        }
+    };
     private String mOption;
     private String mReadableValue;
 
     public Sort(@SortOption String option, String readableValue) {
         mOption = option;
         mReadableValue = readableValue;
+    }
+
+    protected Sort(Parcel in) {
+        this.mOption = in.readString();
+        this.mReadableValue = in.readString();
     }
 
     public String getOption() {
@@ -74,19 +88,4 @@ public class Sort implements Parcelable {
         dest.writeString(this.mOption);
         dest.writeString(this.mReadableValue);
     }
-
-    protected Sort(Parcel in) {
-        this.mOption = in.readString();
-        this.mReadableValue = in.readString();
-    }
-
-    public static final Parcelable.Creator<Sort> CREATOR = new Parcelable.Creator<Sort>() {
-        public Sort createFromParcel(Parcel source) {
-            return new Sort(source);
-        }
-
-        public Sort[] newArray(int size) {
-            return new Sort[size];
-        }
-    };
 }

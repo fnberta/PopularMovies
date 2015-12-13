@@ -190,6 +190,11 @@ public class Movie implements Parcelable {
         mReviewsAndVideosSet = reviewsAndVideosSet;
     }
 
+    /**
+     * Returns a {@link ContentValues} object with the movie's data.
+     *
+     * @return a {@link ContentValues} object with the movie's data
+     */
     public ContentValues getContentValuesEntry() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieContract.Movie.COLUMN_DB_ID, mDbId);
@@ -202,6 +207,12 @@ public class Movie implements Parcelable {
         return contentValues;
     }
 
+    /**
+     * Returns the release date properly formatted as a string.
+     *
+     * @param showLong whether to return the date formatted in long or short style
+     * @return the release date properly formatted as a string
+     */
     public String getReleaseDateFormatted(boolean showLong) {
         Date date = getReleaseDate();
         if (date == null) {
@@ -211,6 +222,11 @@ public class Movie implements Parcelable {
         return showLong ? Utils.formatDateLong(date) : Utils.formatDateShort(date);
     }
 
+    /**
+     * Returns the release date as a long in UNIX time.
+     *
+     * @return the release date as a long
+     */
     public long getReleaseDateAsLong() {
         return mReleaseDate.getTime();
     }

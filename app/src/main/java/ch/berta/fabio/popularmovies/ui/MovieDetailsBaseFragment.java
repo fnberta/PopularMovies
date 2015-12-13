@@ -203,9 +203,11 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
     @Override
     public void onVideoRowItemClick(int position) {
         Video video = mRecyclerAdapter.getVideoAtPosition(position);
-        final Uri uri = Uri.parse(Video.YOUTUBE_BASE_URL + video.getKey());
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(intent);
+        if (video.siteIsYouTube()) {
+            final Uri uri = Uri.parse(Video.YOUTUBE_BASE_URL + video.getKey());
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        }
     }
 
     @Override

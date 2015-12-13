@@ -338,6 +338,13 @@ public class MovieRepository {
         );
     }
 
+    /**
+     * Returns the row id of the movie via the data of the cursor. Must be a cursor obtained via
+     * the {@link #getIsFavLoader(Context, int)} method.
+     *
+     * @param cursor the cursor to get the data from
+     * @return the row id of the movie
+     */
     public long getRowIdFromIsFavCursor(@NonNull Cursor cursor) {
         return cursor.getLong(0);
     }
@@ -479,7 +486,7 @@ public class MovieRepository {
             if (!videos.isEmpty()) {
                 for (Video video : videos) {
                     // only add youtube videos
-                    if (video.getSite().equals("YouTube")) {
+                    if (video.siteIsYouTube()) {
                         ops.add(ContentProviderOperation
                                         .newInsert(MovieContract.Video.CONTENT_URI)
                                         .withValueBackReference(MovieContract.Video.COLUMN_MOVIE_ID, 0)
