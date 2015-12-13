@@ -25,12 +25,10 @@ import com.google.gson.annotations.SerializedName;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
 /**
- * Created by fabio on 09.12.15.
+ * Represents a video (e.g. trailer) of a movie, obtained from TheMovieDb.
  */
 public class Video implements Parcelable {
 
-    public static final String YOUTUBE_THUMB_BASE_URL = "https://img.youtube.com/vi/";
-    public static final String YOUTUBE_THUMB_DEFAULT = "/default.jpg";
     public static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
     public static final Parcelable.Creator<Video> CREATOR = new Parcelable.Creator<Video>() {
         public Video createFromParcel(Parcel source) {
@@ -41,6 +39,7 @@ public class Video implements Parcelable {
             return new Video[size];
         }
     };
+    private static final String YOU_TUBE = "YouTube";
     @SerializedName("name")
     private String mName;
     @SerializedName("key")
@@ -109,6 +108,10 @@ public class Video implements Parcelable {
 
     public void setType(String type) {
         mType = type;
+    }
+
+    public boolean siteIsYouTube() {
+        return mSite.equals(YOU_TUBE);
     }
 
     public ContentValues getContentValuesEntry() {

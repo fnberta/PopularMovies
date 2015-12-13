@@ -23,10 +23,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract.Movie;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract.Review;
 
-import static ch.berta.fabio.popularmovies.data.storage.MovieContract.*;
+import static ch.berta.fabio.popularmovies.data.storage.MovieContract.Video;
 
 /**
- * Created by fabio on 12.10.15.
+ * Provides the instructions to create, upgrade and delete local sqlite database.
  */
 public class MovieDbHelper extends SQLiteOpenHelper {
 
@@ -35,6 +35,15 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
     public MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    /**
+     * Deletes the database.
+     *
+     * @param context the context to use
+     */
+    public static void deleteDatabase(Context context) {
+        context.deleteDatabase(DATABASE_NAME);
     }
 
     @Override
@@ -102,9 +111,5 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         db.execSQL(dropVideoTable);
 
         onCreate(db);
-    }
-
-    public static void deleteDatabase(Context context) {
-        context.deleteDatabase(DATABASE_NAME);
     }
 }

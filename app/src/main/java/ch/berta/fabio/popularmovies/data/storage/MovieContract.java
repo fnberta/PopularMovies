@@ -22,7 +22,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Created by fabio on 12.10.15.
+ * Defines the structure of the local sqlite database.
  */
 public class MovieContract {
 
@@ -53,7 +53,7 @@ public class MovieContract {
         public static final String COLUMN_BACKDROP = "backdrop";
 
         public static final String SORT_DEFAULT = TABLE_NAME + "." + _ID + " DESC";
-        public static final String SORT_BY_RELEASE_DATE =  TABLE_NAME + "." + COLUMN_RELEASE_DATE + " DESC";
+        public static final String SORT_BY_RELEASE_DATE = TABLE_NAME + "." + COLUMN_RELEASE_DATE + " DESC";
 
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);

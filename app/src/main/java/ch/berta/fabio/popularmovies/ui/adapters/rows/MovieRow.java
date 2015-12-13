@@ -31,7 +31,8 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 
 /**
- * Created by fabio on 18.10.15.
+ * Provides a {@link RecyclerView} row that displays a movie with its poster, title and release
+ * date.
  */
 public class MovieRow extends RecyclerView.ViewHolder {
 

@@ -25,14 +25,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by fabio on 09.12.15.
+ * Represents a list of videos (e.g.) trailers obtained from TheMovieDb.
  */
 public class VideosPage implements Parcelable {
 
+    public static final Parcelable.Creator<VideosPage> CREATOR = new Parcelable.Creator<VideosPage>() {
+        public VideosPage createFromParcel(Parcel source) {
+            return new VideosPage(source);
+        }
+
+        public VideosPage[] newArray(int size) {
+            return new VideosPage[size];
+        }
+    };
     @SerializedName("results")
     private List<Video> mVideos = new ArrayList<>();
 
     public VideosPage() {
+    }
+
+    protected VideosPage(Parcel in) {
+        mVideos = new ArrayList<Video>();
+        in.readList(mVideos, List.class.getClassLoader());
     }
 
     public List<Video> getVideos() {
@@ -52,19 +66,4 @@ public class VideosPage implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeList(mVideos);
     }
-
-    protected VideosPage(Parcel in) {
-        mVideos = new ArrayList<Video>();
-        in.readList(mVideos, List.class.getClassLoader());
-    }
-
-    public static final Parcelable.Creator<VideosPage> CREATOR = new Parcelable.Creator<VideosPage>() {
-        public VideosPage createFromParcel(Parcel source) {
-            return new VideosPage(source);
-        }
-
-        public VideosPage[] newArray(int size) {
-            return new VideosPage[size];
-        }
-    };
 }
