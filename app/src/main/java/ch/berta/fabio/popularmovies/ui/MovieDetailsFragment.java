@@ -159,6 +159,13 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
     }
 
     @Override
+    public void onMovieDeleted() {
+        super.onMovieDeleted();
+
+        getLoaderManager().restartLoader(LOADER_IS_FAV, null, this);
+    }
+
+    @Override
     protected void onMovieDeletedOnePane() {
         Snackbar.make(mRecyclerView, getString(R.string.snackbar_removed_from_favorites), Snackbar.LENGTH_LONG).show();
     }

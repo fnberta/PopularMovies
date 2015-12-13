@@ -114,6 +114,15 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment {
     }
 
     @Override
+    public void onMovieDeleted() {
+        super.onMovieDeleted();
+
+        if (mUseTwoPane) {
+            mListener.hideDetailsFragment();
+        }
+    }
+
+    @Override
     protected void onMovieDeletedOnePane() {
         removeSharedElement();
         final FragmentActivity activity = getActivity();

@@ -49,10 +49,8 @@ public class MovieProvider extends ContentProvider {
     private static final int URI_TYPE_MOVIE_REVIEW_TRAILER_ID = 103;
     private static final int URI_TYPE_REVIEW = 200;
     private static final int URI_TYPE_REVIEW_ID = 201;
-    private static final int URI_TYPE_REVIEW_MOVIE_ID = 202;
     private static final int URI_TYPE_VIDEO = 300;
     private static final int URI_TYPE_VIDEO_ID = 301;
-    private static final int URI_TYPE_VIDEO_MOVIE_ID = 302;
     private static final UriMatcher URI_MATCHER = buildUriMatcher();
     private SQLiteOpenHelper mOpenHelper;
 
@@ -71,13 +69,9 @@ public class MovieProvider extends ContentProvider {
 
         matcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW, URI_TYPE_REVIEW);
         matcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW + "/#", URI_TYPE_REVIEW_ID);
-        matcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW + "/" + Review.COLUMN_MOVIE_ID + "/#",
-                URI_TYPE_REVIEW_MOVIE_ID);
 
         matcher.addURI(CONTENT_AUTHORITY, PATH_VIDEO, URI_TYPE_VIDEO);
         matcher.addURI(CONTENT_AUTHORITY, PATH_VIDEO + "/#", URI_TYPE_VIDEO_ID);
-        matcher.addURI(CONTENT_AUTHORITY, PATH_VIDEO + "/" + Video.COLUMN_MOVIE_ID + "/#",
-                URI_TYPE_VIDEO_MOVIE_ID);
 
         return matcher;
     }
@@ -104,14 +98,10 @@ public class MovieProvider extends ContentProvider {
                 return Review.CONTENT_TYPE;
             case URI_TYPE_REVIEW_ID:
                 return Review.CONTENT_ITEM_TYPE;
-            case URI_TYPE_REVIEW_MOVIE_ID:
-                return Review.CONTENT_TYPE;
             case URI_TYPE_VIDEO:
                 return Video.CONTENT_TYPE;
             case URI_TYPE_VIDEO_ID:
                 return Video.CONTENT_ITEM_TYPE;
-            case URI_TYPE_VIDEO_MOVIE_ID:
-                return Video.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -161,17 +151,6 @@ public class MovieProvider extends ContentProvider {
                 queryBuilder.setTables(Review.TABLE_NAME);
                 queryBuilder.appendWhere(Review._ID + " = " + ContentUris.parseId(uri));
                 break;
-            case URI_TYPE_REVIEW_MOVIE_ID:
-                queryBuilder.setTables(Review.TABLE_NAME
-                                + " JOIN "
-                                + Movie.TABLE_NAME
-                                + " ON "
-                                + Movie.TABLE_NAME + "." + Movie._ID
-                                + " = "
-                                + Review.TABLE_NAME + "." + Review.COLUMN_MOVIE_ID
-                );
-                queryBuilder.appendWhere(Movie._ID + " = " + Review.getMovieIdFromUri(uri));
-                break;
             case URI_TYPE_VIDEO:
                 queryBuilder.setTables(Video.TABLE_NAME);
                 // no selection
@@ -179,17 +158,6 @@ public class MovieProvider extends ContentProvider {
             case URI_TYPE_VIDEO_ID:
                 queryBuilder.setTables(Video.TABLE_NAME);
                 queryBuilder.appendWhere(Video._ID + " = " + ContentUris.parseId(uri));
-                break;
-            case URI_TYPE_VIDEO_MOVIE_ID:
-                queryBuilder.setTables(Video.TABLE_NAME
-                                + " JOIN "
-                                + Movie.TABLE_NAME
-                                + " ON "
-                                + Movie.TABLE_NAME + "." + Movie._ID
-                                + " = "
-                                + Video.TABLE_NAME + "." + Video.COLUMN_MOVIE_ID
-                );
-                queryBuilder.appendWhere(Video._ID + " = " + Video.getMovieIdFromUri(uri));
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -322,6 +290,30 @@ public class MovieProvider extends ContentProvider {
                 rowsUpdated = db.update(Movie.TABLE_NAME, values, where, selectionArgs);
                 break;
             }
+            case URI_TYPE_REVIEW: {
+                rowsUpdated = db.update(Review.TABLE_NAME, values, selection, selectionArgs);
+                break;
+            }
+            case URI_TYPE_REVIEW_ID: {
+                String where = Review._ID + " = " + ContentUris.parseId(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsUpdated = db.update(Review.TABLE_NAME, values, where, selectionArgs);
+                break;
+            }
+            case URI_TYPE_VIDEO: {
+                rowsUpdated = db.update(Video.TABLE_NAME, values, selection, selectionArgs);
+                break;
+            }
+            case URI_TYPE_VIDEO_ID: {
+                String where = Video._ID + " = " + ContentUris.parseId(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsUpdated = db.update(Video.TABLE_NAME, values, where, selectionArgs);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -356,6 +348,30 @@ public class MovieProvider extends ContentProvider {
                     where += " AND " + selection;
                 }
                 rowsDeleted = db.delete(Movie.TABLE_NAME, where, selectionArgs);
+                break;
+            }
+            case URI_TYPE_REVIEW: {
+                rowsDeleted = db.delete(Review.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case URI_TYPE_REVIEW_ID: {
+                String where = Review._ID + " = " + ContentUris.parseId(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsDeleted = db.delete(Review.TABLE_NAME, where, selectionArgs);
+                break;
+            }
+            case URI_TYPE_VIDEO: {
+                rowsDeleted = db.delete(Video.TABLE_NAME, selection, selectionArgs);
+                break;
+            }
+            case URI_TYPE_VIDEO_ID: {
+                String where = Video._ID + " = " + ContentUris.parseId(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsDeleted = db.delete(Video.TABLE_NAME, where, selectionArgs);
                 break;
             }
             default:

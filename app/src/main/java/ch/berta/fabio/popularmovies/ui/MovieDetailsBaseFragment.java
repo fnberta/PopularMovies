@@ -192,7 +192,6 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
     public void onMovieDeleted() {
         if (mUseTwoPane) {
             Snackbar.make(mRecyclerView, getString(R.string.snackbar_removed_from_favorites), Snackbar.LENGTH_LONG).show();
-            mListener.hideDetailsFragment();
         } else {
             onMovieDeletedOnePane();
         }
