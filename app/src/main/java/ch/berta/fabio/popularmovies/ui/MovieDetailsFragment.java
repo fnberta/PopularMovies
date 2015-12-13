@@ -155,7 +155,6 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
     public void onMovieDetailsQueryFailed() {
         WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
         Snackbar.make(mRecyclerView, R.string.snackbar_error_reviews_videos, Snackbar.LENGTH_LONG).show();
-        // TODO: hide progress bar
     }
 
     @Override
