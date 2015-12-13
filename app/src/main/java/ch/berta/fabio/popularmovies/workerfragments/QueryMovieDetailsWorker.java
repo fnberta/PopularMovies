@@ -18,15 +18,12 @@ package ch.berta.fabio.popularmovies.workerfragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
-import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.data.MovieDbClient;
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 
 /**
  * Queries TheMoviesDB for movies.
@@ -36,12 +33,14 @@ import retrofit.Retrofit;
  * via the callback interface {@link QueryMovieDetailsWorker.TaskInteractionListener}.
  * </p>
  */
-public class QueryMovieDetailsWorker extends Fragment {
+public class QueryMovieDetailsWorker extends Fragment implements
+        MovieRepository.GetMovieDetailsOnlineListener {
 
     private static final String LOG_TAG = QueryMovieDetailsWorker.class.getSimpleName();
     private static final String BUNDLE_MOVIE_DB_ID = "BUNDLE_MOVIE_DB_ID";
+    @Nullable
     private TaskInteractionListener mListener;
-    private Call<MovieDetails> mLoadMovieDetails;
+    private MovieRepository mMovieRepo;
 
     public QueryMovieDetailsWorker() {
         // required empty constructor
@@ -74,6 +73,8 @@ public class QueryMovieDetailsWorker extends Fragment {
 
         setRetainInstance(true);
 
+        mMovieRepo = new MovieRepository();
+
         int movieDbId = -1;
         Bundle args = getArguments();
         if (args != null) {
@@ -81,46 +82,37 @@ public class QueryMovieDetailsWorker extends Fragment {
         }
 
         if (movieDbId != -1) {
-            queryMovieDetails(movieDbId);
+            mMovieRepo.getMovieDetailsOnline(getActivity(), movieDbId, this);
         } else if (mListener != null) {
-            mListener.onMovieDetailsQueryFailed();
+            mListener.onMovieDetailsOnlineLoadFailed();
         }
     }
 
-    private void queryMovieDetails(int movieDbId) {
-        mLoadMovieDetails = MovieDbClient.getService().loadMovieDetails(movieDbId,
-                getString(R.string.movie_db_key), "reviews,videos");
-        mLoadMovieDetails.enqueue(new Callback<MovieDetails>() {
-            @Override
-            public void onResponse(Response<MovieDetails> response, Retrofit retrofit) {
-                MovieDetails movieDetails = response.body();
-                if (mListener != null) {
-                    if (movieDetails != null) {
-                        mListener.onMovieDetailsQueried(movieDetails);
-                    } else {
-                        mListener.onMovieDetailsQueryFailed();
-                    }
-                }
-            }
+    @Override
+    public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
+        if (mListener != null) {
+            mListener.onMovieDetailsOnlineLoaded(movieDetails);
+        }
+    }
 
-            @Override
-            public void onFailure(Throwable t) {
-                if (mListener != null) {
-                    mListener.onMovieDetailsQueryFailed();
-                }
-            }
-        });
+    @Override
+    public void onMovieDetailsOnlineLoadFailed() {
+        if (mListener != null) {
+            mListener.onMovieDetailsOnlineLoadFailed();
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+
         mListener = null;
     }
 
     @Override
     public void onDestroy() {
-        mLoadMovieDetails.cancel();
+        mMovieRepo.cancelOnlineLoad();
+
         super.onDestroy();
     }
 
@@ -133,11 +125,11 @@ public class QueryMovieDetailsWorker extends Fragment {
          *
          * @param movieDetails the queried movie details
          */
-        void onMovieDetailsQueried(MovieDetails movieDetails);
+        void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails);
 
         /**
          * Handles a failed movie details query.
          */
-        void onMovieDetailsQueryFailed();
+        void onMovieDetailsOnlineLoadFailed();
     }
 }

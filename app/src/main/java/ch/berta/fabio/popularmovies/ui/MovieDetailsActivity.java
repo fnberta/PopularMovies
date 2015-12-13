@@ -17,6 +17,7 @@
 package ch.berta.fabio.popularmovies.ui;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
@@ -129,12 +130,12 @@ public class MovieDetailsActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMovieDetailsQueried(MovieDetails movieDetails) {
+    public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
         ((MovieDetailsFragment) mMovieDetailsFragment).onMovieDetailsQueried(movieDetails);
     }
 
     @Override
-    public void onMovieDetailsQueryFailed() {
+    public void onMovieDetailsOnlineLoadFailed() {
         ((MovieDetailsFragment) mMovieDetailsFragment).onMovieDetailsQueryFailed();
     }
 

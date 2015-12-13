@@ -19,10 +19,8 @@ package ch.berta.fabio.popularmovies.ui;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.view.LayoutInflater;
@@ -30,7 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.data.storage.MovieContract;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesFavRecyclerAdapter;
 import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecoration;
 
@@ -41,23 +39,19 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String INTENT_MOVIE_SELECTED_ROW_ID = "ch.berta.fabio.popularmovies.intents.MOVIE_SELECTED_ROW_ID";
-    public static final int COL_INDEX_ROW_ID = 0;
-    public static final int COL_INDEX_DB_ID = 1;
-    public static final int COL_INDEX_TITLE = 2;
-    public static final int COL_INDEX_RELEASE_DATE = 3;
-    public static final int COL_INDEX_POSTER = 4;
-    private static final String[] FAV_MOVIE_COLUMNS = new String[]{
-            BaseColumns._ID,
-            MovieContract.Movie.COLUMN_DB_ID,
-            MovieContract.Movie.COLUMN_TITLE,
-            MovieContract.Movie.COLUMN_RELEASE_DATE,
-            MovieContract.Movie.COLUMN_POSTER,
-    };
     private static final int FAV_MOVIES_LOADER = 0;
     private MoviesFavRecyclerAdapter mRecyclerAdapter;
+    private MovieRepository mMovieRepo;
 
     public MovieGridFavFragment() {
         // required empty constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mMovieRepo = new MovieRepository();
     }
 
     @Nullable
@@ -75,7 +69,7 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
         mRecyclerView.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
         mRecyclerAdapter = new MoviesFavRecyclerAdapter(null, mViewEmpty, getLayoutWidth(),
-                spanCount, this, this);
+                spanCount, mMovieRepo, this, this);
         mRecyclerView.setAdapter(mRecyclerAdapter);
     }
 
@@ -88,12 +82,7 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity(),
-                MovieContract.Movie.CONTENT_URI,
-                FAV_MOVIE_COLUMNS,
-                null,
-                null,
-                MovieContract.Movie.SORT_BY_RELEASE_DATE);
+        return mMovieRepo.getFavMoviesLoader(getActivity());
     }
 
     @Override

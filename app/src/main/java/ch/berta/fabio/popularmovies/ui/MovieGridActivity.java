@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
@@ -187,12 +188,12 @@ public class MovieGridActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMoviesQueried(List<Movie> movies) {
+    public void onMoviesOnlineLoaded(List<Movie> movies) {
         ((MovieGridFragment) mMovieGridFragment).onMoviesQueried(movies);
     }
 
     @Override
-    public void onMovieQueryFailed() {
+    public void onMoviesOnlineLoadFailed() {
         ((MovieGridFragment) mMovieGridFragment).onMovieQueryFailed();
     }
 
@@ -240,12 +241,12 @@ public class MovieGridActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onMovieDetailsQueried(MovieDetails movieDetails) {
+    public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
         ((MovieDetailsFragment) getMovieDetailsFragment()).onMovieDetailsQueried(movieDetails);
     }
 
     @Override
-    public void onMovieDetailsQueryFailed() {
+    public void onMovieDetailsOnlineLoadFailed() {
         ((MovieDetailsFragment) getMovieDetailsFragment()).onMovieDetailsQueryFailed();
     }
 

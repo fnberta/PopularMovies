@@ -22,7 +22,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +30,6 @@ import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
-import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
 import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
@@ -112,23 +110,21 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(
-                getActivity(),
-                MovieContract.Movie.buildMovieByDbIdUri(mMovie.getDbId()),
-                new String[]{MovieContract.Movie._ID},
-                null,
-                null,
-                MovieContract.Movie.SORT_DEFAULT
-        );
+        return mMovieRepo.getIsFavLoader(getActivity(), mMovie.getDbId());
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (loader.getId() != LOADER_IS_FAV) {
+            // id does not match, return
+            return;
+        }
+
         boolean isFavoured = data.moveToFirst();
         setFavoured(isFavoured);
 
         if (isFavoured) {
-            mMovieRowId = data.getLong(0);
+            mMovieRowId = mMovieRepo.getRowIdFromIsFavCursor(data);
         }
     }
 

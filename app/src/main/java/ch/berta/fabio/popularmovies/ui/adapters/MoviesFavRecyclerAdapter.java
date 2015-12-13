@@ -18,6 +18,8 @@ package ch.berta.fabio.popularmovies.ui.adapters;
 
 import android.database.Cursor;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,7 +30,7 @@ import java.util.Date;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.Utils;
-import ch.berta.fabio.popularmovies.ui.MovieGridFavFragment;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 import ch.berta.fabio.popularmovies.ui.adapters.rows.MovieRow;
 
@@ -45,16 +47,20 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
     private boolean mDataIsValid;
     private Fragment mLifecycleFragment;
     private MovieInteractionListener mListener;
+    private MovieRepository mMovieRepo;
     private int mItemHeight;
 
-    public MoviesFavRecyclerAdapter(Cursor cursor, View emptyView, int layoutWidth, int columnCount,
-                                    Fragment fragment, MovieInteractionListener listener) {
+    public MoviesFavRecyclerAdapter(@Nullable Cursor cursor, @NonNull View emptyView,
+                                    int layoutWidth, int columnCount,
+                                    @NonNull MovieRepository movieRepo, @NonNull Fragment fragment,
+                                    @NonNull MovieInteractionListener listener) {
         mCursor = cursor;
         mViewEmpty = emptyView;
         mDataIsValid = cursor != null;
         mRowIdColumn = mDataIsValid ? cursor.getColumnIndexOrThrow(BaseColumns._ID) : -1;
         setHasStableIds(true);
 
+        mMovieRepo = movieRepo;
         mLifecycleFragment = fragment;
         mListener = listener;
 
@@ -76,11 +82,11 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
 
         MovieRow movieRow = (MovieRow) holder;
 
-        String title = mCursor.getString(MovieGridFavFragment.COL_INDEX_TITLE);
-        long date = mCursor.getLong(MovieGridFavFragment.COL_INDEX_RELEASE_DATE);
-        String poster = mCursor.getString(MovieGridFavFragment.COL_INDEX_POSTER);
+        String title = mMovieRepo.getMovieTitleFromFavMoviesCursor(mCursor);
+        Date date = mMovieRepo.getMovieReleaseDateFromFavMoviesCursor(mCursor);
+        String poster = mMovieRepo.getMoviePosterFromFavMoviesCursor(mCursor);
 
-        movieRow.setMovie(title, Utils.formatDateShort(new Date(date)), poster, mLifecycleFragment);
+        movieRow.setMovie(title, Utils.formatDateShort(date), poster, mLifecycleFragment);
     }
 
     @Override
@@ -110,7 +116,7 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
             return -1;
         }
 
-        return mCursor.getInt(MovieGridFavFragment.COL_INDEX_DB_ID);
+        return mMovieRepo.getMovieDbIdFromFavMoviesCursor(mCursor);
     }
 
     /**
@@ -119,7 +125,7 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
      *
      * @param cursor The new cursor to be used
      */
-    public void changeCursor(Cursor cursor) {
+    public void changeCursor(@Nullable Cursor cursor) {
         Cursor old = swapCursor(cursor);
         if (old != null) {
             old.close();
@@ -136,7 +142,7 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
      * If the given new Cursor is the same instance as the previously set
      * Cursor, null is returned.
      */
-    public Cursor swapCursor(Cursor newCursor) {
+    public Cursor swapCursor(@Nullable Cursor newCursor) {
         if (newCursor == mCursor) {
             return null;
         }
