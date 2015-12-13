@@ -39,12 +39,13 @@ import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
 import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter.InfoRow;
 
 /**
- * Displays detail information about a movie, including poster image, release date, rating and
- * an overview of the plot.
+ * Displays detail information about a movie, including poster image, release date, rating, an
+ * overview of the plot, reviews and videos (e.g. trailers). Queries data from the local content
+ * provider.
  */
 public class MovieDetailsFavFragment extends MovieDetailsBaseFragment {
 
-    public static final int RESULT_UNFAOUVRED = 2;
+    public static final int RESULT_UNFAVOURED = 2;
     public static final String[] FAV_MOVIE_COLUMNS = new String[]{
             MovieContract.Movie.COLUMN_DB_ID,
             MovieContract.Movie.COLUMN_TITLE,
@@ -156,6 +157,9 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment {
                 mListener.setOnePaneHeader(mMovie.getTitle(), mMovie.getBackdropPath());
             }
             mRecyclerAdapter.setMovie(mMovie);
+
+            setShareYoutubeIntent();
+            getActivity().invalidateOptionsMenu();
         } else {
             startPostponedEnterTransition();
             Snackbar.make(mRecyclerView, R.string.snackbar_no_movie_data, Snackbar.LENGTH_LONG);
@@ -210,7 +214,7 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment {
     protected void onMovieDeletedOnePane() {
         removeSharedElement();
         final FragmentActivity activity = getActivity();
-        activity.setResult(RESULT_UNFAOUVRED);
+        activity.setResult(RESULT_UNFAVOURED);
         ActivityCompat.finishAfterTransition(activity);
     }
 

@@ -39,6 +39,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -70,6 +73,8 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
     RecyclerView mRecyclerView;
     private InsertMovieTask mInsertMovieTask;
     private QueryHandler mDeleteMovieHandler;
+    private Intent mShareYoutubeIntent;
+    private boolean mHasVideos = false;
 
     public MovieDetailsBaseFragment() {
         // Required empty public constructor
@@ -90,7 +95,12 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
         mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
+
+        mShareYoutubeIntent = new Intent(Intent.ACTION_SEND);
+        mShareYoutubeIntent.setType("text/plain");
     }
 
     @Override
@@ -119,6 +129,43 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
     protected abstract MovieDetailsRecyclerAdapter getRecyclerAdapter();
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.menu_movie_details, menu);
+        MenuItem shareItem = menu.findItem(R.id.menu_details_action_share);
+        shareItem.setVisible(mHasVideos);
+    }
+
+    final void setShareYoutubeIntent() {
+        final List<Video> videos = mMovie.getVideos();
+        if (videos.isEmpty()) {
+            mHasVideos = false;
+        } else {
+            mHasVideos = true;
+            final Video firstVideo = videos.get(0);
+            final String url = Video.YOUTUBE_BASE_URL + firstVideo.getKey();
+            mShareYoutubeIntent.putExtra(Intent.EXTRA_TEXT, url);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int id = item.getItemId();
+        switch (id) {
+            case R.id.menu_details_action_share:
+                shareYoutubeUrl();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void shareYoutubeUrl() {
+        startActivity(Intent.createChooser(mShareYoutubeIntent, getString(R.string.action_share)));
+    }
+
+    @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         // do nothing
     }
@@ -128,6 +175,10 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
         mListener.toggleFabImage(isFavoured);
     }
 
+    /**
+     * Adds or removes a movie from the local content provider, depending on whether the user set
+     * the movie as favoured or not.
+     */
     public void toggleFavorite() {
         boolean newlyFavoured;
         if (!mMovie.isFavoured()) {
@@ -235,7 +286,7 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
 
     /**
      * Handles content provider batch insert operation on a background thread. To avoid a leak, the
-     * process needs to be canceled in the fragment's onPause().
+     * process needs to be canceled in the activity's or fragment's onPause() method.
      */
     private class InsertMovieTask extends AsyncTask<Movie, Integer, ContentProviderResult[]> {
 
@@ -297,7 +348,7 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
 
     /**
      * Handles content provider delete operation on a background thread. To avoid a leak, the
-     * process needs to be canceled in the fragment's onPause().
+     * process needs to be canceled in the activity's or fragment's onPause() method.
      */
     @SuppressWarnings("HandlerLeak")
     private class QueryHandler extends AsyncQueryHandler {

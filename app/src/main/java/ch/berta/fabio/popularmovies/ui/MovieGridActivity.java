@@ -180,7 +180,7 @@ public class MovieGridActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == MovieGridBaseFragment.REQUEST_MOVIE_DETAILS &&
-                resultCode == MovieDetailsFavFragment.RESULT_UNFAOUVRED) {
+                resultCode == MovieDetailsFavFragment.RESULT_UNFAVOURED) {
             Snackbar.make(mSpinnerSort, getString(R.string.snackbar_removed_from_favorites),
                     Snackbar.LENGTH_LONG).show();
         }

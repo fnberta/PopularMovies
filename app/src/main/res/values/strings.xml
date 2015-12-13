@@ -39,4 +39,5 @@
     <string name="no_movie_selected">No movie selected</string>
     <string name="snackbar_no_movie_data">No data for this movie</string>
     <string name="snackbar_error_reviews_videos">Failed to load reviews and trailers</string>
+    <string name="action_share">Share</string>
 </resources>

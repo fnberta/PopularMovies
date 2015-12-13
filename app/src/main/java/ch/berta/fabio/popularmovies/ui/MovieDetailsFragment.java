@@ -24,6 +24,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.WorkerUtils;
@@ -94,9 +96,18 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
             mListener.setOnePaneHeader(mMovie.getTitle(), mMovie.getBackdropPath());
         }
 
-        if (mMovie.getReviews().isEmpty() && mMovie.getVideos().isEmpty()) {
+        if (!mMovie.areReviewsAndVideosSet()) {
             fetchReviewsAndVideosWithWorker();
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (mMovie.areReviewsAndVideosSet()) {
+            setShareYoutubeIntent();
+        }
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -138,7 +149,11 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
 
         mMovie.setReviews(movieDetails.getReviewsPage().getReviews());
         mMovie.setVideos(movieDetails.getVideosPage().getVideos());
+        mMovie.setReviewsAndVideosSet(true);
         mRecyclerAdapter.notifyReviewsAndVideosLoaded();
+
+        setShareYoutubeIntent();
+        getActivity().invalidateOptionsMenu();
     }
 
     public void onMovieDetailsQueryFailed() {

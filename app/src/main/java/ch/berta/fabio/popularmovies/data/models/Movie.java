@@ -38,7 +38,7 @@ public class Movie implements Parcelable {
     public static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
     public static final String IMAGE_POSTER_SIZE = "w185";
     public static final String IMAGE_BACKDROP_SIZE = "w780";
-    public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>() {
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
         public Movie createFromParcel(Parcel source) {
             return new Movie(source);
         }
@@ -64,6 +64,7 @@ public class Movie implements Parcelable {
     private boolean mIsFavoured;
     private List<Review> mReviews;
     private List<Video> mVideos;
+    private boolean mReviewsAndVideosSet;
 
     public Movie() {
     }
@@ -81,20 +82,22 @@ public class Movie implements Parcelable {
         mTitle = title;
         mVoteAverage = voteAverage;
         mReviews = reviews;
+        mReviewsAndVideosSet = true;
     }
 
     protected Movie(Parcel in) {
-        mBackdropPath = in.readString();
-        mDbId = in.readInt();
-        mOverview = in.readString();
+        this.mBackdropPath = in.readString();
+        this.mDbId = in.readInt();
+        this.mOverview = in.readString();
         long tmpMReleaseDate = in.readLong();
-        mReleaseDate = tmpMReleaseDate == -1 ? null : new Date(tmpMReleaseDate);
-        mPosterPath = in.readString();
-        mTitle = in.readString();
-        mVoteAverage = in.readDouble();
-        mIsFavoured = in.readByte() != 0;
-        mReviews = in.createTypedArrayList(Review.CREATOR);
-        mVideos = in.createTypedArrayList(Video.CREATOR);
+        this.mReleaseDate = tmpMReleaseDate == -1 ? null : new Date(tmpMReleaseDate);
+        this.mPosterPath = in.readString();
+        this.mTitle = in.readString();
+        this.mVoteAverage = in.readDouble();
+        this.mIsFavoured = in.readByte() != 0;
+        this.mReviews = in.createTypedArrayList(Review.CREATOR);
+        this.mVideos = in.createTypedArrayList(Video.CREATOR);
+        this.mReviewsAndVideosSet = in.readByte() != 0;
     }
 
     public String getBackdropPath() {
@@ -179,6 +182,14 @@ public class Movie implements Parcelable {
         mVideos = videos;
     }
 
+    public boolean areReviewsAndVideosSet() {
+        return mReviewsAndVideosSet;
+    }
+
+    public void setReviewsAndVideosSet(boolean reviewsAndVideosSet) {
+        mReviewsAndVideosSet = reviewsAndVideosSet;
+    }
+
     public ContentValues getContentValuesEntry() {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieContract.Movie.COLUMN_DB_ID, mDbId);
@@ -211,15 +222,16 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mBackdropPath);
-        dest.writeInt(mDbId);
-        dest.writeString(mOverview);
+        dest.writeString(this.mBackdropPath);
+        dest.writeInt(this.mDbId);
+        dest.writeString(this.mOverview);
         dest.writeLong(mReleaseDate != null ? mReleaseDate.getTime() : -1);
-        dest.writeString(mPosterPath);
-        dest.writeString(mTitle);
-        dest.writeDouble(mVoteAverage);
+        dest.writeString(this.mPosterPath);
+        dest.writeString(this.mTitle);
+        dest.writeDouble(this.mVoteAverage);
         dest.writeByte(mIsFavoured ? (byte) 1 : (byte) 0);
         dest.writeTypedList(mReviews);
         dest.writeTypedList(mVideos);
+        dest.writeByte(mReviewsAndVideosSet ? (byte) 1 : (byte) 0);
     }
 }
