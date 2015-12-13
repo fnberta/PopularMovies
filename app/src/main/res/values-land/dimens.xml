@@ -23,4 +23,7 @@
     <dimen name="toolbar_height_x5">200dp</dimen>
     <dimen name="toolbar_height_x6">240dp</dimen>
 
+    <!-- Movie Detail View -->
+    <dimen name="detail_two_pane_header_height">200dp</dimen>
+
 </resources>

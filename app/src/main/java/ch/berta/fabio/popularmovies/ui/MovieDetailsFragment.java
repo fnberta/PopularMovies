@@ -16,37 +16,37 @@
 
 package ch.berta.fabio.popularmovies.ui;
 
-import android.graphics.Bitmap;
+import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
+import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
- * Displays detail information about a movie, including poster image, release date, rating and
- * an overview of the plot.
+ * Displays detail information about a movie, including poster image, release date, rating, an
+ * overview of the plot, reviews and trailers. Uses info from the passed {@link Movie} object and
+ * downloads additional information from TheMovieDB.
+ * <p/>
+ * Queries the local content provider to check if the movie is favoured and displays the according
+ * drawable in the FAB.
  */
-public class MovieDetailsFragment extends Fragment {
+public class MovieDetailsFragment extends MovieDetailsBaseFragment {
 
-    private static final String BUNDLE_MOVIE = "bundle_movie";
+    private static final String KEY_MOVIE = "KEY_MOVIE";
+    private static final String QUERY_MOVIE_DETAILS_WORKER = "QUERY_MOVIE_DETAILS_WORKER";
     private static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
-    private ImageView mImageViewPoster;
-    private TextView mTextViewPlot;
-    private TextView mTextViewDate;
-    private TextView mTextViewRating;
-    private Movie mMovie;
+    private static final int LOADER_IS_FAV = 0;
 
     public MovieDetailsFragment() {
         // Required empty public constructor
@@ -55,14 +55,14 @@ public class MovieDetailsFragment extends Fragment {
     /**
      * Returns a new instance of a {@link MovieDetailsFragment} with a {@link Movie} as an argument.
      *
-     * @param movie the {@link Movie} object to be set as an argument
+     * @param movie the selected {@link Movie}
      * @return a new instance of a {@link MovieDetailsFragment}
      */
     public static MovieDetailsFragment newInstance(Movie movie) {
         MovieDetailsFragment fragment = new MovieDetailsFragment();
 
         Bundle args = new Bundle();
-        args.putParcelable(BUNDLE_MOVIE, movie);
+        args.putParcelable(KEY_MOVIE, movie);
         fragment.setArguments(args);
 
         return fragment;
@@ -72,61 +72,100 @@ public class MovieDetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mMovie = getArguments().getParcelable(BUNDLE_MOVIE);
+        Bundle args = getArguments();
+        if (args != null) {
+            mMovie = args.getParcelable(KEY_MOVIE);
+        }
+    }
+
+    @NonNull
+    @Override
+    protected MovieDetailsRecyclerAdapter getRecyclerAdapter() {
+        return new MovieDetailsRecyclerAdapter(getActivity(), mMovie, mUseTwoPane, this, this);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        getLoaderManager().initLoader(LOADER_IS_FAV, null, this);
+
+        if (!mUseTwoPane) {
+            mListener.setOnePaneHeader(mMovie.getTitle(), mMovie.getBackdropPath());
+        }
+
+        if (!mMovie.areReviewsAndVideosSet()) {
+            fetchReviewsAndVideosWithWorker();
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_movie_details, container, false);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (mMovie.areReviewsAndVideosSet()) {
+            setShareYoutubeIntent();
+        }
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mImageViewPoster = (ImageView) view.findViewById(R.id.iv_details_poster);
-        loadPoster();
-
-        mTextViewPlot = (TextView) view.findViewById(R.id.tv_details_plot);
-        mTextViewPlot.setText(mMovie.getOverview());
-
-        mTextViewDate = (TextView) view.findViewById(R.id.tv_details_release_date);
-        loadDate();
-
-        mTextViewRating = (TextView) view.findViewById(R.id.tv_details_rating);
-        mTextViewRating.setText(getString(R.string.details_rating, mMovie.getVoteAverage()));
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return mMovieRepo.getIsFavLoader(getActivity(), mMovie.getDbId());
     }
 
-    private void loadPoster() {
-        String poster = mMovie.getPosterPath();
-        if (!TextUtils.isEmpty(poster)) {
-            String imagePath = Movie.IMAGE_BASE_URL + Movie.IMAGE_POSTER_SIZE + poster;
-            Glide.with(this)
-                    .load(imagePath)
-                    .asBitmap()
-                    .into(new BitmapImageViewTarget(mImageViewPoster) {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            super.onResourceReady(resource, glideAnimation);
-                            ActivityCompat.startPostponedEnterTransition(getActivity());
-                        }
-                    });
-        } else {
-            mImageViewPoster.setScaleType(ImageView.ScaleType.CENTER);
-            mImageViewPoster.setImageResource(R.drawable.ic_movie_white_72dp);
-            ActivityCompat.startPostponedEnterTransition(getActivity());
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (loader.getId() != LOADER_IS_FAV) {
+            // id does not match, return
+            return;
+        }
+
+        boolean isFavoured = data.moveToFirst();
+        setFavoured(isFavoured);
+
+        if (isFavoured) {
+            mMovieRowId = mMovieRepo.getRowIdFromIsFavCursor(data);
         }
     }
 
-    private void loadDate() {
-        String date = mMovie.getReleaseDateFormatted(true);
-        if (!TextUtils.isEmpty(date)) {
-            mTextViewDate.setText(date);
-        } else {
-            mTextViewDate.setVisibility(View.GONE);
+    private void fetchReviewsAndVideosWithWorker() {
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIE_DETAILS_WORKER);
+
+        if (worker == null) {
+            worker = QueryMovieDetailsWorker.newInstance(mMovie.getDbId());
+            fragmentManager.beginTransaction()
+                    .add(worker, QUERY_MOVIE_DETAILS_WORKER)
+                    .commit();
         }
+    }
+
+    public void onMovieDetailsQueried(MovieDetails movieDetails) {
+        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
+
+        mMovie.setReviews(movieDetails.getReviewsPage().getReviews());
+        mMovie.setVideos(movieDetails.getVideosPage().getVideos());
+        mMovie.setReviewsAndVideosSet(true);
+        mRecyclerAdapter.notifyReviewsAndVideosLoaded();
+
+        setShareYoutubeIntent();
+        getActivity().invalidateOptionsMenu();
+    }
+
+    public void onMovieDetailsQueryFailed() {
+        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
+        Snackbar.make(mRecyclerView, R.string.snackbar_error_reviews_videos, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onMovieDeleted() {
+        super.onMovieDeleted();
+
+        getLoaderManager().restartLoader(LOADER_IS_FAV, null, this);
+    }
+
+    @Override
+    protected void onMovieDeletedOnePane() {
+        Snackbar.make(mRecyclerView, getString(R.string.snackbar_removed_from_favorites), Snackbar.LENGTH_LONG).show();
     }
 }

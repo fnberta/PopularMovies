@@ -16,6 +16,8 @@
 
 package ch.berta.fabio.popularmovies.data.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.StringDef;
 
 import java.lang.annotation.Retention;
@@ -24,20 +26,35 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Represents an option how to sort a movie poster images list or grid.
  */
-public class Sort {
+public class Sort implements Parcelable {
 
-    @StringDef({SORT_POPULARITY, SORT_RELEASE_DATE, SORT_RATING})
+    @StringDef({SORT_POPULARITY, SORT_RELEASE_DATE, SORT_RATING, SORT_FAVORITE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface SortOption {}
     public static final String SORT_POPULARITY = "popularity.desc";
     public static final String SORT_RATING = "vote_average.desc";
     public static final String SORT_RELEASE_DATE = "release_date.desc";
+    public static final String SORT_FAVORITE = "favorite";
+    public static final Parcelable.Creator<Sort> CREATOR = new Parcelable.Creator<Sort>() {
+        public Sort createFromParcel(Parcel source) {
+            return new Sort(source);
+        }
+
+        public Sort[] newArray(int size) {
+            return new Sort[size];
+        }
+    };
     private String mOption;
     private String mReadableValue;
 
     public Sort(@SortOption String option, String readableValue) {
         mOption = option;
         mReadableValue = readableValue;
+    }
+
+    protected Sort(Parcel in) {
+        this.mOption = in.readString();
+        this.mReadableValue = in.readString();
     }
 
     public String getOption() {
@@ -56,5 +73,19 @@ public class Sort {
         mReadableValue = readableValue;
     }
 
+    @Override
+    public String toString() {
+        return mReadableValue;
+    }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mOption);
+        dest.writeString(this.mReadableValue);
+    }
 }

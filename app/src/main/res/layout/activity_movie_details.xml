@@ -39,7 +39,7 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginEnd="@dimen/key_line_1"
+            app:expandedTitleMarginEnd="@dimen/key_line_2"
             app:expandedTitleMarginStart="@dimen/key_line_1"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             >
@@ -52,7 +52,7 @@
                 >
 
                 <ImageView
-                    android:id="@+id/iv_details_backdrop"
+                    android:id="@+id/iv_toolbar_details_backdrop"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/movie_backdrop"
@@ -84,6 +84,16 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:ignore="MergeRootFrame"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_details_favorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/normal_space"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="bottom|end"
+        tools:src="@drawable/ic_favorite_outline_white_24dp"
         />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -14,7 +14,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <manifest
     package="ch.berta.fabio.popularmovies"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -48,6 +47,12 @@
             android:theme="@style/AppTheme.DrawStatusBar.Explode"
             />
 
+        <provider
+            android:name=".data.storage.MovieProvider"
+            android:authorities="ch.berta.fabio.popularmovies"
+            android:enabled="true"
+            android:exported="false"
+            />
     </application>
 
 </manifest>

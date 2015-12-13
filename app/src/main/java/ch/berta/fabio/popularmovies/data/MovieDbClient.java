@@ -18,12 +18,25 @@ package ch.berta.fabio.popularmovies.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 
+import java.lang.reflect.Type;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import retrofit.Call;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 import retrofit.http.GET;
+import retrofit.http.Path;
 import retrofit.http.Query;
 
 /**
@@ -36,8 +49,9 @@ public class MovieDbClient {
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(getGsonObject()))
             .build();
-    private static final MoviePosters MOVIE_POSTERS_SERVICE =
-            REST_ADAPTER.create(MoviePosters.class);
+    private static final PopularMovies POPULAR_MOVIES_SERVICE =
+            REST_ADAPTER.create(PopularMovies.class);
+    private static final String DATE_FORMAT = "yyyy-mm-dd";
 
     private MovieDbClient() {
         // class cannot be instantiated
@@ -48,28 +62,61 @@ public class MovieDbClient {
      *
      * @return the {@link Retrofit} adapter
      */
-    public static MoviePosters getService() {
-        return MOVIE_POSTERS_SERVICE;
+    public static PopularMovies getService() {
+        return POPULAR_MOVIES_SERVICE;
     }
 
+    /**
+     * Returns a custom date deserializer that handles empty strings and returns today's date instead.
+     *
+     * @return the Gson object to use
+     */
     private static Gson getGsonObject() {
-        return new GsonBuilder().setDateFormat("yyyy-mm-dd").create();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+            DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+
+            @Override
+            public Date deserialize(final JsonElement json, final Type typeOfT,
+                                    final JsonDeserializationContext context) throws JsonParseException {
+                try {
+                    return dateFormat.parse(json.getAsString());
+                } catch (ParseException e) {
+                    return new Date();
+                }
+            }
+        });
+
+        return gsonBuilder.create();
     }
 
     /**
      * Provides the query calls to the TheMovieDB.
      */
-    public interface MoviePosters {
+    public interface PopularMovies {
         /**
          * Queries TheMovieDB for movies based on the page number and sort option.
          *
          * @param page   the page to query
          * @param sortBy the option to sort movies by
          * @param apiKey the api key for querying TheMovieDB.
+         *
          * @return a {@link Call} object with the query
          */
         @GET("discover/movie")
         Call<MoviesPage> loadMoviePosters(@Query("page") int page, @Query("sort_by") String sortBy,
                                           @Query("api_key") String apiKey);
+
+        /**
+         * Queries TheMovieDB for movie details.
+         * @param movieId the db id of the movie
+         * @param apiKey the api key for querying TheMovieDB.
+         * @param appendTo the extra query information to append
+         *
+         * @return a {@link Call} object with the query
+         */
+        @GET("movie/{id}")
+        Call<MovieDetails> loadMovieDetails(@Path("id") int movieId, @Query("api_key") String apiKey,
+                                @Query("append_to_response") String appendTo);
     }
 }

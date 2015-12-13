@@ -15,6 +15,15 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <integer name="span_count">6</integer>
-</resources>
+<TextView
+    android:id="@+id/tv_header"
+    style="@style/SubHeader"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/sub_header_height"
+    android:gravity="center_vertical"
+    android:paddingEnd="@dimen/key_line_1"
+    android:paddingStart="@dimen/key_line_1"
+    tools:text="Items"
+    />

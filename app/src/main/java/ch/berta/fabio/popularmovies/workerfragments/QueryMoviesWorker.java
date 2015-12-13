@@ -14,54 +14,52 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.taskfragments;
+package ch.berta.fabio.popularmovies.workerfragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.data.MovieDbClient;
 import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.data.models.MoviesPage;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 
 /**
  * Queries TheMoviesDB for movies.
  * <p>
  * A {@link Fragment} with a single task: to perform an online query for movies from the
  * TheMovieDB. It is retained across configuration changes and reports back to its activity
- * via the callback interface {@link ch.berta.fabio.popularmovies.taskfragments.QueryMoviesTaskFragment.TaskInteractionListener}.
+ * via the callback interface {@link QueryMoviesWorker.TaskInteractionListener}.
  * </p>
  */
-public class QueryMoviesTaskFragment extends Fragment {
+public class QueryMoviesWorker extends Fragment implements
+        MovieRepository.GetMoviesOnlineListener {
 
-    private static final String LOG_TAG = QueryMoviesTaskFragment.class.getSimpleName();
+    private static final String LOG_TAG = QueryMoviesWorker.class.getSimpleName();
     private static final String BUNDLE_PAGE = "bundle_page";
     private static final String BUNDLE_SORT = "bundle_sort";
+    @Nullable
     private TaskInteractionListener mListener;
-    private Call<MoviesPage> mLoadMoviePosters;
+    private MovieRepository mMovieRepo;
 
-    public QueryMoviesTaskFragment() {
+    public QueryMoviesWorker() {
         // required empty constructor
     }
 
     /**
-     * Returns a new instance of a {@link QueryMoviesTaskFragment} with a page and sort options
+     * Returns a new instance of a {@link QueryMoviesWorker} with a page and sort options
      * as arguments.
      *
      * @param page the page number to be used for the movie query
      * @param sort the sort option to be used for the movie query
-     * @return a new instance of a {@link QueryMoviesTaskFragment}
+     * @return a new instance of a {@link QueryMoviesWorker}
      */
-    public static QueryMoviesTaskFragment newInstance(int page, String sort) {
-        QueryMoviesTaskFragment fragment = new QueryMoviesTaskFragment();
+    public static QueryMoviesWorker newInstance(int page, @NonNull String sort) {
+        QueryMoviesWorker fragment = new QueryMoviesWorker();
 
         Bundle args = new Bundle();
         args.putInt(BUNDLE_PAGE, page);
@@ -88,55 +86,48 @@ public class QueryMoviesTaskFragment extends Fragment {
 
         setRetainInstance(true);
 
+        mMovieRepo = new MovieRepository();
+
         Bundle args = getArguments();
         int page = 0;
         String sort = "";
         if (args != null) {
-            page = args.getInt(BUNDLE_PAGE);
-            sort = args.getString(BUNDLE_SORT);
+            page = args.getInt(BUNDLE_PAGE, 0);
+            sort = args.getString(BUNDLE_SORT, "");
         }
 
         if (page > 0 && !TextUtils.isEmpty(sort)) {
-            queryMovies(page, sort);
+            mMovieRepo.getMoviesOnline(getActivity(), page, sort, this);
         } else if (mListener != null) {
-            mListener.onMovieQueryFailed();
+            mListener.onMoviesOnlineLoadFailed();
         }
     }
 
-    private void queryMovies(int page, String sort) {
-        mLoadMoviePosters = MovieDbClient.getService().loadMoviePosters(page, sort,
-                getString(R.string.movie_db_key));
-        mLoadMoviePosters.enqueue(new Callback<MoviesPage>() {
-            @Override
-            public void onResponse(Response<MoviesPage> response, Retrofit retrofit) {
-                MoviesPage moviesPage = response.body();
-                if (mListener != null) {
-                    if (moviesPage != null) {
-                        mListener.onMoviesQueried(moviesPage.getMovies());
-                    } else {
-                        mListener.onMovieQueryFailed();
-                    }
-                }
-            }
+    @Override
+    public void onMoviesOnlineLoaded(@NonNull List<Movie> movies) {
+        if (mListener != null) {
+            mListener.onMoviesOnlineLoaded(movies);
+        }
+    }
 
-            @Override
-            public void onFailure(Throwable t) {
-                if (mListener != null) {
-                    mListener.onMovieQueryFailed();
-                }
-            }
-        });
+    @Override
+    public void onMoviesOnlineLoadFailed() {
+        if (mListener != null) {
+            mListener.onMoviesOnlineLoadFailed();
+        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+
         mListener = null;
     }
 
     @Override
     public void onDestroy() {
-        mLoadMoviePosters.cancel();
+        mMovieRepo.cancelOnlineLoad();
+
         super.onDestroy();
     }
 
@@ -149,11 +140,11 @@ public class QueryMoviesTaskFragment extends Fragment {
          *
          * @param movies the {@link List<Movie>} containing the queried movies
          */
-        void onMoviesQueried(List<Movie> movies);
+        void onMoviesOnlineLoaded(List<Movie> movies);
 
         /**
          * Handles the event when movie query failed.
          */
-        void onMovieQueryFailed();
+        void onMoviesOnlineLoadFailed();
     }
 }

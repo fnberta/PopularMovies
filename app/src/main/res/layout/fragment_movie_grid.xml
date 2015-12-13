@@ -21,17 +21,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivityFragment"
-    tools:showIn="@layout/content_main"
     >
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/srl_base"
+        android:id="@+id/srl_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_base"
+            android:id="@+id/rv_grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -41,27 +40,6 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <ProgressBar
-        android:id="@+id/pb_base"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        />
-
-    <TextView
-        android:id="@+id/empty_view"
-        style="@style/TextAppearance.AppCompat.Title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:drawablePadding="@dimen/small_space"
-        android:drawableTop="@drawable/ic_movie_white_144dp"
-        android:gravity="center_horizontal"
-        android:text="@string/no_movies"
-        android:visibility="gone"
-        tools:visibility="visible"
-        />
+    <include layout="@layout/include_pb_empty"/>
 
 </FrameLayout>
