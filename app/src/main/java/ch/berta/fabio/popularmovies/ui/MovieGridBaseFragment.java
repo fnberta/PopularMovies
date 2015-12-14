@@ -43,8 +43,8 @@ public abstract class MovieGridBaseFragment extends Fragment implements
     public static final int REQUEST_MOVIE_DETAILS = 1;
     private static final String LOG_TAG = MovieGridBaseFragment.class.getSimpleName();
     private static final String STATE_MOVIE_SELECTED = "STATE_MOVIE_SELECTED";
-    boolean mUseTwoPane;
-    ProgressBar mProgressBar;
+    private boolean mUseTwoPane;
+    private ProgressBar mProgressBar;
     RecyclerView mRecyclerView;
     View mViewEmpty;
     int mMovieDbIdSelected;
@@ -140,7 +140,7 @@ public abstract class MovieGridBaseFragment extends Fragment implements
         }
     }
 
-    protected abstract Intent setDetailsIntentExtras(Intent intent, int position);
+    protected abstract void setDetailsIntentExtras(Intent intent, int position);
 
     @Nullable
     protected abstract MovieDetailsBaseFragment getDetailsFragment(int position);

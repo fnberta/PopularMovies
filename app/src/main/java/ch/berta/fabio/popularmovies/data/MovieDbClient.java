@@ -74,7 +74,7 @@ public class MovieDbClient {
     private static Gson getGsonObject() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-            DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+            final DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 
             @Override
             public Date deserialize(final JsonElement json, final Type typeOfT,

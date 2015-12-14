@@ -51,11 +51,11 @@ import ch.berta.fabio.popularmovies.data.models.Video;
  */
 public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
 
-    public static final int TYPE_HEADER = 0;
-    public static final int TYPE_TWO_PANE_HEADER = 1;
-    public static final int TYPE_INFO = 2;
-    public static final int TYPE_REVIEW = 3;
-    public static final int TYPE_VIDEO = 4;
+    private static final int TYPE_HEADER = 0;
+    private static final int TYPE_TWO_PANE_HEADER = 1;
+    private static final int TYPE_INFO = 2;
+    private static final int TYPE_REVIEW = 3;
+    private static final int TYPE_VIDEO = 4;
     @LayoutRes
     private static final int VIEW_RESOURCE_TWO_PANE_HEADER = R.layout.row_details_two_pane_header;
     @LayoutRes

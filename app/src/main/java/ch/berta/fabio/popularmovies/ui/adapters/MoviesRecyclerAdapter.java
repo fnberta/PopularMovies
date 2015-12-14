@@ -35,7 +35,7 @@ import ch.berta.fabio.popularmovies.ui.adapters.rows.MovieRow;
  */
 public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
-    public static final int TYPE_ITEM = 0;
+    private static final int TYPE_ITEM = 0;
     public static final int TYPE_PROGRESS = 1;
     private static final int VIEW_RESOURCE_ITEM = R.layout.row_movie;
     private static final int VIEW_RESOURCE_PROGRESS = R.layout.row_progress;

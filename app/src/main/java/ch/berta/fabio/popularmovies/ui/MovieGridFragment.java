@@ -309,11 +309,9 @@ public class MovieGridFragment extends MovieGridBaseFragment {
     }
 
     @Override
-    protected Intent setDetailsIntentExtras(Intent intent, int position) {
+    protected void setDetailsIntentExtras(Intent intent, int position) {
         final Movie movie = mMovies.get(position);
         intent.putExtra(INTENT_MOVIE_SELECTED, movie);
-
-        return intent;
     }
 
     @Nullable

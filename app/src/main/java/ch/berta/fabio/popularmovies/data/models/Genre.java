@@ -36,16 +36,16 @@ public class Genre implements Parcelable {
         }
     };
     @SerializedName("id")
-    public int mId;
+    private int mId;
     @SerializedName("name")
-    public String mName;
+    private String mName;
 
     public Genre() {
     }
 
     protected Genre(Parcel in) {
-        this.mId = in.readInt();
-        this.mName = in.readString();
+        mId = in.readInt();
+        mName = in.readString();
     }
 
     public int getId() {
@@ -71,7 +71,7 @@ public class Genre implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mId);
-        dest.writeString(this.mName);
+        dest.writeInt(mId);
+        dest.writeString(mName);
     }
 }

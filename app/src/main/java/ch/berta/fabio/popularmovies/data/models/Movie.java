@@ -86,18 +86,18 @@ public class Movie implements Parcelable {
     }
 
     protected Movie(Parcel in) {
-        this.mBackdropPath = in.readString();
-        this.mDbId = in.readInt();
-        this.mOverview = in.readString();
+        mBackdropPath = in.readString();
+        mDbId = in.readInt();
+        mOverview = in.readString();
         long tmpMReleaseDate = in.readLong();
-        this.mReleaseDate = tmpMReleaseDate == -1 ? null : new Date(tmpMReleaseDate);
-        this.mPosterPath = in.readString();
-        this.mTitle = in.readString();
-        this.mVoteAverage = in.readDouble();
-        this.mIsFavoured = in.readByte() != 0;
-        this.mReviews = in.createTypedArrayList(Review.CREATOR);
-        this.mVideos = in.createTypedArrayList(Video.CREATOR);
-        this.mReviewsAndVideosSet = in.readByte() != 0;
+        mReleaseDate = tmpMReleaseDate == -1 ? null : new Date(tmpMReleaseDate);
+        mPosterPath = in.readString();
+        mTitle = in.readString();
+        mVoteAverage = in.readDouble();
+        mIsFavoured = in.readByte() != 0;
+        mReviews = in.createTypedArrayList(Review.CREATOR);
+        mVideos = in.createTypedArrayList(Video.CREATOR);
+        mReviewsAndVideosSet = in.readByte() != 0;
     }
 
     public String getBackdropPath() {
@@ -238,13 +238,13 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mBackdropPath);
-        dest.writeInt(this.mDbId);
-        dest.writeString(this.mOverview);
+        dest.writeString(mBackdropPath);
+        dest.writeInt(mDbId);
+        dest.writeString(mOverview);
         dest.writeLong(mReleaseDate != null ? mReleaseDate.getTime() : -1);
-        dest.writeString(this.mPosterPath);
-        dest.writeString(this.mTitle);
-        dest.writeDouble(this.mVoteAverage);
+        dest.writeString(mPosterPath);
+        dest.writeString(mTitle);
+        dest.writeDouble(mVoteAverage);
         dest.writeByte(mIsFavoured ? (byte) 1 : (byte) 0);
         dest.writeTypedList(mReviews);
         dest.writeTypedList(mVideos);

@@ -97,10 +97,9 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
     }
 
     @Override
-    protected Intent setDetailsIntentExtras(Intent intent, int position) {
+    protected void setDetailsIntentExtras(Intent intent, int position) {
         final long rowId = mRecyclerAdapter.getItemId(position);
         intent.putExtra(INTENT_MOVIE_SELECTED_ROW_ID, rowId);
-        return intent;
     }
 
     @Nullable
