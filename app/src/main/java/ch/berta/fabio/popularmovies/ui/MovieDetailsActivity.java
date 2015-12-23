@@ -131,12 +131,12 @@ public class MovieDetailsActivity extends AppCompatActivity implements
 
     @Override
     public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
-        ((MovieDetailsFragment) mMovieDetailsFragment).onMovieDetailsQueried(movieDetails);
+        mMovieDetailsFragment.onMovieDetailsOnlineLoaded(movieDetails);
     }
 
     @Override
     public void onMovieDetailsOnlineLoadFailed() {
-        ((MovieDetailsFragment) mMovieDetailsFragment).onMovieDetailsQueryFailed();
+        mMovieDetailsFragment.onMovieDetailsOnlineLoadFailed();
     }
 
     @Override

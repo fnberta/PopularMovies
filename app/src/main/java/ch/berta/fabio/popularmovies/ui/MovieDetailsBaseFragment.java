@@ -21,29 +21,32 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.models.Video;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
  * Provides a base class for the display of detail information about a movie, including poster
@@ -54,6 +57,7 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
         MovieDetailsRecyclerAdapter.AdapterInteractionListener,
         MovieRepository.LocalOperationsListener {
 
+    static final String QUERY_MOVIE_DETAILS_WORKER = "QUERY_MOVIE_DETAILS_WORKER";
     private static final String LOG_TAG = MovieDetailsBaseFragment.class.getSimpleName();
     FragmentInteractionListener mListener;
     long mMovieRowId;
@@ -95,12 +99,6 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_movie_details, container, false);
-    }
-
-    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -127,6 +125,30 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
         MenuItem shareItem = menu.findItem(R.id.menu_details_action_share);
         shareItem.setVisible(mHasVideos);
     }
+
+    final void fetchMovieDetailsWithWorker() {
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIE_DETAILS_WORKER);
+
+        if (worker == null) {
+            worker = QueryMovieDetailsWorker.newInstance(mMovie.getDbId());
+            fragmentManager.beginTransaction()
+                    .add(worker, QUERY_MOVIE_DETAILS_WORKER)
+                    .commit();
+        }
+    }
+
+    /**
+     * Handles the successful load of new movie details data.
+     *
+     * @param movieDetails the online fetched details data
+     */
+    public abstract void onMovieDetailsOnlineLoaded(MovieDetails movieDetails);
+
+    /**
+     * Handles the failed fetch of new movie details data.
+     */
+    public abstract void onMovieDetailsOnlineLoadFailed();
 
     final void setShareYoutubeIntent() {
         final List<Video> videos = mMovie.getVideos();
@@ -185,16 +207,27 @@ public abstract class MovieDetailsBaseFragment extends Fragment implements
 
     @Override
     public void onMovieInserted() {
-        Snackbar.make(mRecyclerView, getString(R.string.snackbar_added_to_favorites), Snackbar.LENGTH_LONG).show();
+        Snackbar.make(mRecyclerView, R.string.snackbar_added_to_favorites, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
     public void onMovieDeleted() {
         if (mUseTwoPane) {
-            Snackbar.make(mRecyclerView, getString(R.string.snackbar_removed_from_favorites), Snackbar.LENGTH_LONG).show();
+            Snackbar.make(mRecyclerView, R.string.snackbar_removed_from_favorites, Snackbar.LENGTH_LONG).show();
         } else {
             onMovieDeletedOnePane();
         }
+    }
+
+    @Override
+    @CallSuper
+    public void onMovieUpdated() {
+        // empty default implementation
+    }
+
+    @Override
+    public void onLocalOperationFailed() {
+        Snackbar.make(mRecyclerView, R.string.snackbar_local_operation_failed, Snackbar.LENGTH_LONG).show();
     }
 
     protected abstract void onMovieDeletedOnePane();

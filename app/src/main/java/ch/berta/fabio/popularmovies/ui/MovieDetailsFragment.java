@@ -20,18 +20,18 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.Loader;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
-import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
  * Displays detail information about a movie, including poster image, release date, rating, an
@@ -44,7 +44,6 @@ import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 public class MovieDetailsFragment extends MovieDetailsBaseFragment {
 
     private static final String KEY_MOVIE = "KEY_MOVIE";
-    private static final String QUERY_MOVIE_DETAILS_WORKER = "QUERY_MOVIE_DETAILS_WORKER";
     private static final String LOG_TAG = MovieDetailsFragment.class.getSimpleName();
     private static final int LOADER_IS_FAV = 0;
 
@@ -78,6 +77,12 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
         }
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_movie_details, container, false);
+    }
+
     @NonNull
     @Override
     protected MovieDetailsRecyclerAdapter getRecyclerAdapter() {
@@ -95,7 +100,7 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
         }
 
         if (!mMovie.areReviewsAndVideosSet()) {
-            fetchReviewsAndVideosWithWorker();
+            fetchMovieDetailsWithWorker();
         }
     }
 
@@ -128,19 +133,8 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
         }
     }
 
-    private void fetchReviewsAndVideosWithWorker() {
-        FragmentManager fragmentManager = getFragmentManager();
-        Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIE_DETAILS_WORKER);
-
-        if (worker == null) {
-            worker = QueryMovieDetailsWorker.newInstance(mMovie.getDbId());
-            fragmentManager.beginTransaction()
-                    .add(worker, QUERY_MOVIE_DETAILS_WORKER)
-                    .commit();
-        }
-    }
-
-    public void onMovieDetailsQueried(MovieDetails movieDetails) {
+    @Override
+    public void onMovieDetailsOnlineLoaded(MovieDetails movieDetails) {
         WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
 
         mMovie.setReviews(movieDetails.getReviewsPage().getReviews());
@@ -152,7 +146,8 @@ public class MovieDetailsFragment extends MovieDetailsBaseFragment {
         getActivity().invalidateOptionsMenu();
     }
 
-    public void onMovieDetailsQueryFailed() {
+    @Override
+    public void onMovieDetailsOnlineLoadFailed() {
         WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
         Snackbar.make(mRecyclerView, R.string.snackbar_error_reviews_videos, Snackbar.LENGTH_LONG).show();
     }

@@ -36,6 +36,7 @@ import com.mugen.MugenCallbacks;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.berta.fabio.popularmovies.BuildConfig;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.WorkerUtils;
 import ch.berta.fabio.popularmovies.data.models.Movie;
@@ -49,7 +50,7 @@ import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecorat
  */
 public class MovieGridFragment extends MovieGridBaseFragment {
 
-    public static final String INTENT_MOVIE_SELECTED = "ch.berta.fabio.popularmovies.intents.MOVIE_SELECTED";
+    public static final String INTENT_MOVIE_SELECTED = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED";
     private static final String KEY_SORT_SELECTED = "SORT_SELECTED";
     private static final int MOVIE_DB_MAX_PAGE = 1000;
     private static final String LOG_TAG = MovieGridFragment.class.getSimpleName();

@@ -27,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import ch.berta.fabio.popularmovies.BuildConfig;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesFavRecyclerAdapter;
@@ -38,7 +39,7 @@ import ch.berta.fabio.popularmovies.ui.adapters.decorators.PosterGridItemDecorat
 public class MovieGridFavFragment extends MovieGridBaseFragment implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    public static final String INTENT_MOVIE_SELECTED_ROW_ID = "ch.berta.fabio.popularmovies.intents.MOVIE_SELECTED_ROW_ID";
+    public static final String INTENT_MOVIE_SELECTED_ROW_ID = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED_ROW_ID";
     private static final int FAV_MOVIES_LOADER = 0;
     private MoviesFavRecyclerAdapter mRecyclerAdapter;
     private MovieRepository mMovieRepo;
@@ -58,7 +59,7 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_fav_movie_grid, container, false);
+        return inflater.inflate(R.layout.fragment_movie_grid_fav, container, false);
     }
 
     protected void setupRecyclerView() {

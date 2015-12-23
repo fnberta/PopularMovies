@@ -21,12 +21,14 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import ch.berta.fabio.popularmovies.BuildConfig;
+
 /**
  * Defines the structure of the local sqlite database.
  */
 public class MovieContract {
 
-    public static final String CONTENT_AUTHORITY = "ch.berta.fabio.popularmovies";
+    public static final String CONTENT_AUTHORITY = BuildConfig.APPLICATION_ID;
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     public static final String PATH_MOVIE = "movie";
@@ -100,6 +102,10 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static Uri buildReviewsFromMovieUri(long movieId) {
+            return CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).appendPath(String.valueOf(movieId)).build();
+        }
+
         public static String getMovieIdFromUri(Uri uri) {
             return uri.getPathSegments().get(2);
         }
@@ -126,6 +132,10 @@ public class MovieContract {
 
         public static Uri buildVideoUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildVideosFromMovieUri(long movieId) {
+            return CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).appendPath(String.valueOf(movieId)).build();
         }
 
         public static String getMovieIdFromUri(Uri uri) {

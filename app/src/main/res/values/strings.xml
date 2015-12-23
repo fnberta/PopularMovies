@@ -40,4 +40,6 @@
     <string name="snackbar_no_movie_data">No data for this movie</string>
     <string name="snackbar_error_reviews_videos">Failed to load reviews and trailers</string>
     <string name="action_share">Share</string>
+    <string name="snackbar_local_operation_failed">Local operation failed</string>
+    <string name="snackbar_movie_update_failed">Failed to update movie</string>
 </resources>

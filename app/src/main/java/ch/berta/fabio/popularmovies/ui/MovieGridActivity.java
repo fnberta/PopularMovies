@@ -242,12 +242,12 @@ public class MovieGridActivity extends AppCompatActivity implements
 
     @Override
     public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
-        ((MovieDetailsFragment) getMovieDetailsFragment()).onMovieDetailsQueried(movieDetails);
+        getMovieDetailsFragment().onMovieDetailsOnlineLoaded(movieDetails);
     }
 
     @Override
     public void onMovieDetailsOnlineLoadFailed() {
-        ((MovieDetailsFragment) getMovieDetailsFragment()).onMovieDetailsQueryFailed();
+        getMovieDetailsFragment().onMovieDetailsOnlineLoadFailed();
     }
 
     @Override

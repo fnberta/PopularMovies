@@ -109,6 +109,7 @@ public class MovieRepository {
     private Call<MoviesPage> mLoadMovies;
     private Call<MovieDetails> mLoadMovieDetails;
     private InsertMovieTask mInsertMovieTask;
+    private UpdateMovieTask mUpdateMovieTask;
     private DeleteMovieHandler mDeleteMovieHandler;
 
     /**
@@ -384,11 +385,30 @@ public class MovieRepository {
     }
 
     /**
+     * Update a movie from the local content provider with new data fetched online.
+     *
+     * @param context      the context to get the {@link ContentResolver}
+     * @param movieDetails the new online data
+     * @param movieRowId   the row id of the movie to update
+     * @param listener     the callback for when the update finished
+     */
+    public void updateMovieLocal(@NonNull Context context, @NonNull MovieDetails movieDetails,
+                                 long movieRowId, @NonNull LocalOperationsListener listener) {
+        final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+        mUpdateMovieTask = new UpdateMovieTask(contentResolver, movieRowId, listener);
+        mUpdateMovieTask.execute(movieDetails);
+    }
+
+    /**
      * Cancels all local content provider operations.
      */
     public void cancelLocalOperations() {
         if (mInsertMovieTask != null) {
             mInsertMovieTask.cancel(true);
+        }
+
+        if (mUpdateMovieTask != null) {
+            mUpdateMovieTask.cancel(true);
         }
 
         if (mDeleteMovieHandler != null) {
@@ -443,6 +463,16 @@ public class MovieRepository {
          * Called when a movie was deleted from the local content provider.
          */
         void onMovieDeleted();
+
+        /**
+         * Called when a movie was updated in the local content provider.
+         */
+        void onMovieUpdated();
+
+        /**
+         * Called when a local content provider operation fails.
+         */
+        void onLocalOperationFailed();
     }
 
     /**
@@ -454,7 +484,8 @@ public class MovieRepository {
         private ContentResolver mContentResolver;
         private LocalOperationsListener mListener;
 
-        public InsertMovieTask(ContentResolver contentResolver, LocalOperationsListener listener) {
+        public InsertMovieTask(@NonNull ContentResolver contentResolver,
+                               @NonNull LocalOperationsListener listener) {
             mContentResolver = contentResolver;
             mListener = listener;
         }
@@ -511,6 +542,106 @@ public class MovieRepository {
 
             if (contentProviderResults != null) {
                 mListener.onMovieInserted();
+            } else {
+                mListener.onLocalOperationFailed();
+            }
+        }
+    }
+
+    /**
+     * Handles content provider batch update operations on a background thread. To avoid a leak, the
+     * process needs to be canceled in the activity's or fragment's onPause() method.
+     */
+    private class UpdateMovieTask extends AsyncTask<MovieDetails, Integer, ContentProviderResult[]> {
+
+        private ContentResolver mContentResolver;
+        private LocalOperationsListener mListener;
+        private long mMovieRowId;
+
+        public UpdateMovieTask(@NonNull ContentResolver contentResolver, long movieRowId,
+                               @NonNull LocalOperationsListener listener) {
+            mContentResolver = contentResolver;
+            mMovieRowId = movieRowId;
+            mListener = listener;
+        }
+
+        @Override
+        protected ContentProviderResult[] doInBackground(MovieDetails... params) {
+            final MovieDetails movieDetails = params[0];
+            final ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+
+            updateMovie(movieDetails, ops);
+            updateReviews(movieDetails, ops);
+            updateVideos(movieDetails, ops);
+
+            try {
+                return mContentResolver.applyBatch(MovieContract.CONTENT_AUTHORITY, ops);
+            } catch (RemoteException | OperationApplicationException e) {
+                Log.e(LOG_TAG, e.toString());
+                return null;
+            }
+        }
+
+        private void updateMovie(@NonNull MovieDetails movieDetails,
+                                 @NonNull ArrayList<ContentProviderOperation> ops) {
+            ops.add(ContentProviderOperation
+                            .newUpdate(MovieContract.Movie.buildMovieUri(mMovieRowId))
+                            .withValues(movieDetails.getContentValuesEntry())
+                            .build()
+            );
+        }
+
+        private void updateReviews(@NonNull MovieDetails movieDetails,
+                                   @NonNull ArrayList<ContentProviderOperation> ops) {
+            ops.add(ContentProviderOperation
+                            .newDelete(MovieContract.Review.buildReviewsFromMovieUri(mMovieRowId))
+                            .build()
+            );
+
+            List<Review> reviews = movieDetails.getReviewsPage().getReviews();
+            if (!reviews.isEmpty()) {
+                for (Review review : reviews) {
+                    ops.add(ContentProviderOperation
+                                    .newInsert(MovieContract.Review.CONTENT_URI)
+                                    .withValue(MovieContract.Review.COLUMN_MOVIE_ID, mMovieRowId)
+                                    .withValues(review.getContentValuesEntry())
+                                    .build()
+                    );
+                }
+            }
+        }
+
+        private void updateVideos(@NonNull MovieDetails movieDetails,
+                                  @NonNull ArrayList<ContentProviderOperation> ops) {
+            ops.add(ContentProviderOperation
+                            .newDelete(MovieContract.Video.buildVideosFromMovieUri(mMovieRowId))
+                            .build()
+            );
+
+            List<Video> videos = movieDetails.getVideosPage().getVideos();
+            if (!videos.isEmpty()) {
+                for (Video video : videos) {
+                    // only add youtube videos
+                    if (video.siteIsYouTube()) {
+                        ops.add(ContentProviderOperation
+                                        .newInsert(MovieContract.Video.CONTENT_URI)
+                                        .withValue(MovieContract.Video.COLUMN_MOVIE_ID, mMovieRowId)
+                                        .withValues(video.getContentValuesEntry())
+                                        .build()
+                        );
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(ContentProviderResult[] contentProviderResults) {
+            super.onPostExecute(contentProviderResults);
+
+            if (contentProviderResults != null) {
+                mListener.onMovieUpdated();
+            } else {
+                mListener.onLocalOperationFailed();
             }
         }
     }
