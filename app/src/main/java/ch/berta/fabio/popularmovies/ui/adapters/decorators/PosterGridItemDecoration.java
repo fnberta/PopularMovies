@@ -29,7 +29,7 @@ import android.view.View;
  */
 public class PosterGridItemDecoration extends RecyclerView.ItemDecoration {
 
-    private int mItemPadding;
+    private final int mItemPadding;
 
     public PosterGridItemDecoration(int itemPadding) {
         super();

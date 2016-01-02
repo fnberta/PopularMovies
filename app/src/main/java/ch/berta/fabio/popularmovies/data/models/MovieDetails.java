@@ -169,21 +169,12 @@ public class MovieDetails implements Parcelable {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieContract.Movie.COLUMN_DB_ID, mDbId);
         contentValues.put(MovieContract.Movie.COLUMN_TITLE, mTitle);
-        contentValues.put(MovieContract.Movie.COLUMN_RELEASE_DATE, getReleaseDateAsLong());
+        contentValues.put(MovieContract.Movie.COLUMN_RELEASE_DATE, mReleaseDate.getTime());
         contentValues.put(MovieContract.Movie.COLUMN_VOTE_AVERAGE, mVoteAverage);
         contentValues.put(MovieContract.Movie.COLUMN_PLOT, mOverview);
         contentValues.put(MovieContract.Movie.COLUMN_POSTER, mPosterPath);
         contentValues.put(MovieContract.Movie.COLUMN_BACKDROP, mBackdropPath);
         return contentValues;
-    }
-
-    /**
-     * Returns the release date as a long in UNIX time.
-     *
-     * @return the release date as a long
-     */
-    public long getReleaseDateAsLong() {
-        return mReleaseDate.getTime();
     }
 
     @Override

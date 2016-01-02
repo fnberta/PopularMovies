@@ -20,73 +20,72 @@ import android.database.Cursor;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.Date;
 
-import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
-import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
+import ch.berta.fabio.popularmovies.databinding.RowMovieBinding;
 import ch.berta.fabio.popularmovies.ui.adapters.rows.MovieRow;
+import ch.berta.fabio.popularmovies.utils.Utils;
+import ch.berta.fabio.popularmovies.viewmodels.rows.MovieRowViewModel;
+import ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelFav;
 
 /**
  * Provides the adapter for a movie poster images grid.
  */
-public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
+public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter<MovieRow> {
 
-    private static final int VIEW_RESOURCE = R.layout.row_movie;
     private static final String LOG_TAG = MoviesFavRecyclerAdapter.class.getSimpleName();
     private Cursor mCursor;
-    private View mViewEmpty;
     private int mRowIdColumn;
     private boolean mDataIsValid;
-    private Fragment mLifecycleFragment;
-    private MovieInteractionListener mListener;
-    private MovieRepository mMovieRepo;
-    private int mItemHeight;
+    private final MovieGridViewModelFav mViewModel;
+    private final MovieRepository mMovieRepo;
+    private final int mItemHeight;
 
-    public MoviesFavRecyclerAdapter(@Nullable Cursor cursor, @NonNull View emptyView,
-                                    int layoutWidth, int columnCount,
-                                    @NonNull MovieRepository movieRepo, @NonNull Fragment fragment,
-                                    @NonNull MovieInteractionListener listener) {
+    public MoviesFavRecyclerAdapter(@Nullable Cursor cursor,
+                                    @NonNull MovieGridViewModelFav fragmentViewModel,
+                                    @NonNull MovieRepository movieRepo,
+                                    int layoutWidth, int columnCount) {
         mCursor = cursor;
-        mViewEmpty = emptyView;
         mDataIsValid = cursor != null;
         mRowIdColumn = mDataIsValid ? cursor.getColumnIndexOrThrow(BaseColumns._ID) : -1;
         setHasStableIds(true);
 
         mMovieRepo = movieRepo;
-        mLifecycleFragment = fragment;
-        mListener = listener;
+        mViewModel = fragmentViewModel;
 
         mItemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(VIEW_RESOURCE,
+    public MovieRow onCreateViewHolder(ViewGroup parent, int viewType) {
+        RowMovieBinding binding = RowMovieBinding.inflate(LayoutInflater.from(parent.getContext()),
                 parent, false);
-        return new MovieRow(view, mItemHeight, mListener);
+        return new MovieRow(binding, mViewModel);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(MovieRow holder, int position) {
         if (!mCursor.moveToPosition(position)) {
             throw new IllegalStateException("couldn't move cursor to position " + position);
         }
-
-        MovieRow movieRow = (MovieRow) holder;
 
         String title = mMovieRepo.getMovieTitleFromFavMoviesCursor(mCursor);
         Date date = mMovieRepo.getMovieReleaseDateFromFavMoviesCursor(mCursor);
         String poster = mMovieRepo.getMoviePosterFromFavMoviesCursor(mCursor);
 
-        movieRow.setMovie(title, Utils.formatDateShort(date), poster, mLifecycleFragment);
+        final RowMovieBinding binding = holder.getBinding();
+        final MovieRowViewModel viewModel = binding.getViewModel();
+        if (viewModel == null) {
+            binding.setViewModel(new MovieRowViewModel(title, date, poster, mItemHeight));
+        } else {
+            viewModel.setMovieInfo(title, date, poster);
+        }
+        binding.executePendingBindings();
     }
 
     @Override
@@ -97,9 +96,9 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
     @Override
     public long getItemId(int position) {
         if (mDataIsValid) {
-            return mCursor.moveToPosition(position) ?
-                    mCursor.getLong(mRowIdColumn) :
-                    RecyclerView.NO_ID;
+            return mCursor.moveToPosition(position)
+                    ? mCursor.getLong(mRowIdColumn)
+                    : RecyclerView.NO_ID;
         } else {
             return RecyclerView.NO_ID;
         }
@@ -154,20 +153,14 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter {
         if (newCursor != null) {
             mRowIdColumn = newCursor.getColumnIndexOrThrow(BaseColumns._ID);
             mDataIsValid = true;
-            // notify the observers about the new cursor
             notifyDataSetChanged();
         } else {
             mRowIdColumn = -1;
             mDataIsValid = false;
-            // notify the observers about the lack of a data set
+            // notify about the lack of a data set
             notifyItemRangeRemoved(0, itemCount);
         }
 
-        toggleEmptyViewVisibility();
         return oldCursor;
-    }
-
-    private void toggleEmptyViewVisibility() {
-        mViewEmpty.setVisibility(getItemCount() > 0 ? View.GONE : View.VISIBLE);
     }
 }

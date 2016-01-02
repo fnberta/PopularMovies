@@ -16,74 +16,36 @@
 
 package ch.berta.fabio.popularmovies.ui.adapters.rows;
 
-import android.support.v4.app.Fragment;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-
-import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.data.models.Movie;
+import ch.berta.fabio.popularmovies.databinding.RowMovieBinding;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 
 /**
  * Provides a {@link RecyclerView} row that displays a movie with its poster, title and release
  * date.
+ * <p/>
+ * Subclass of {@link BaseBindingRow}
  */
-public class MovieRow extends RecyclerView.ViewHolder {
+public class MovieRow extends BaseBindingRow<RowMovieBinding> {
 
-    private ImageView mImageViewPoster;
-    private TextView mTextViewTitle;
-    private TextView mTextViewDate;
-
-    public MovieRow(final View itemView, int itemHeight,
-                    final MovieInteractionListener listener) {
-        super(itemView);
+    /**
+     * Constructs a new {@link MovieRow}.
+     *
+     * @param rowMovieBinding the binding of the views
+     * @param listener        the callback for clicks on the movie
+     */
+    public MovieRow(@NonNull final RowMovieBinding rowMovieBinding,
+                    @NonNull final MovieInteractionListener listener) {
+        super(rowMovieBinding);
 
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onMovieRowItemClick(getAdapterPosition(), mImageViewPoster);
+                listener.onMovieRowItemClick(getAdapterPosition(), rowMovieBinding.ivPoster);
             }
         });
-
-        setPosterHeight(itemView, itemHeight);
-        mImageViewPoster = (ImageView) itemView.findViewById(R.id.iv_poster);
-        mTextViewTitle = (TextView) itemView.findViewById(R.id.tv_title);
-        mTextViewDate = (TextView) itemView.findViewById(R.id.tv_date);
-    }
-
-    private void setPosterHeight(View itemView, int itemHeight) {
-        ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
-        layoutParams.height = itemHeight;
-        itemView.setLayoutParams(layoutParams);
-    }
-
-    /**
-     * Sets all information of a movie.
-     *
-     * @param title    the title of the movie
-     * @param date     the release date of the movie
-     * @param poster   the relative url of the movie poster
-     * @param fragment the fragment whose lifecycle the image loading should follow
-     */
-    public void setMovie(String title, String date, String poster, Fragment fragment) {
-        if (!TextUtils.isEmpty(poster)) {
-            mImageViewPoster.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            String imageUrl = Movie.IMAGE_BASE_URL + Movie.IMAGE_POSTER_SIZE + poster;
-            Glide.with(fragment)
-                    .load(imageUrl)
-                    .crossFade()
-                    .into(mImageViewPoster);
-        } else {
-            mImageViewPoster.setScaleType(ImageView.ScaleType.CENTER);
-            mImageViewPoster.setImageResource(R.drawable.ic_movie_white_72dp);
-        }
-        mTextViewTitle.setText(title);
-        mTextViewDate.setText(date);
     }
 }

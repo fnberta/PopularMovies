@@ -13,21 +13,36 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<android.support.v4.widget.SwipeRefreshLayout
-    android:id="@+id/srl_details_fav"
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     >
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_details"
+    <data>
+
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelFav"
+            />
+    </data>
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/srl_details_fav"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/small_space"
-        tools:context=".ui.MovieDetailsBaseFragment"
-        />
+        app:colorScheme="@{@intArray/srl_color_scheme}"
+        app:refreshing="@{viewModel.refreshing}"
+        app:onRefreshListener="@{viewModel.onRefreshListener}"
+        >
 
-</android.support.v4.widget.SwipeRefreshLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_details"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/small_space"
+            tools:context=".ui.fragments.MovieDetailsBaseFragment"
+            />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+</layout>

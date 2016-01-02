@@ -13,13 +13,32 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<android.support.v7.widget.RecyclerView
-    android:id="@+id/rv_details"
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/small_space"
-    tools:context=".ui.MovieDetailsBaseFragment"
-    />
+    >
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelOnl"
+            />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_details"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/small_space"
+            tools:context=".ui.fragments.MovieDetailsBaseFragment"
+            />
+
+    </FrameLayout>
+
+</layout>

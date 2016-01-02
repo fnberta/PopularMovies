@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies;
+package ch.berta.fabio.popularmovies.utils;
 
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;

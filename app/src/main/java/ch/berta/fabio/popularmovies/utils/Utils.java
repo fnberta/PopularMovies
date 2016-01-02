@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies;
+package ch.berta.fabio.popularmovies.utils;
 
 import android.animation.ObjectAnimator;
 import android.content.res.Resources;

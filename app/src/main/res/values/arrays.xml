@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (c) 2015 Fabio Berta
   ~
@@ -14,17 +15,11 @@
   ~ limitations under the License.
   -->
 
-<vector
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportHeight="24.0"
-    android:viewportWidth="24.0"
-    >
-
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M3,18h6v-2H3v2zM3,6v2h18V6H3zm0,7h12v-2H3v2z"
-        />
-
-</vector>
+<resources>
+    <integer-array
+        name="srl_color_scheme">
+        <item>@color/red_500</item>
+        <item>@color/red_700</item>
+        <item>@color/amber_A400</item>
+    </integer-array>
+</resources>

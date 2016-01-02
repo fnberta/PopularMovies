@@ -15,24 +15,42 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout
+
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivityFragment"
-    tools:showIn="@layout/content_main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     >
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_grid"
+    <data>
+
+        <import type="android.view.View"/>
+
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelFav"
+            />
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:scrollbars="vertical"
-        android:visibility="gone"
-        />
+        tools:context=".ui.fragments.MovieGridFavFragment"
+        >
 
-    <include layout="@layout/include_pb_empty"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:visibility="@{viewModel.moviesLoaded ? View.VISIBLE : View.GONE}"
+            />
 
-</FrameLayout>
+        <include
+            layout="@layout/include_pb_empty"
+            app:viewModel="@{viewModel}"
+            />
+
+    </FrameLayout>
+</layout>

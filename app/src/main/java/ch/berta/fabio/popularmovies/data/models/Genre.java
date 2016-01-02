@@ -36,9 +36,9 @@ public class Genre implements Parcelable {
         }
     };
     @SerializedName("id")
-    public int mId;
+    private int mId;
     @SerializedName("name")
-    public String mName;
+    private String mName;
 
     public Genre() {
     }

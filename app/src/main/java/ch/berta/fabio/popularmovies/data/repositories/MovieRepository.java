@@ -34,13 +34,14 @@ import java.util.Date;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.data.MovieDbClient;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import ch.berta.fabio.popularmovies.data.models.Review;
 import ch.berta.fabio.popularmovies.data.models.Video;
+import ch.berta.fabio.popularmovies.data.rest.MovieDbClient;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
+import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel;
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Response;
@@ -317,7 +318,7 @@ public class MovieRepository {
             }
         } while (cursor.moveToNext());
 
-        return new Movie(videos, backdrop, dbId, plot, releaseDate, poster, title, rating, reviews);
+        return new Movie(videos, backdrop, dbId, plot, releaseDate, poster, title, rating, reviews, true);
     }
 
     /**
@@ -354,31 +355,29 @@ public class MovieRepository {
      * Inserts a {@link Movie} into the local content provider.
      *
      * @param context  the context to get the {@link ContentResolver}
-     * @param movie    the movie to insert
-     * @param listener the callback for when the insert finished
+     * @param viewModel the view model we use to get the movie and as the callback when the insert
+     *                  finished
      */
-    public void insertMovieLocal(@NonNull Context context, @NonNull Movie movie,
-                                 @NonNull LocalOperationsListener listener) {
+    public void insertMovieLocal(@NonNull Context context, @NonNull MovieDetailsViewModel viewModel) {
         final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
-        mInsertMovieTask = new InsertMovieTask(contentResolver, listener);
-        mInsertMovieTask.execute(movie);
+        mInsertMovieTask = new InsertMovieTask(contentResolver, viewModel);
+        mInsertMovieTask.execute(viewModel.getMovie());
     }
 
     /**
      * Deletes a movie from the local content provider.
      *
-     * @param context    the context to get the {@link ContentResolver}
-     * @param movieRowId the row id of the movie to delete
-     * @param listener   the callback for when the delete finished
+     * @param context   the context to get the {@link ContentResolver}
+     * @param viewModel the view model we use to get the movie's row id and as the callback when
+     *                  the delete finished
      */
-    public void deleteMovieLocal(@NonNull Context context, long movieRowId,
-                                 @NonNull LocalOperationsListener listener) {
+    public void deleteMovieLocal(@NonNull Context context, @NonNull MovieDetailsViewModel viewModel) {
         final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
-        mDeleteMovieHandler = new DeleteMovieHandler(contentResolver, listener);
+        mDeleteMovieHandler = new DeleteMovieHandler(contentResolver, viewModel);
         mDeleteMovieHandler.startDelete(
                 TOKEN_DELETE,
                 null,
-                MovieContract.Movie.buildMovieUri(movieRowId),
+                MovieContract.Movie.buildMovieUri(viewModel.getMovieRowId()),
                 null,
                 null
         );
@@ -389,13 +388,13 @@ public class MovieRepository {
      *
      * @param context      the context to get the {@link ContentResolver}
      * @param movieDetails the new online data
-     * @param movieRowId   the row id of the movie to update
-     * @param listener     the callback for when the update finished
+     * @param viewModel    the view model we use to get the movie's row id and as the callback when
+     *                     the update finished
      */
     public void updateMovieLocal(@NonNull Context context, @NonNull MovieDetails movieDetails,
-                                 long movieRowId, @NonNull LocalOperationsListener listener) {
+                                 @NonNull MovieDetailsViewModel viewModel) {
         final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
-        mUpdateMovieTask = new UpdateMovieTask(contentResolver, movieRowId, listener);
+        mUpdateMovieTask = new UpdateMovieTask(contentResolver, viewModel.getMovieRowId(), viewModel);
         mUpdateMovieTask.execute(movieDetails);
     }
 
@@ -481,8 +480,8 @@ public class MovieRepository {
      */
     private class InsertMovieTask extends AsyncTask<Movie, Integer, ContentProviderResult[]> {
 
-        private ContentResolver mContentResolver;
-        private LocalOperationsListener mListener;
+        private final ContentResolver mContentResolver;
+        private final LocalOperationsListener mListener;
 
         public InsertMovieTask(@NonNull ContentResolver contentResolver,
                                @NonNull LocalOperationsListener listener) {
@@ -496,19 +495,19 @@ public class MovieRepository {
 
             ArrayList<ContentProviderOperation> ops = new ArrayList<>();
             ops.add(ContentProviderOperation
-                            .newInsert(MovieContract.Movie.CONTENT_URI)
-                            .withValues(movie.getContentValuesEntry())
-                            .build()
+                    .newInsert(MovieContract.Movie.CONTENT_URI)
+                    .withValues(movie.getContentValuesEntry())
+                    .build()
             );
 
             List<Review> reviews = movie.getReviews();
             if (!reviews.isEmpty()) {
                 for (Review review : reviews) {
                     ops.add(ContentProviderOperation
-                                    .newInsert(MovieContract.Review.CONTENT_URI)
-                                    .withValueBackReference(MovieContract.Review.COLUMN_MOVIE_ID, 0)
-                                    .withValues(review.getContentValuesEntry())
-                                    .build()
+                            .newInsert(MovieContract.Review.CONTENT_URI)
+                            .withValueBackReference(MovieContract.Review.COLUMN_MOVIE_ID, 0)
+                            .withValues(review.getContentValuesEntry())
+                            .build()
                     );
                 }
             }
@@ -519,10 +518,10 @@ public class MovieRepository {
                     // only add youtube videos
                     if (video.siteIsYouTube()) {
                         ops.add(ContentProviderOperation
-                                        .newInsert(MovieContract.Video.CONTENT_URI)
-                                        .withValueBackReference(MovieContract.Video.COLUMN_MOVIE_ID, 0)
-                                        .withValues(video.getContentValuesEntry())
-                                        .build()
+                                .newInsert(MovieContract.Video.CONTENT_URI)
+                                .withValueBackReference(MovieContract.Video.COLUMN_MOVIE_ID, 0)
+                                .withValues(video.getContentValuesEntry())
+                                .build()
                         );
                     }
                 }
@@ -554,9 +553,9 @@ public class MovieRepository {
      */
     private class UpdateMovieTask extends AsyncTask<MovieDetails, Integer, ContentProviderResult[]> {
 
-        private ContentResolver mContentResolver;
-        private LocalOperationsListener mListener;
-        private long mMovieRowId;
+        private final ContentResolver mContentResolver;
+        private final LocalOperationsListener mListener;
+        private final long mMovieRowId;
 
         public UpdateMovieTask(@NonNull ContentResolver contentResolver, long movieRowId,
                                @NonNull LocalOperationsListener listener) {
@@ -585,27 +584,27 @@ public class MovieRepository {
         private void updateMovie(@NonNull MovieDetails movieDetails,
                                  @NonNull ArrayList<ContentProviderOperation> ops) {
             ops.add(ContentProviderOperation
-                            .newUpdate(MovieContract.Movie.buildMovieUri(mMovieRowId))
-                            .withValues(movieDetails.getContentValuesEntry())
-                            .build()
+                    .newUpdate(MovieContract.Movie.buildMovieUri(mMovieRowId))
+                    .withValues(movieDetails.getContentValuesEntry())
+                    .build()
             );
         }
 
         private void updateReviews(@NonNull MovieDetails movieDetails,
                                    @NonNull ArrayList<ContentProviderOperation> ops) {
             ops.add(ContentProviderOperation
-                            .newDelete(MovieContract.Review.buildReviewsFromMovieUri(mMovieRowId))
-                            .build()
+                    .newDelete(MovieContract.Review.buildReviewsFromMovieUri(mMovieRowId))
+                    .build()
             );
 
             List<Review> reviews = movieDetails.getReviewsPage().getReviews();
             if (!reviews.isEmpty()) {
                 for (Review review : reviews) {
                     ops.add(ContentProviderOperation
-                                    .newInsert(MovieContract.Review.CONTENT_URI)
-                                    .withValue(MovieContract.Review.COLUMN_MOVIE_ID, mMovieRowId)
-                                    .withValues(review.getContentValuesEntry())
-                                    .build()
+                            .newInsert(MovieContract.Review.CONTENT_URI)
+                            .withValue(MovieContract.Review.COLUMN_MOVIE_ID, mMovieRowId)
+                            .withValues(review.getContentValuesEntry())
+                            .build()
                     );
                 }
             }
@@ -614,8 +613,8 @@ public class MovieRepository {
         private void updateVideos(@NonNull MovieDetails movieDetails,
                                   @NonNull ArrayList<ContentProviderOperation> ops) {
             ops.add(ContentProviderOperation
-                            .newDelete(MovieContract.Video.buildVideosFromMovieUri(mMovieRowId))
-                            .build()
+                    .newDelete(MovieContract.Video.buildVideosFromMovieUri(mMovieRowId))
+                    .build()
             );
 
             List<Video> videos = movieDetails.getVideosPage().getVideos();
@@ -624,10 +623,10 @@ public class MovieRepository {
                     // only add youtube videos
                     if (video.siteIsYouTube()) {
                         ops.add(ContentProviderOperation
-                                        .newInsert(MovieContract.Video.CONTENT_URI)
-                                        .withValue(MovieContract.Video.COLUMN_MOVIE_ID, mMovieRowId)
-                                        .withValues(video.getContentValuesEntry())
-                                        .build()
+                                .newInsert(MovieContract.Video.CONTENT_URI)
+                                .withValue(MovieContract.Video.COLUMN_MOVIE_ID, mMovieRowId)
+                                .withValues(video.getContentValuesEntry())
+                                .build()
                         );
                     }
                 }
@@ -653,7 +652,7 @@ public class MovieRepository {
     @SuppressWarnings("HandlerLeak")
     private class DeleteMovieHandler extends AsyncQueryHandler {
 
-        private LocalOperationsListener mListener;
+        private final LocalOperationsListener mListener;
 
         public DeleteMovieHandler(ContentResolver cr, LocalOperationsListener listener) {
             super(cr);

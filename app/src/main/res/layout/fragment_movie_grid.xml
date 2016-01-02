@@ -14,32 +14,52 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<FrameLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivityFragment"
     >
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/srl_grid"
+    <data>
+
+        <import type="android.view.View"/>
+
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelOnl"
+            />
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:context=".ui.fragments.MovieGridOnlFragment"
         >
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_grid"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/srl_grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:scrollbars="vertical"
-            android:visibility="gone"
+            app:onRefreshListener="@{viewModel.onRefreshListener}"
+            app:colorScheme="@{@intArray/srl_color_scheme}"
+            app:refreshing="@{viewModel.refreshing}"
+            >
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_grid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                android:visibility="@{viewModel.moviesLoaded ? View.VISIBLE : View.GONE}"
+                />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <include
+            layout="@layout/include_pb_empty"
+            app:viewModel="@{viewModel}"
             />
 
-    </android.support.v4.widget.SwipeRefreshLayout>
-
-    <include layout="@layout/include_pb_empty"/>
-
-</FrameLayout>
+    </FrameLayout>
+</layout>

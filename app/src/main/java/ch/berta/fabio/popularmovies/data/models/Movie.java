@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.Utils;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
 /**
@@ -35,9 +34,6 @@ import ch.berta.fabio.popularmovies.data.storage.MovieContract;
  */
 public class Movie implements Parcelable {
 
-    public static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
-    public static final String IMAGE_POSTER_SIZE = "w185";
-    public static final String IMAGE_BACKDROP_SIZE = "w780";
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
         public Movie createFromParcel(Parcel source) {
             return new Movie(source);
@@ -72,7 +68,7 @@ public class Movie implements Parcelable {
     public Movie(@NonNull List<Video> videos, @NonNull String backdropPath, int dbId,
                  @NonNull String overview, @NonNull Date releaseDate,
                  @NonNull String posterPath, @NonNull String title, double voteAverage,
-                 @NonNull List<Review> reviews) {
+                 @NonNull List<Review> reviews, boolean isFavoured) {
         mVideos = videos;
         mBackdropPath = backdropPath;
         mDbId = dbId;
@@ -83,6 +79,7 @@ public class Movie implements Parcelable {
         mVoteAverage = voteAverage;
         mReviews = reviews;
         mReviewsAndVideosSet = true;
+        mIsFavoured = isFavoured;
     }
 
     protected Movie(Parcel in) {
@@ -199,36 +196,12 @@ public class Movie implements Parcelable {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieContract.Movie.COLUMN_DB_ID, mDbId);
         contentValues.put(MovieContract.Movie.COLUMN_TITLE, mTitle);
-        contentValues.put(MovieContract.Movie.COLUMN_RELEASE_DATE, getReleaseDateAsLong());
+        contentValues.put(MovieContract.Movie.COLUMN_RELEASE_DATE, mReleaseDate.getTime());
         contentValues.put(MovieContract.Movie.COLUMN_VOTE_AVERAGE, mVoteAverage);
         contentValues.put(MovieContract.Movie.COLUMN_PLOT, mOverview);
         contentValues.put(MovieContract.Movie.COLUMN_POSTER, mPosterPath);
         contentValues.put(MovieContract.Movie.COLUMN_BACKDROP, mBackdropPath);
         return contentValues;
-    }
-
-    /**
-     * Returns the release date properly formatted as a string.
-     *
-     * @param showLong whether to return the date formatted in long or short style
-     * @return the release date properly formatted as a string
-     */
-    public String getReleaseDateFormatted(boolean showLong) {
-        Date date = getReleaseDate();
-        if (date == null) {
-            return "";
-        }
-
-        return showLong ? Utils.formatDateLong(date) : Utils.formatDateShort(date);
-    }
-
-    /**
-     * Returns the release date as a long in UNIX time.
-     *
-     * @return the release date as a long
-     */
-    public long getReleaseDateAsLong() {
-        return mReleaseDate.getTime();
     }
 
     @Override

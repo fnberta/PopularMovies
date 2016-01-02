@@ -51,10 +51,10 @@ public class ReviewsPage implements Parcelable {
     }
 
     protected ReviewsPage(Parcel in) {
-        this.mPage = in.readInt();
-        this.mReviews = in.createTypedArrayList(Review.CREATOR);
-        this.mTotalPages = in.readInt();
-        this.mTotalResults = in.readInt();
+        mPage = in.readInt();
+        mReviews = in.createTypedArrayList(Review.CREATOR);
+        mTotalPages = in.readInt();
+        mTotalResults = in.readInt();
     }
 
     public int getPage() {
@@ -96,9 +96,9 @@ public class ReviewsPage implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(this.mPage);
+        dest.writeInt(mPage);
         dest.writeTypedList(mReviews);
-        dest.writeInt(this.mTotalPages);
-        dest.writeInt(this.mTotalResults);
+        dest.writeInt(mTotalPages);
+        dest.writeInt(mTotalResults);
     }
 }

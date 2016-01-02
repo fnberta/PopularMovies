@@ -33,7 +33,7 @@ import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
  * <p>
  * A {@link Fragment} with a single task: to perform an online query for movies from the
  * TheMovieDB. It is retained across configuration changes and reports back to its activity
- * via the callback interface {@link QueryMoviesWorker.TaskInteractionListener}.
+ * via the callback interface {@link WorkerInteractionListener}.
  * </p>
  */
 public class QueryMoviesWorker extends Fragment implements
@@ -43,7 +43,7 @@ public class QueryMoviesWorker extends Fragment implements
     private static final String BUNDLE_PAGE = "bundle_page";
     private static final String BUNDLE_SORT = "bundle_sort";
     @Nullable
-    private TaskInteractionListener mListener;
+    private WorkerInteractionListener mActivity;
     private MovieRepository mMovieRepo;
 
     public QueryMoviesWorker() {
@@ -73,10 +73,10 @@ public class QueryMoviesWorker extends Fragment implements
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (TaskInteractionListener) activity;
+            mActivity = (WorkerInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement TaskInteractionListener");
+                    + " must implement WorkerInteractionListener");
         }
     }
 
@@ -98,22 +98,22 @@ public class QueryMoviesWorker extends Fragment implements
 
         if (page > 0 && !TextUtils.isEmpty(sort)) {
             mMovieRepo.getMoviesOnline(getActivity(), page, sort, this);
-        } else if (mListener != null) {
-            mListener.onMoviesOnlineLoadFailed();
+        } else if (mActivity != null) {
+            mActivity.onMoviesOnlineLoadFailed();
         }
     }
 
     @Override
     public void onMoviesOnlineLoaded(@NonNull List<Movie> movies) {
-        if (mListener != null) {
-            mListener.onMoviesOnlineLoaded(movies);
+        if (mActivity != null) {
+            mActivity.onMoviesOnlineLoaded(movies);
         }
     }
 
     @Override
     public void onMoviesOnlineLoadFailed() {
-        if (mListener != null) {
-            mListener.onMoviesOnlineLoadFailed();
+        if (mActivity != null) {
+            mActivity.onMoviesOnlineLoadFailed();
         }
     }
 
@@ -121,7 +121,7 @@ public class QueryMoviesWorker extends Fragment implements
     public void onDetach() {
         super.onDetach();
 
-        mListener = null;
+        mActivity = null;
     }
 
     @Override
@@ -132,15 +132,15 @@ public class QueryMoviesWorker extends Fragment implements
     }
 
     /**
-     * Handles the interaction of the TaskFragment.
+     * Handles the interaction of the WorkerFragment.
      */
-    public interface TaskInteractionListener {
+    public interface WorkerInteractionListener {
         /**
          * Handles the event when movie query finished.
          *
          * @param movies the {@link List<Movie>} containing the queried movies
          */
-        void onMoviesOnlineLoaded(List<Movie> movies);
+        void onMoviesOnlineLoaded(@NonNull List<Movie> movies);
 
         /**
          * Handles the event when movie query failed.

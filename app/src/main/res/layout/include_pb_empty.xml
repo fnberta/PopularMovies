@@ -14,33 +14,47 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<merge
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     >
 
-    <ProgressBar
-        android:id="@+id/pb_grid"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
-        />
+    <data>
 
-    <TextView
-        android:id="@+id/empty_view"
-        style="@style/TextAppearance.AppCompat.Title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:drawablePadding="@dimen/small_space"
-        android:drawableTop="@drawable/ic_movie_white_144dp"
-        android:gravity="center_horizontal"
-        android:text="@string/no_movies"
-        android:visibility="gone"
-        tools:visibility="visible"
-        />
+        <import type="android.view.View"/>
 
-</merge>
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModel"
+            />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <ProgressBar
+            android:id="@+id/pb_grid"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="@{viewModel.moviesLoaded ? View.GONE : View.VISIBLE}"
+            />
+
+        <TextView
+            android:id="@+id/empty_view"
+            style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:drawablePadding="@dimen/small_space"
+            android:drawableTop="@drawable/ic_movie_white_144dp"
+            android:gravity="center_horizontal"
+            android:text="@string/no_movies"
+            android:visibility="@{viewModel.moviesAvailable ? View.GONE : viewModel.moviesLoaded ? View.VISIBLE : View.GONE}"
+            />
+
+    </FrameLayout>
+</layout>

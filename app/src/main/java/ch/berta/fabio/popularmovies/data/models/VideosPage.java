@@ -45,7 +45,7 @@ public class VideosPage implements Parcelable {
     }
 
     protected VideosPage(Parcel in) {
-        mVideos = new ArrayList<Video>();
+        mVideos = new ArrayList<>();
         in.readList(mVideos, List.class.getClassLoader());
     }
 

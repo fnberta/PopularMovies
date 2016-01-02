@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Fabio Berta
+ * Copyright (c) 2016 Fabio Berta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.data;
+package ch.berta.fabio.popularmovies.data.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -74,7 +74,7 @@ public class MovieDbClient {
     private static Gson getGsonObject() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-            DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+            final DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 
             @Override
             public Date deserialize(final JsonElement json, final Type typeOfT,

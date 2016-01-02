@@ -17,19 +17,21 @@
 package ch.berta.fabio.popularmovies.data.models;
 
 import android.content.ContentValues;
+import android.databinding.BaseObservable;
+import android.databinding.Bindable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
 /**
  * Represents a video (e.g. trailer) of a movie, obtained from TheMovieDb.
  */
-public class Video implements Parcelable {
+public class Video extends BaseObservable implements Parcelable {
 
-    public static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
     public static final Parcelable.Creator<Video> CREATOR = new Parcelable.Creator<Video>() {
         public Video createFromParcel(Parcel source) {
             return new Video(source);
@@ -39,6 +41,7 @@ public class Video implements Parcelable {
             return new Video[size];
         }
     };
+    private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
     private static final String YOU_TUBE = "YouTube";
     @SerializedName("name")
     private String mName;
@@ -55,11 +58,11 @@ public class Video implements Parcelable {
     }
 
     public Video(String name, String key, String site, int size, String type) {
-        mName = name;
-        mKey = key;
-        mSite = site;
-        mSize = size;
-        mType = type;
+        setName(name);
+        setKey(key);
+        setSite(site);
+        setSize(size);
+        setType(type);
     }
 
     protected Video(Parcel in) {
@@ -70,36 +73,44 @@ public class Video implements Parcelable {
         mType = in.readString();
     }
 
+    @Bindable
     public String getName() {
         return mName;
     }
 
     public void setName(String name) {
         mName = name;
+        notifyPropertyChanged(BR.name);
     }
 
+    @Bindable
     public String getKey() {
         return mKey;
     }
 
     public void setKey(String key) {
         mKey = key;
+        notifyPropertyChanged(BR.key);
     }
 
+    @Bindable
     public String getSite() {
         return mSite;
     }
 
     public void setSite(String site) {
         mSite = site;
+        notifyPropertyChanged(BR.site);
     }
 
+    @Bindable
     public int getSize() {
         return mSize;
     }
 
     public void setSize(int size) {
         mSize = size;
+        notifyPropertyChanged(BR.size);
     }
 
     public String getType() {
@@ -112,6 +123,10 @@ public class Video implements Parcelable {
 
     public boolean siteIsYouTube() {
         return mSite.equals(YOU_TUBE);
+    }
+
+    public String getYoutubeUrl() {
+        return Video.YOUTUBE_BASE_URL + getKey();
     }
 
     public ContentValues getContentValuesEntry() {

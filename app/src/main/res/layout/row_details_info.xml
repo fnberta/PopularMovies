@@ -15,77 +15,94 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
     >
 
-    <ImageView
-        android:id="@+id/iv_details_poster"
-        android:layout_width="@dimen/detail_poster_width"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/key_line_1"
-        android:layout_marginTop="@dimen/normal_space"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/movie_poster"
-        android:scaleType="fitXY"
-        android:transitionName="@string/shared_transition_details_poster"
-        tools:layout_height="222dp"
-        />
+    <data>
+
+        <import type="android.view.View"/>
+
+        <import type="ch.berta.fabio.popularmovies.utils.Utils"/>
+
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.viewmodels.rows.DetailsInfoRowViewModel"
+            />
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         >
 
-        <TextView
-            android:id="@+id/tv_details_header_facts"
-            style="@style/SubHeader"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/sub_header_height"
-            android:paddingEnd="@dimen/key_line_1"
-            android:paddingStart="@dimen/key_line_1"
-            android:paddingTop="@dimen/normal_space"
-            android:text="@string/header_info"
+        <ImageView
+            android:id="@+id/iv_details_poster"
+            android:layout_width="@dimen/detail_poster_width"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:layout_marginTop="@dimen/normal_space"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/movie_poster"
+            android:scaleType="fitXY"
+            android:transitionName="@{viewModel.transitionEnabled ? @string/shared_transition_details_poster : null}"
+            tools:layout_height="222dp"
             />
 
-        <TextView
-            android:id="@+id/tv_details_release_date"
-            style="@style/TextAppearance.AppCompat.Subhead"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/key_line_1"
-            android:layout_marginStart="@dimen/key_line_1"
-            tools:text="27. September 2015"
-            />
+            android:orientation="vertical"
+            >
 
-        <TextView
-            android:id="@+id/tv_details_rating"
-            style="@style/TextAppearance.AppCompat.Subhead"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/normal_space"
-            android:layout_marginEnd="@dimen/key_line_1"
-            android:layout_marginStart="@dimen/key_line_1"
-            tools:text="Rating: 4/10"
-            />
+            <TextView
+                android:id="@+id/tv_details_header_facts"
+                style="@style/SubHeader"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/sub_header_height"
+                android:paddingEnd="@dimen/key_line_1"
+                android:paddingStart="@dimen/key_line_1"
+                android:paddingTop="@dimen/normal_space"
+                android:text="@string/header_info"
+                />
 
-        <TextView
-            android:id="@+id/tv_details_plot"
-            style="@style/TextAppearance.AppCompat.Body1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/key_line_1"
-            android:layout_marginStart="@dimen/key_line_1"
-            android:ellipsize="end"
-            android:maxLines="@integer/plot_max_lines"
-            tools:text="A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival."
-            />
+            <TextView
+                android:id="@+id/tv_details_release_date"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/key_line_1"
+                android:layout_marginStart="@dimen/key_line_1"
+                android:text="@{Utils.formatDateLong(viewModel.movieDate)}"
+                />
+
+            <TextView
+                android:id="@+id/tv_details_rating"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/normal_space"
+                android:layout_marginEnd="@dimen/key_line_1"
+                android:layout_marginStart="@dimen/key_line_1"
+                android:text="@{@string/details_rating(viewModel.movieRating)}"
+                />
+
+            <TextView
+                android:id="@+id/tv_details_plot"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/key_line_1"
+                android:layout_marginStart="@dimen/key_line_1"
+                android:ellipsize="end"
+                android:maxLines="@integer/plot_max_lines"
+                android:onClick="@{viewModel.onPlotClick}"
+                android:text="@{viewModel.moviePlot}"
+                />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</layout>
