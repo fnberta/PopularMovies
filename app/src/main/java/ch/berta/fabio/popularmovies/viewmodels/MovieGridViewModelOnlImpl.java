@@ -96,6 +96,7 @@ public class MovieGridViewModelOnlImpl extends
         return new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                setRefreshing(true);
                 mMoviePage = 1;
                 mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
             }
@@ -138,42 +139,48 @@ public class MovieGridViewModelOnlImpl extends
         mView.removeQueryMoviesWorker();
 
         if (mMoviePage == 1) {
-            mLoadingNewSort = false;
-            setRefreshing(false);
-
             setMovies(movies);
-            mView.scrollToPosition(0);
-
-            setMoviesLoaded(true);
-            setMoviesAvailable(!movies.isEmpty());
         } else {
-            hideLoadMoreIndicator();
             addMovies(movies);
-            mLoadingMore = false;
         }
 
         mMoviePage++;
     }
 
-    private void setMovies(@NonNull List<Movie> movies) {
-        mMovies.clear();
+    private void setMovies(List<Movie> movies) {
+        // finished loading
+        mLoadingNewSort = false;
+        setRefreshing(false);
 
+        // set movies
+        mMovies.clear();
         if (!movies.isEmpty()) {
             mMovies.addAll(movies);
         }
-
         mView.notifyMoviesChanged();
+
+        // update view
+        mView.scrollToPosition(0);
+        setMoviesLoaded(true);
+        setMoviesAvailable(!movies.isEmpty());
+    }
+
+    private void addMovies(List<Movie> movies) {
+        // remove load more indicator
+        hideLoadMoreIndicator();
+
+        // insert movies
+        mMovies.addAll(movies);
+        mView.notifyMoviesInserted(getItemCount(), movies.size());
+
+        // indicate load more process finished
+        mLoadingMore = false;
     }
 
     private void hideLoadMoreIndicator() {
         final int position = getItemCount() - 1;
         mMovies.remove(position);
         mView.notifyLoadMoreRemoved(position);
-    }
-
-    private void addMovies(@NonNull List<Movie> movies) {
-        mMovies.addAll(movies);
-        mView.notifyMoviesInserted(getItemCount(), movies.size());
     }
 
     @Override
@@ -185,7 +192,7 @@ public class MovieGridViewModelOnlImpl extends
             setRefreshing(false);
             setMoviesLoaded(true);
 
-            mView.showSnackbar(R.string.error_connection, new SnackbarAction(R.string.snackbar_retry) {
+            mView.showSnackbar(R.string.snackbar_movies_load_failed, new SnackbarAction(R.string.snackbar_retry) {
                 @Override
                 public void onClick(View v) {
                     setRefreshing(true);
@@ -196,7 +203,7 @@ public class MovieGridViewModelOnlImpl extends
             hideLoadMoreIndicator();
             mLoadingMore = false;
 
-            mView.showSnackbar(R.string.error_connection, null);
+            mView.showSnackbar(R.string.snackbar_movies_load_failed, null);
         }
     }
 

@@ -20,7 +20,9 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,13 +30,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsFavBinding;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsInfoBinding;
 import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter.InfoRow;
 import ch.berta.fabio.popularmovies.utils.Utils;
+import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelFav;
+import ch.berta.fabio.popularmovies.workerfragments.UpdateMovieDetailsWorker;
 
 /**
  * Displays detail information about a movie, including poster image, release date, rating, an
@@ -46,7 +49,6 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
 
     public static final int RESULT_UNFAVOURED = 2;
     private static final int LOADER_FAV = 0;
-    private static final String KEY_MOVIE_ROW_ID = "KEY_MOVIE_ROW_ID";
     private static final String LOG_TAG = MovieDetailsFavFragment.class.getSimpleName();
     private FragmentMovieDetailsFavBinding mBinding;
 
@@ -134,8 +136,21 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     }
 
     @Override
-    public void updateMovieLocal(@NonNull MovieDetails movieDetails) {
-        mMovieRepo.updateMovieLocal(getActivity(), movieDetails, mViewModel);
+    public void loadUpdateMovieDetailsWorker(int movieDbId, long movieRowId) {
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment worker = WorkerUtils.findWorker(fragmentManager, UpdateMovieDetailsWorker.WORKER_TAG);
+
+        if (worker == null) {
+            worker = UpdateMovieDetailsWorker.newInstance(movieDbId, movieRowId);
+            fragmentManager.beginTransaction()
+                    .add(worker, UpdateMovieDetailsWorker.WORKER_TAG)
+                    .commit();
+        }
+    }
+
+    @Override
+    public void removeUpdateMovieDetailsWorker() {
+        WorkerUtils.removeWorker(getFragmentManager(), UpdateMovieDetailsWorker.WORKER_TAG);
     }
 
     @Override

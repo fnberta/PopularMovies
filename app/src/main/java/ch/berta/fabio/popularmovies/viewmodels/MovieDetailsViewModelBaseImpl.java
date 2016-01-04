@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.viewmodels;
 
+import android.content.ContentProviderResult;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.net.Uri;
@@ -29,6 +30,9 @@ import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.Review;
 import ch.berta.fabio.popularmovies.data.models.Video;
+import rx.Observable;
+import rx.Subscriber;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Provides an abstract base class that implements {@link MovieDetailsViewModel}.
@@ -39,12 +43,13 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
         extends BaseObservable
         implements MovieDetailsViewModel<T> {
 
+    final boolean mUseTwoPane;
+    private final CompositeSubscription mSubscriptions = new CompositeSubscription();
     T mView;
     Movie mMovie;
     int mReviewsCount;
     int mVideosCount;
     long mMovieRowId;
-    final boolean mUseTwoPane;
 
     /**
      * Constructs a new {@link MovieDetailsViewModelBaseImpl}.
@@ -71,6 +76,9 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
     @Override
     public void detachView() {
         mView = null;
+        if (mSubscriptions.hasSubscriptions()) {
+            mSubscriptions.unsubscribe();
+        }
     }
 
     @Override
@@ -117,33 +125,7 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
         mMovieRowId = rowId;
     }
 
-    @Override
-    public void onMovieInserted() {
-        mView.showSnackbar(R.string.snackbar_added_to_favorites, null);
-    }
-
-    @Override
-    @CallSuper
-    public void onMovieDeleted() {
-        if (mUseTwoPane) {
-            mView.showSnackbar(R.string.snackbar_removed_from_favorites, null);
-        } else {
-            onMovieDeletedOnePane();
-        }
-    }
-
     protected abstract void onMovieDeletedOnePane();
-
-    @Override
-    @CallSuper
-    public void onMovieUpdated() {
-        // empty default implementation
-    }
-
-    @Override
-    public void onLocalOperationFailed() {
-        mView.showSnackbar(R.string.snackbar_local_operation_failed, null);
-    }
 
     @Override
     public boolean hasMovieVideos() {
@@ -243,10 +225,52 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
     public void onFabClick(View view) {
         if (mMovie.isFavoured()) {
             setMovieFavoured(false);
-            mView.deleteMovieLocal();
+            final Observable<Integer> observable = mView.deleteMovieLocal(mMovieRowId);
+            mSubscriptions.add(observable.subscribe(new Subscriber<Integer>() {
+                @Override
+                public void onCompleted() {
+
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    mView.showSnackbar(R.string.snackbar_movie_delete_failed, null);
+                }
+
+                @Override
+                public void onNext(Integer integer) {
+                    onMovieDeleted();
+                }
+            }));
         } else {
             setMovieFavoured(true);
-            mView.insertMovieLocal();
+            final Observable<ContentProviderResult[]> observable = mView.insertMovieLocal(mMovie);
+            mSubscriptions.add(observable.subscribe(new Subscriber<ContentProviderResult[]>() {
+                        @Override
+                        public void onCompleted() {
+
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            mView.showSnackbar(R.string.snackbar_movie_insert_failed, null);
+                        }
+
+                        @Override
+                        public void onNext(ContentProviderResult[] contentProviderResults) {
+                            mView.showSnackbar(R.string.snackbar_movie_added_to_favorites, null);
+                        }
+                    })
+            );
+        }
+    }
+
+    @CallSuper
+    void onMovieDeleted() {
+        if (mUseTwoPane) {
+            mView.showSnackbar(R.string.snackbar_movie_removed_from_favorites, null);
+        } else {
+            onMovieDeletedOnePane();
         }
     }
 

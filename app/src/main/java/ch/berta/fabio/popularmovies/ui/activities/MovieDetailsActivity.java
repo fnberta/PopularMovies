@@ -33,9 +33,12 @@ import ch.berta.fabio.popularmovies.ui.fragments.MovieDetailsOnlFragment;
 import ch.berta.fabio.popularmovies.ui.fragments.MovieGridFavFragment;
 import ch.berta.fabio.popularmovies.ui.fragments.MovieGridOnlFragment;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel;
+import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelFav;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelFavImpl;
+import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelOnl;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelOnlImpl;
-import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorkerListener;
+import ch.berta.fabio.popularmovies.workerfragments.UpdateMovieDetailsWorkerListener;
 
 /**
  * Presents the backdrop image of a selected movie in a collapsing toolbar and hosts a
@@ -43,7 +46,7 @@ import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
  */
 public class MovieDetailsActivity extends AppCompatActivity implements
         MovieDetailsOnlFragment.FragmentInteractionListener,
-        QueryMovieDetailsWorker.WorkerInteractionListener {
+        QueryMovieDetailsWorkerListener, UpdateMovieDetailsWorkerListener {
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
@@ -97,12 +100,22 @@ public class MovieDetailsActivity extends AppCompatActivity implements
 
     @Override
     public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
-        mViewModel.onMovieDetailsOnlineLoaded(movieDetails);
+        ((MovieDetailsViewModelOnl) mViewModel).onMovieDetailsOnlineLoaded(movieDetails);
     }
 
     @Override
     public void onMovieDetailsOnlineLoadFailed() {
-        mViewModel.onMovieDetailsOnlineLoadFailed();
+        ((MovieDetailsViewModelOnl) mViewModel).onMovieDetailsOnlineLoadFailed();
+    }
+
+    @Override
+    public void onMovieDetailsUpdated() {
+        ((MovieDetailsViewModelFav) mViewModel).onMovieDetailsUpdated();
+    }
+
+    @Override
+    public void onMovieDetailsUpdateFailed() {
+        ((MovieDetailsViewModelFav) mViewModel).onMovieDetailsUpdateFailed();
     }
 
     @Override

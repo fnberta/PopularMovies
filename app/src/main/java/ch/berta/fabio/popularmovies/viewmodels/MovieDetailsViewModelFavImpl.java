@@ -25,7 +25,6 @@ import android.view.View;
 import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.models.SnackbarAction;
 
 /**
@@ -108,7 +107,7 @@ public class MovieDetailsViewModelFavImpl extends
             onMovieUpdateFailed();
         } else {
             mView.startPostponedEnterTransition();
-            mView.showSnackbar(R.string.snackbar_no_movie_data, null);
+            mView.showSnackbar(R.string.snackbar_movie_no_data, null);
         }
     }
 
@@ -117,17 +116,9 @@ public class MovieDetailsViewModelFavImpl extends
         mView.showSnackbar(R.string.snackbar_movie_update_failed, new SnackbarAction(R.string.snackbar_retry) {
             @Override
             public void onClick(View v) {
-                mView.loadQueryMovieDetailsWorker(mMovie.getDbId());
+                mView.loadUpdateMovieDetailsWorker(mMovie.getDbId(), mMovieRowId);
             }
         });
-    }
-
-    @Override
-    public void onMovieUpdated() {
-        super.onMovieUpdated();
-
-        mView.restartLoader();
-        setRefreshing(false);
     }
 
     @Override
@@ -145,25 +136,26 @@ public class MovieDetailsViewModelFavImpl extends
     }
 
     @Override
+    public void onMovieDetailsUpdated() {
+        mView.removeUpdateMovieDetailsWorker();
+        mView.restartLoader();
+    }
+
+    @Override
+    public void onMovieDetailsUpdateFailed() {
+        mView.removeUpdateMovieDetailsWorker();
+        onMovieUpdateFailed();
+    }
+
+    @Override
     public SwipeRefreshLayout.OnRefreshListener getOnRefreshListener() {
         return new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mView.loadQueryMovieDetailsWorker(mMovie.getDbId());
+                setRefreshing(true);
+                mView.loadUpdateMovieDetailsWorker(mMovie.getDbId(), mMovieRowId);
             }
         };
-    }
-
-    @Override
-    public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
-        mView.removeQueryMovieDetailsWorker();
-        mView.updateMovieLocal(movieDetails);
-    }
-
-    @Override
-    public void onMovieDetailsOnlineLoadFailed() {
-        mView.removeQueryMovieDetailsWorker();
-        onMovieUpdateFailed();
     }
 
     @Override

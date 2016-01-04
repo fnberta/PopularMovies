@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.viewmodels.rows;
+package ch.berta.fabio.popularmovies.workerfragments;
 
-import android.databinding.Bindable;
-import android.databinding.Observable;
 import android.support.annotation.NonNull;
 
+import ch.berta.fabio.popularmovies.data.models.MovieDetails;
+
 /**
- * Defines a view model for a generic header row.
- * <p/>
- * Extends {@link Observable}.
+ * Defines the actions after a query for movie details was attempted.
  */
-public interface HeaderRowViewModel extends Observable {
+public interface QueryMovieDetailsWorkerListener {
+    /**
+     * Handles a successful movie details query
+     *
+     * @param movieDetails the queried movie details
+     */
+    void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails);
 
-    @Bindable
-    String getHeader();
-
-    void setHeader(@NonNull String header);
+    /**
+     * Handles a failed movie details query.
+     */
+    void onMovieDetailsOnlineLoadFailed();
 }

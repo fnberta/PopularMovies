@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.viewmodels;
 
+import android.content.ContentProviderResult;
 import android.databinding.Bindable;
 import android.databinding.Observable;
 import android.net.Uri;
@@ -29,16 +30,14 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.Review;
 import ch.berta.fabio.popularmovies.data.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.data.models.Video;
-import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieDetailsInteractionListener;
-import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
  * Defines a view model for the details screen of a movie.
  */
 public interface MovieDetailsViewModel<T extends MovieDetailsViewModel.ViewInteractionListener> extends
-        Parcelable, Observable, InteractionViewModel<T>, AdapterViewModel, MovieDetailsInteractionListener,
-        MovieRepository.LocalOperationsListener, QueryMovieDetailsWorker.WorkerInteractionListener {
+        Parcelable, Observable, InteractionViewModel<T>, AdapterViewModel,
+        MovieDetailsInteractionListener {
 
     int TYPE_HEADER = 0;
     int TYPE_TWO_PANE_HEADER = 1;
@@ -120,30 +119,22 @@ public interface MovieDetailsViewModel<T extends MovieDetailsViewModel.ViewInter
 
         /**
          * Inserts a movie to the local content provider.
+         *
+         * @param movie the movie to insert
          */
-        void insertMovieLocal();
+        rx.Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Movie movie);
 
         /**
          * Deletes a movie from the local content provider.
+         *
+         * @param movieRowId the row id of the movie to delete
          */
-        void deleteMovieLocal();
+        rx.Observable<Integer> deleteMovieLocal(long movieRowId);
 
         /**
          * Starts the postponed enter transition.
          */
         void startPostponedEnterTransition();
-
-        /**
-         * Loads the worker fragment that queries for the details of a movie.
-         *
-         * @param movieDbId the TheMovieDB id of the movie
-         */
-        void loadQueryMovieDetailsWorker(int movieDbId);
-
-        /**
-         * Removes the worker fragment that queried for movie details.
-         */
-        void removeQueryMovieDetailsWorker();
 
         /**
          * Starts an activity that can handle the playback of the video uri.

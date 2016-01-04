@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Fabio Berta
+ * Copyright (c) 2016 Fabio Berta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,75 +16,31 @@
 
 package ch.berta.fabio.popularmovies.viewmodels.rows;
 
-import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.support.annotation.NonNull;
+import android.databinding.Observable;
 import android.view.View;
-import android.widget.TextView;
-
-import ch.berta.fabio.popularmovies.BR;
-import ch.berta.fabio.popularmovies.data.models.Review;
-import ch.berta.fabio.popularmovies.utils.Utils;
 
 /**
- * Provides a view model for the movie review rows.
+ * Defines a view model for the movie review rows.
  * <p/>
- * Subclass of {@link BaseObservable}.
+ * Extends {@link Observable}.
  */
-public class DetailsReviewRowViewModel extends BaseObservable {
-
-    private String mReviewAuthor;
-    private String mReviewContent;
-    private boolean mReviewLastPosition;
-    private final int mContentMaxLines;
-
-    /**
-     * Constructs a new {@link DetailsInfoRowViewModel}.
-     *
-     * @param review             the review to use
-     * @param reviewLastPosition whether the review is the last in the list, used to decide whether
-     *                           to show a divider or not
-     * @param contentMaxLines    the max lines of review content to show
-     */
-    public DetailsReviewRowViewModel(@NonNull Review review, boolean reviewLastPosition,
-                                     int contentMaxLines) {
-        setReviewAuthor(review.getAuthor());
-        setReviewContent(review.getContent());
-        setReviewLastPosition(reviewLastPosition);
-        mContentMaxLines = contentMaxLines;
-    }
+public interface DetailsReviewRowViewModel extends Observable {
 
     @Bindable
-    public String getReviewAuthor() {
-        return mReviewAuthor;
-    }
+    String getReviewAuthor();
 
-    public void setReviewAuthor(String reviewAuthor) {
-        mReviewAuthor = reviewAuthor;
-        notifyPropertyChanged(BR.reviewAuthor);
-    }
+    void setReviewAuthor(String reviewAuthor);
 
     @Bindable
-    public String getReviewContent() {
-        return mReviewContent;
-    }
+    String getReviewContent();
 
-    public void setReviewContent(String reviewContent) {
-        mReviewContent = reviewContent;
-        notifyPropertyChanged(BR.reviewContent);
-    }
+    void setReviewContent(String reviewContent);
 
     @Bindable
-    public boolean isReviewLastPosition() {
-        return mReviewLastPosition;
-    }
+    boolean isReviewLastPosition();
 
-    public void setReviewLastPosition(boolean reviewLastPosition) {
-        mReviewLastPosition = reviewLastPosition;
-        notifyPropertyChanged(BR.reviewLastPosition);
-    }
+    void setReviewLastPosition(boolean reviewLastPosition);
 
-    public void onContentClick(View view) {
-        Utils.expandOrCollapseTextView((TextView) view, mContentMaxLines);
-    }
+    void onContentClick(View view);
 }

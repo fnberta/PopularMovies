@@ -29,6 +29,7 @@ import ch.berta.fabio.popularmovies.ui.adapters.rows.ProgressRow;
 import ch.berta.fabio.popularmovies.utils.Utils;
 import ch.berta.fabio.popularmovies.viewmodels.rows.MovieRowViewModel;
 import ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelOnl;
+import ch.berta.fabio.popularmovies.viewmodels.rows.MovieRowViewModelImpl;
 
 /**
  * Provides the adapter for a movie poster images grid.
@@ -75,7 +76,7 @@ public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
 
                 final MovieRowViewModel viewModel = binding.getViewModel();
                 if (viewModel == null) {
-                    binding.setViewModel(new MovieRowViewModel(movie, mItemHeight));
+                    binding.setViewModel(new MovieRowViewModelImpl(movie, mItemHeight));
                 } else {
                     viewModel.setMovieInfo(movie);
                 }

@@ -17,16 +17,11 @@
 package ch.berta.fabio.popularmovies.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Review;
@@ -40,9 +35,9 @@ import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieDetailsInteractio
 import ch.berta.fabio.popularmovies.ui.adapters.rows.BaseBindingRow;
 import ch.berta.fabio.popularmovies.ui.adapters.rows.HeaderRow;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel;
-import ch.berta.fabio.popularmovies.viewmodels.rows.DetailsInfoRowViewModel;
-import ch.berta.fabio.popularmovies.viewmodels.rows.DetailsReviewRowViewModel;
-import ch.berta.fabio.popularmovies.viewmodels.rows.HeaderRowViewModel;
+import ch.berta.fabio.popularmovies.viewmodels.rows.DetailsInfoRowViewModelImpl;
+import ch.berta.fabio.popularmovies.viewmodels.rows.DetailsReviewRowViewModelImpl;
+import ch.berta.fabio.popularmovies.viewmodels.rows.HeaderRowViewModelImpl;
 
 /**
  * Provides the adapter to display the details of a movie.
@@ -112,7 +107,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
                 final RowHeaderBinding binding = headerRow.getBinding();
 
                 final int header = mViewModel.getHeaderTitle(position);
-                final HeaderRowViewModel viewModel = new HeaderRowViewModel(mContext.getString(header));
+                final HeaderRowViewModelImpl viewModel = new HeaderRowViewModelImpl(mContext.getString(header));
                 binding.setViewModel(viewModel);
                 binding.executePendingBindings();
 
@@ -129,13 +124,12 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
             case MovieDetailsViewModel.TYPE_INFO: {
                 final InfoRow infoRow = (InfoRow) holder;
                 final int plotMaxLines = mContext.getResources().getInteger(R.integer.plot_max_lines);
-                final DetailsInfoRowViewModel viewModel = new DetailsInfoRowViewModel(mViewModel.getMovie(), plotMaxLines);
+                final DetailsInfoRowViewModelImpl viewModel = new DetailsInfoRowViewModelImpl(mViewModel.getMovie(), plotMaxLines);
 
                 final RowDetailsInfoBinding binding = infoRow.getBinding();
                 binding.setViewModel(viewModel);
+                binding.setDetailsListener(mViewModel);
                 binding.executePendingBindings();
-
-                infoRow.loadPoster(mContext, viewModel.getMoviePosterPath(), mViewModel);
 
                 break;
             }
@@ -143,7 +137,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
                 final ReviewRow reviewRow = (ReviewRow) holder;
                 final Review review = mViewModel.getMovieReviewAtPosition(position);
                 final int contentMaxLines = mContext.getResources().getInteger(R.integer.review_content_max_lines);
-                final DetailsReviewRowViewModel viewModel = new DetailsReviewRowViewModel(review,
+                final DetailsReviewRowViewModelImpl viewModel = new DetailsReviewRowViewModelImpl(review,
                         mViewModel.isMovieReviewLastPosition(review), contentMaxLines);
 
                 final RowDetailsReviewBinding binding = reviewRow.getBinding();
@@ -202,32 +196,6 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
          */
         public InfoRow(@NonNull RowDetailsInfoBinding binding) {
             super(binding);
-        }
-
-        /**
-         * Loads the movie poster and calls back to the view fragment when it is loaded.
-         * <p/>
-         * TODO: Is this achievable with data binding? Would need a reference to the fragment's viewModel in the binding adapter...
-         *
-         * @param context    the context to get the poster url and load the image
-         * @param posterPath the path to the image
-         * @param listener   the callback for when the image is loaded
-         */
-        public void loadPoster(@NonNull Context context, @NonNull String posterPath,
-                               @NonNull final MovieDetailsInteractionListener listener) {
-            final String url = context.getString(R.string.movie_poster_url, posterPath);
-            Glide.with(context)
-                    .load(url)
-                    .asBitmap()
-                    .error(R.drawable.ic_movie_white_72dp)
-                    .into(new BitmapImageViewTarget(getBinding().ivDetailsPoster) {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            super.onResourceReady(resource, glideAnimation);
-
-                            listener.onPosterLoaded();
-                        }
-                    });
         }
     }
 

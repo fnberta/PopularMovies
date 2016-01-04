@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Fabio Berta
+ * Copyright (c) 2016 Fabio Berta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,38 @@
 
 package ch.berta.fabio.popularmovies.workerfragments;
 
+import android.content.ContentProviderResult;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
+import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func1;
 
 /**
- * Queries TheMoviesDB for movie details.
+ * Queries TheMoviesDB for movie details and updates the corresponding movie in the local content
+ * provider.
  * <p/>
  * Subclass of {@link BaseWorker}.
  */
-public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerListener> {
+public class UpdateMovieDetailsWorker extends BaseWorker<UpdateMovieDetailsWorkerListener> {
 
     public static final String WORKER_TAG = "WORKER_TAG";
-    private static final String LOG_TAG = QueryMovieDetailsWorker.class.getSimpleName();
+    private static final String LOG_TAG = UpdateMovieDetailsWorker.class.getSimpleName();
     private static final String BUNDLE_MOVIE_DB_ID = "BUNDLE_MOVIE_DB_ID";
+    private static final String BUNDLE_MOVIE_ROW_ID = "BUNDLE_MOVIE_ROW_ID";
     private final MovieRepository mMovieRepo = new MovieRepositoryImpl();
 
-    public static QueryMovieDetailsWorker newInstance(int movieDbId) {
-        QueryMovieDetailsWorker fragment = new QueryMovieDetailsWorker();
+    public static UpdateMovieDetailsWorker newInstance(int movieDbId, long movieRowId) {
+        UpdateMovieDetailsWorker fragment = new UpdateMovieDetailsWorker();
 
         Bundle args = new Bundle();
         args.putInt(BUNDLE_MOVIE_DB_ID, movieDbId);
+        args.putLong(BUNDLE_MOVIE_ROW_ID, movieRowId);
         fragment.setArguments(args);
 
         return fragment;
@@ -49,20 +56,28 @@ public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerL
     @Override
     protected void onWorkerError() {
         if (mActivity != null) {
-            mActivity.onMovieDetailsOnlineLoadFailed();
+            mActivity.onMovieDetailsUpdateFailed();
         }
     }
 
     @Override
     protected void startWork(@NonNull Bundle args) {
         final int movieDbId = args.getInt(BUNDLE_MOVIE_DB_ID, -1);
-        if (movieDbId == -1) {
+        final long movieRowId = args.getLong(BUNDLE_MOVIE_ROW_ID, -1);
+        if (movieDbId == -1 || movieRowId == -1) {
             onWorkerError();
             return;
         }
 
-        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(getActivity(), movieDbId)
-                .subscribe(new Subscriber<MovieDetails>() {
+        final Context context = getContext();
+        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(context, movieDbId)
+                .flatMap(new Func1<MovieDetails, Observable<ContentProviderResult[]>>() {
+                    @Override
+                    public Observable<ContentProviderResult[]> call(MovieDetails movieDetails) {
+                        return mMovieRepo.updateMovieLocal(context, movieDetails, movieRowId);
+                    }
+                })
+                .subscribe(new Subscriber<ContentProviderResult[]>() {
                     @Override
                     public void onCompleted() {
 
@@ -74,9 +89,9 @@ public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerL
                     }
 
                     @Override
-                    public void onNext(MovieDetails movieDetails) {
+                    public void onNext(ContentProviderResult[] contentProviderResults) {
                         if (mActivity != null) {
-                            mActivity.onMovieDetailsOnlineLoaded(movieDetails);
+                            mActivity.onMovieDetailsUpdated();
                         }
                     }
                 })

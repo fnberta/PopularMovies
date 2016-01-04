@@ -16,7 +16,7 @@
 
 package ch.berta.fabio.popularmovies.ui.fragments;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -54,7 +54,6 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment implements
 
     public static final String INTENT_MOVIE_SELECTED = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED";
     private static final String LOG_TAG = MovieGridOnlFragment.class.getSimpleName();
-    private static final String QUERY_MOVIES_TASK = "query_movies_task";
     private MoviesRecyclerAdapter mRecyclerAdapter;
     private FragmentMovieGridBinding mBinding;
     private MovieGridViewModelOnl mViewModel;
@@ -75,12 +74,13 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment implements
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
         try {
-            mActivity = (FragmentInteractionListener) activity;
+            mActivity = (FragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement FragmentInteractionListener");
         }
     }
@@ -167,24 +167,24 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment implements
     public void loadQueryMoviesWorker(int moviePage, @NonNull String sortOption,
                                       boolean forceNewQuery) {
         FragmentManager fragmentManager = getFragmentManager();
-        Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIES_TASK);
+        Fragment worker = WorkerUtils.findWorker(fragmentManager, QueryMoviesWorker.WORKER_TAG);
 
         if (worker == null) {
             worker = QueryMoviesWorker.newInstance(moviePage, sortOption);
             fragmentManager.beginTransaction()
-                    .add(worker, QUERY_MOVIES_TASK)
+                    .add(worker, QueryMoviesWorker.WORKER_TAG)
                     .commit();
         } else if (forceNewQuery) {
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.remove(worker);
             worker = QueryMoviesWorker.newInstance(moviePage, sortOption);
-            transaction.add(worker, QUERY_MOVIES_TASK).commit();
+            transaction.add(worker, QueryMoviesWorker.WORKER_TAG).commit();
         }
     }
 
     @Override
     public void removeQueryMoviesWorker() {
-        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIES_TASK);
+        WorkerUtils.removeWorker(getFragmentManager(), QueryMoviesWorker.WORKER_TAG);
     }
 
     @Override

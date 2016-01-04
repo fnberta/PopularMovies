@@ -16,110 +16,54 @@
 
 package ch.berta.fabio.popularmovies.viewmodels.rows;
 
-import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.databinding.BindingAdapter;
+import android.databinding.Observable;
 import android.support.annotation.NonNull;
-import android.view.View;
-import android.view.ViewGroup;
 
 import java.util.Date;
 
-import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.ui.adapters.rows.MovieRow;
 
 /**
- * Provides a view model for the movie row.
+ * Defines a view model for the movie row.
  * <p/>
- * Subclass of {@link BaseObservable}.
+ * extends {@link Observable}.
  */
-public class MovieRowViewModel extends BaseObservable {
-
-    private String mMovieTitle;
-    private Date mMovieReleaseDate;
-    private String mMoviePosterPath;
-    private int mMoviePosterHeight;
+public interface MovieRowViewModel extends Observable {
+    /**
+     * Sets the info of the movie (title, release date and poster path) to the according fields.
+     *
+     * @param movie the movie to set
+     */
+    void setMovieInfo(@NonNull Movie movie);
 
     /**
-     * Constructs a new {@link MovieRow} form a {@link Movie} object.
+     * Sets the movie title, release date and poster path.
      *
-     * @param movie             the movie object to use
-     * @param moviePosterHeight the height of the poster image
+     * @param movieTitle       the movie title to set
+     * @param movieReleaseDate the movie relesae date to set
+     * @param moviePosterPath  the movie poster path to set
      */
-    public MovieRowViewModel(@NonNull Movie movie, int moviePosterHeight) {
-        this(movie.getTitle(), movie.getReleaseDate(), movie.getPosterPath(), moviePosterHeight);
-    }
-
-    /**
-     * Constructs a new {@link MovieRowViewModel} from individual strings.
-     *
-     * @param movieTitle        the movie title to use
-     * @param movieReleaseDate  the movie release date to use
-     * @param moviePosterPath   the movie poster path to use
-     * @param moviePosterHeight the height of the poster image
-     */
-    public MovieRowViewModel(@NonNull String movieTitle, @NonNull Date movieReleaseDate,
-                             @NonNull String moviePosterPath, int moviePosterHeight) {
-        setMovieInfo(movieTitle, movieReleaseDate, moviePosterPath);
-        setMoviePosterHeight(moviePosterHeight);
-    }
-
-    @BindingAdapter({"moviePosterHeight"})
-    public static void setMoviePosterHeight(View view, int moviePosterHeight) {
-        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-        layoutParams.height = moviePosterHeight;
-        view.setLayoutParams(layoutParams);
-    }
-
-    public void setMovieInfo(@NonNull Movie movie) {
-        setMovieInfo(movie.getTitle(), movie.getReleaseDate(), movie.getPosterPath());
-    }
-
-    public void setMovieInfo(@NonNull String movieTitle, @NonNull Date movieReleaseDate,
-                             @NonNull String moviePosterPath) {
-        setMovieTitle(movieTitle);
-        setMovieReleaseDate(movieReleaseDate);
-        setMoviePosterPath(moviePosterPath);
-    }
+    void setMovieInfo(@NonNull String movieTitle, @NonNull Date movieReleaseDate,
+                      @NonNull String moviePosterPath);
 
     @Bindable
-    public String getMovieTitle() {
-        return mMovieTitle;
-    }
+    String getMovieTitle();
 
-    public void setMovieTitle(String movieTitle) {
-        mMovieTitle = movieTitle;
-        notifyPropertyChanged(BR.movieTitle);
-    }
+    void setMovieTitle(String movieTitle);
 
     @Bindable
-    public Date getMovieReleaseDate() {
-        return mMovieReleaseDate;
-    }
+    Date getMovieReleaseDate();
 
-    public void setMovieReleaseDate(Date movieReleaseDate) {
-        mMovieReleaseDate = movieReleaseDate;
-        notifyPropertyChanged(BR.movieReleaseDate);
-    }
+    void setMovieReleaseDate(Date movieReleaseDate);
 
     @Bindable
-    public String getMoviePosterPath() {
-        return mMoviePosterPath;
-    }
+    String getMoviePosterPath();
 
-    public void setMoviePosterPath(String moviePosterPath) {
-        mMoviePosterPath = moviePosterPath;
-        notifyPropertyChanged(BR.moviePosterPath);
-    }
+    void setMoviePosterPath(String moviePosterPath);
 
     @Bindable
-    public int getMoviePosterHeight() {
-        return mMoviePosterHeight;
-    }
+    int getMoviePosterHeight();
 
-    public void setMoviePosterHeight(int moviePosterHeight) {
-        mMoviePosterHeight = moviePosterHeight;
-        notifyPropertyChanged(BR.moviePosterHeight);
-    }
+    void setMoviePosterHeight(int moviePosterHeight);
 }

@@ -16,13 +16,16 @@
 
 package ch.berta.fabio.popularmovies.viewmodels;
 
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorkerListener;
+
 /**
  * Defines a view model for the details screen of an online fetched movie.
  * <p/>
  * Extends {@link MovieDetailsViewModel}.
  */
 public interface MovieDetailsViewModelOnl extends
-        MovieDetailsViewModel<MovieDetailsViewModel.ViewInteractionListener> {
+        MovieDetailsViewModel<MovieDetailsViewModelOnl.ViewInteractionListener>,
+        QueryMovieDetailsWorkerListener {
 
     /**
      * Loads the detail information of amovie.
@@ -40,4 +43,18 @@ public interface MovieDetailsViewModelOnl extends
      * @return the TheMovieDB id of the movie
      */
     int getMovieDbId();
+
+    interface ViewInteractionListener extends MovieDetailsViewModel.ViewInteractionListener {
+        /**
+         * Loads the worker fragment that queries for the details of a movie.
+         *
+         * @param movieDbId the TheMovieDB id of the movie
+         */
+        void loadQueryMovieDetailsWorker(int movieDbId);
+
+        /**
+         * Removes the worker fragment that queried for movie details.
+         */
+        void removeQueryMovieDetailsWorker();
+    }
 }

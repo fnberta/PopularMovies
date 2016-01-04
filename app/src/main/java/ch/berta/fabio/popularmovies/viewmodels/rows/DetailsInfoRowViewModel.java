@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Fabio Berta
+ * Copyright (c) 2016 Fabio Berta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,98 +16,42 @@
 
 package ch.berta.fabio.popularmovies.viewmodels.rows;
 
-import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.support.annotation.NonNull;
+import android.databinding.Observable;
 import android.view.View;
-import android.widget.TextView;
 
 import java.util.Date;
 
-import ch.berta.fabio.popularmovies.BR;
-import ch.berta.fabio.popularmovies.data.models.Movie;
-import ch.berta.fabio.popularmovies.utils.Utils;
-
 /**
- * Provides a view model for the movie details info row.
+ * Defines a view model for the movie details info row.
  * <p/>
- * Subclass of {@link BaseObservable}.
+ * Extends {@link Observable}.
  */
-public class DetailsInfoRowViewModel extends BaseObservable {
+public interface DetailsInfoRowViewModel extends Observable {
+    @Bindable
+    String getMoviePosterPath();
 
-    private String mMoviePosterPath;
-    private String mMoviePlot;
-    private Date mMovieDate;
-    private double mMovieRating;
-    private final int mPlotMaxLines;
-    private boolean mTransitionEnabled;
-
-    /**
-     * Constructs a new {@link DetailsInfoRowViewModel}.
-     *
-     * @param movie        the movie to use
-     * @param plotMaxLines the maximum lines of plot info to show
-     */
-    public DetailsInfoRowViewModel(@NonNull Movie movie, int plotMaxLines) {
-        setMoviePosterPath(movie.getPosterPath());
-        setMoviePlot(movie.getOverview());
-        setMovieDate(movie.getReleaseDate());
-        setMovieRating(movie.getVoteAverage());
-        setTransitionEnabled(true);
-        mPlotMaxLines = plotMaxLines;
-    }
+    void setMoviePosterPath(String moviePosterPath);
 
     @Bindable
-    public String getMoviePosterPath() {
-        return mMoviePosterPath;
-    }
+    String getMoviePlot();
 
-    public void setMoviePosterPath(String moviePosterPath) {
-        mMoviePosterPath = moviePosterPath;
-        notifyPropertyChanged(BR.moviePosterPath);
-    }
+    void setMoviePlot(String moviePlot);
 
     @Bindable
-    public String getMoviePlot() {
-        return mMoviePlot;
-    }
+    Date getMovieDate();
 
-    public void setMoviePlot(String moviePlot) {
-        mMoviePlot = moviePlot;
-        notifyPropertyChanged(BR.moviePlot);
-    }
+    void setMovieDate(Date movieDate);
 
     @Bindable
-    public Date getMovieDate() {
-        return mMovieDate;
-    }
+    double getMovieRating();
 
-    public void setMovieDate(Date movieDate) {
-        mMovieDate = movieDate;
-        notifyPropertyChanged(BR.movieDate);
-    }
+    void setMovieRating(double movieRating);
 
     @Bindable
-    public double getMovieRating() {
-        return mMovieRating;
-    }
+    boolean isTransitionEnabled();
 
-    public void setMovieRating(double movieRating) {
-        mMovieRating = movieRating;
-        notifyPropertyChanged(BR.movieRating);
-    }
+    void setTransitionEnabled(boolean transitionEnabled);
 
-    @Bindable
-    public boolean isTransitionEnabled() {
-        return mTransitionEnabled;
-    }
-
-    public void setTransitionEnabled(boolean transitionEnabled) {
-        mTransitionEnabled = transitionEnabled;
-        notifyPropertyChanged(BR.transitionEnabled);
-    }
-
-    public void onPlotClick(View view) {
-        Utils.expandOrCollapseTextView((TextView) view, mPlotMaxLines);
-    }
+    void onPlotClick(View view);
 }

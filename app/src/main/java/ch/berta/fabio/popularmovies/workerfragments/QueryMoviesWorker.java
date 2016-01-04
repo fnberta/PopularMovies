@@ -16,39 +16,29 @@
 
 package ch.berta.fabio.popularmovies.workerfragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
+import rx.Subscriber;
 
 /**
  * Queries TheMoviesDB for movies.
- * <p>
- * A {@link Fragment} with a single task: to perform an online query for movies from the
- * TheMovieDB. It is retained across configuration changes and reports back to its activity
- * via the callback interface {@link WorkerInteractionListener}.
- * </p>
+ * <p/>
+ * Subclass of {@link BaseWorker}.
  */
-public class QueryMoviesWorker extends Fragment implements
-        MovieRepository.GetMoviesOnlineListener {
+public class QueryMoviesWorker extends BaseWorker<QueryMoviesWorkerListener> {
 
+    public static final String WORKER_TAG = "WORKER_TAG";
     private static final String LOG_TAG = QueryMoviesWorker.class.getSimpleName();
-    private static final String BUNDLE_PAGE = "bundle_page";
-    private static final String BUNDLE_SORT = "bundle_sort";
-    @Nullable
-    private WorkerInteractionListener mActivity;
-    private MovieRepository mMovieRepo;
-
-    public QueryMoviesWorker() {
-        // required empty constructor
-    }
+    private static final String BUNDLE_PAGE = "BUNDLE_PAGE";
+    private static final String BUNDLE_SORT = "BUNDLE_SORT";
+    private final MovieRepository mMovieRepo = new MovieRepositoryImpl();
 
     /**
      * Returns a new instance of a {@link QueryMoviesWorker} with a page and sort options
@@ -70,81 +60,40 @@ public class QueryMoviesWorker extends Fragment implements
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mActivity = (WorkerInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement WorkerInteractionListener");
-        }
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setRetainInstance(true);
-
-        mMovieRepo = new MovieRepository();
-
-        Bundle args = getArguments();
-        int page = 0;
-        String sort = "";
-        if (args != null) {
-            page = args.getInt(BUNDLE_PAGE, 0);
-            sort = args.getString(BUNDLE_SORT, "");
-        }
-
-        if (page > 0 && !TextUtils.isEmpty(sort)) {
-            mMovieRepo.getMoviesOnline(getActivity(), page, sort, this);
-        } else if (mActivity != null) {
-            mActivity.onMoviesOnlineLoadFailed();
-        }
-    }
-
-    @Override
-    public void onMoviesOnlineLoaded(@NonNull List<Movie> movies) {
-        if (mActivity != null) {
-            mActivity.onMoviesOnlineLoaded(movies);
-        }
-    }
-
-    @Override
-    public void onMoviesOnlineLoadFailed() {
+    protected void onWorkerError() {
         if (mActivity != null) {
             mActivity.onMoviesOnlineLoadFailed();
         }
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
+    protected void startWork(@NonNull Bundle args) {
+        int page = args.getInt(BUNDLE_PAGE, 0);
+        String sort = args.getString(BUNDLE_SORT, "");
+        if (page == 0 || TextUtils.isEmpty(sort)) {
+            onWorkerError();
+            return;
+        }
 
-        mActivity = null;
-    }
+        mSubscriptions.add(mMovieRepo.getMoviesOnline(getActivity(), page, sort)
+                .subscribe(new Subscriber<List<Movie>>() {
+                    @Override
+                    public void onCompleted() {
 
-    @Override
-    public void onDestroy() {
-        mMovieRepo.cancelOnlineLoad();
+                    }
 
-        super.onDestroy();
-    }
+                    @Override
+                    public void onError(Throwable e) {
+                        onWorkerError();
+                    }
 
-    /**
-     * Handles the interaction of the WorkerFragment.
-     */
-    public interface WorkerInteractionListener {
-        /**
-         * Handles the event when movie query finished.
-         *
-         * @param movies the {@link List<Movie>} containing the queried movies
-         */
-        void onMoviesOnlineLoaded(@NonNull List<Movie> movies);
-
-        /**
-         * Handles the event when movie query failed.
-         */
-        void onMoviesOnlineLoadFailed();
+                    @Override
+                    public void onNext(List<Movie> movies) {
+                        if (mActivity != null) {
+                            mActivity.onMoviesOnlineLoaded(movies);
+                        }
+                    }
+                })
+        );
     }
 }

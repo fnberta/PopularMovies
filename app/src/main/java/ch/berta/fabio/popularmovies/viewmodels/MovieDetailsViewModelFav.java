@@ -17,10 +17,9 @@
 package ch.berta.fabio.popularmovies.viewmodels;
 
 import android.databinding.Bindable;
-import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 
-import ch.berta.fabio.popularmovies.data.models.MovieDetails;
+import ch.berta.fabio.popularmovies.workerfragments.UpdateMovieDetailsWorkerListener;
 
 /**
  * Defines a view model for the details screen of a favoured movie.
@@ -28,7 +27,7 @@ import ch.berta.fabio.popularmovies.data.models.MovieDetails;
  * Extends {@link MovieDetailsViewModel}.
  */
 public interface MovieDetailsViewModelFav extends
-        MovieDetailsViewModel<MovieDetailsViewModelFav.ViewInteractionListener> {
+        MovieDetailsViewModel<MovieDetailsViewModelFav.ViewInteractionListener>, UpdateMovieDetailsWorkerListener {
 
     @Bindable
     boolean isRefreshing();
@@ -46,11 +45,19 @@ public interface MovieDetailsViewModelFav extends
      */
     interface ViewInteractionListener extends MovieDetailsViewModel.ViewInteractionListener {
         /**
-         * Updates a movie in the local content provider with the details.
+         * Loads the worker fragment that queries for the details of a movie and updates them in the
+         * local content provider.
          *
-         * @param movieDetails the details to update the movie with
+         * @param movieDbId  the TheMovieDB id of the movie
+         * @param movieRowId the row id of the movie in the local content provider
          */
-        void updateMovieLocal(@NonNull MovieDetails movieDetails);
+        void loadUpdateMovieDetailsWorker(int movieDbId, long movieRowId);
+
+        /**
+         * Removes the worker fragment that queried for movie details and updated them in the local
+         * content provider.
+         */
+        void removeUpdateMovieDetailsWorker();
 
         /**
          * Hides the movie details screen.

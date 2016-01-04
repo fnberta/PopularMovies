@@ -19,9 +19,7 @@ package ch.berta.fabio.popularmovies.viewmodels;
 import android.databinding.Bindable;
 import android.databinding.Observable;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
 
-import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieInteractionListener;
 
 /**
@@ -38,7 +36,7 @@ public interface MovieGridViewModel<T> extends
     @Bindable
     boolean isMoviesLoaded();
 
-    void setMoviesLoaded(boolean moviesLoaiie);
+    void setMoviesLoaded(boolean moviesLoaded);
 
     @Bindable
     boolean isUserSelectedMovie();

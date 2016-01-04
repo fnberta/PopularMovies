@@ -29,6 +29,7 @@ import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.data.models.Sort;
 import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorker;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorkerListener;
 
 /**
  * Defines a view model for a list of online fetched movie posters.
@@ -37,7 +38,7 @@ import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorker;
  */
 public interface MovieGridViewModelOnl
         extends MovieGridViewModel<MovieGridViewModelOnl.ViewInteractionListener>,
-        MugenCallbacks, AdapterViewModel, QueryMoviesWorker.WorkerInteractionListener {
+        MugenCallbacks, AdapterViewModel, QueryMoviesWorkerListener {
 
     int TYPE_ITEM = 0;
     int TYPE_PROGRESS = 1;

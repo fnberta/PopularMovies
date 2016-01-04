@@ -35,7 +35,6 @@ import android.widget.ArrayAdapter;
 
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.MovieDetails;
@@ -48,15 +47,18 @@ import ch.berta.fabio.popularmovies.ui.fragments.MovieGridBaseFragment;
 import ch.berta.fabio.popularmovies.ui.fragments.MovieGridFavFragment;
 import ch.berta.fabio.popularmovies.ui.fragments.MovieGridOnlFragment;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel;
+import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelFav;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelFavImpl;
+import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelOnl;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelOnlImpl;
 import ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModel;
 import ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelFav;
 import ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelFavImpl;
 import ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelOnl;
 import ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelOnlImpl;
-import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
-import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorker;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorkerListener;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorkerListener;
+import ch.berta.fabio.popularmovies.workerfragments.UpdateMovieDetailsWorkerListener;
 
 /**
  * Provides the main entry point to the app and hosts a {@link MovieGridOnlFragment}.
@@ -64,8 +66,9 @@ import ch.berta.fabio.popularmovies.workerfragments.QueryMoviesWorker;
 public class MovieGridActivity extends AppCompatActivity implements
         MovieGridOnlFragment.FragmentInteractionListener,
         MovieGridFavFragment.FragmentInteractionListener,
-        QueryMoviesWorker.WorkerInteractionListener,
-        QueryMovieDetailsWorker.WorkerInteractionListener,
+        QueryMoviesWorkerListener,
+        QueryMovieDetailsWorkerListener,
+        UpdateMovieDetailsWorkerListener,
         MovieDetailsBaseFragment.FragmentInteractionListener {
 
     private static final String LOG_TAG = MovieGridActivity.class.getSimpleName();
@@ -114,7 +117,7 @@ public class MovieGridActivity extends AppCompatActivity implements
             mViewModel = savedInstanceState.getParcelable(STATE_VIEW_MODEL);
             if (mUseTwoPane) {
                 mDetailsViewModel = savedInstanceState.getParcelable(STATE_VIEW_MODEL_DETAILS);
-                mBinding.setVariable(BR.viewModelDetails, mDetailsViewModel);
+                mBinding.setViewModelDetails(mDetailsViewModel);
             }
         }
 
@@ -204,7 +207,7 @@ public class MovieGridActivity extends AppCompatActivity implements
 
         if (requestCode == MovieGridBaseFragment.REQUEST_MOVIE_DETAILS &&
                 resultCode == MovieDetailsFavFragment.RESULT_UNFAVOURED) {
-            Snackbar.make(mBinding.clMain, R.string.snackbar_removed_from_favorites,
+            Snackbar.make(mBinding.clMain, R.string.snackbar_movie_removed_from_favorites,
                     Snackbar.LENGTH_LONG).show();
         }
     }
@@ -242,7 +245,7 @@ public class MovieGridActivity extends AppCompatActivity implements
                 .commit();
 
         mViewModel.setUserSelectedMovie(true);
-        mBinding.setVariable(BR.viewModelDetails, mDetailsViewModel);
+        mBinding.setViewModelDetails(mDetailsViewModel);
     }
 
     @Override
@@ -259,11 +262,21 @@ public class MovieGridActivity extends AppCompatActivity implements
 
     @Override
     public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
-        mDetailsViewModel.onMovieDetailsOnlineLoaded(movieDetails);
+        ((MovieDetailsViewModelOnl) mDetailsViewModel).onMovieDetailsOnlineLoaded(movieDetails);
     }
 
     @Override
     public void onMovieDetailsOnlineLoadFailed() {
-        mDetailsViewModel.onMovieDetailsOnlineLoadFailed();
+        ((MovieDetailsViewModelOnl) mDetailsViewModel).onMovieDetailsOnlineLoadFailed();
+    }
+
+    @Override
+    public void onMovieDetailsUpdated() {
+        ((MovieDetailsViewModelFav) mDetailsViewModel).onMovieDetailsUpdated();
+    }
+
+    @Override
+    public void onMovieDetailsUpdateFailed() {
+        ((MovieDetailsViewModelFav) mDetailsViewModel).onMovieDetailsUpdateFailed();
     }
 }

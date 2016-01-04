@@ -35,9 +35,11 @@ import ch.berta.fabio.popularmovies.data.models.MoviesPage;
 import retrofit.Call;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
+import retrofit.RxJavaCallAdapterFactory;
 import retrofit.http.GET;
 import retrofit.http.Path;
 import retrofit.http.Query;
+import rx.Observable;
 
 /**
  * Provides a singleton {@link Retrofit} instance that queries TheMovieDB for movies.
@@ -45,13 +47,14 @@ import retrofit.http.Query;
 public class MovieDbClient {
 
     private static final String BASE_URL = "http://api.themoviedb.org/3/";
+    private static final String DATE_FORMAT = "yyyy-mm-dd";
     private static final Retrofit REST_ADAPTER = new Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create(getGsonObject()))
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
             .build();
     private static final PopularMovies POPULAR_MOVIES_SERVICE =
             REST_ADAPTER.create(PopularMovies.class);
-    private static final String DATE_FORMAT = "yyyy-mm-dd";
 
     private MovieDbClient() {
         // class cannot be instantiated
@@ -100,23 +103,24 @@ public class MovieDbClient {
          * @param page   the page to query
          * @param sortBy the option to sort movies by
          * @param apiKey the api key for querying TheMovieDB.
-         *
          * @return a {@link Call} object with the query
          */
         @GET("discover/movie")
-        Call<MoviesPage> loadMoviePosters(@Query("page") int page, @Query("sort_by") String sortBy,
-                                          @Query("api_key") String apiKey);
+        Observable<MoviesPage> loadMoviePosters(@Query("page") int page,
+                                                @Query("sort_by") String sortBy,
+                                                @Query("api_key") String apiKey);
 
         /**
          * Queries TheMovieDB for movie details.
-         * @param movieId the db id of the movie
-         * @param apiKey the api key for querying TheMovieDB.
-         * @param appendTo the extra query information to append
          *
+         * @param movieId  the db id of the movie
+         * @param apiKey   the api key for querying TheMovieDB.
+         * @param appendTo the extra query information to append
          * @return a {@link Call} object with the query
          */
         @GET("movie/{id}")
-        Call<MovieDetails> loadMovieDetails(@Path("id") int movieId, @Query("api_key") String apiKey,
-                                @Query("append_to_response") String appendTo);
+        Observable<MovieDetails> loadMovieDetails(@Path("id") int movieId,
+                                                  @Query("api_key") String apiKey,
+                                                  @Query("append_to_response") String appendTo);
     }
 }

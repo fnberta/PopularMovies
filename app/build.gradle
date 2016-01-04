@@ -42,6 +42,7 @@ android {
 
 ext {
     supportLibVersion = '23.1.1'
+    retrofitVersion = '2.0.0-beta2'
 }
 
 dependencies {
@@ -53,7 +54,10 @@ dependencies {
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
     compile "com.android.support:support-annotations:${supportLibVersion}"
     compile 'com.github.bumptech.glide:glide:3.6.1'
-    compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
-    compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
+    compile "com.squareup.retrofit:retrofit:${retrofitVersion}"
+    compile "com.squareup.retrofit:converter-gson:${retrofitVersion}"
+    compile "com.squareup.retrofit:adapter-rxjava:${retrofitVersion}"
     compile 'com.vinaysshenoy:mugen:1.0.2'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'io.reactivex:rxjava:1.1.0'
 }

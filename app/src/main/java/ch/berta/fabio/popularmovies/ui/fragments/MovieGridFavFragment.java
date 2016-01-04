@@ -16,7 +16,7 @@
 
 package ch.berta.fabio.popularmovies.ui.fragments;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import ch.berta.fabio.popularmovies.BuildConfig;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridFavBinding;
 import ch.berta.fabio.popularmovies.ui.activities.MovieDetailsActivity;
 import ch.berta.fabio.popularmovies.ui.adapters.MoviesFavRecyclerAdapter;
@@ -69,12 +70,13 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
         try {
-            mActivity = (FragmentInteractionListener) activity;
+            mActivity = (FragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement FragmentInteractionListener");
         }
     }
@@ -88,7 +90,7 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
             mViewModel = args.getParcelable(KEY_VIEW_MODEL);
         }
 
-        mMovieRepo = new MovieRepository();
+        mMovieRepo = new MovieRepositoryImpl();
     }
 
     @Nullable

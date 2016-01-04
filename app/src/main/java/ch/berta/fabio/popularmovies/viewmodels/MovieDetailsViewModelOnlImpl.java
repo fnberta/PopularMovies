@@ -30,7 +30,7 @@ import ch.berta.fabio.popularmovies.data.models.MovieDetails;
  * Subclass of {@link MovieDetailsViewModelBaseImpl}.
  */
 public class MovieDetailsViewModelOnlImpl extends
-        MovieDetailsViewModelBaseImpl<MovieDetailsViewModelBaseImpl.ViewInteractionListener> implements
+        MovieDetailsViewModelBaseImpl<MovieDetailsViewModelOnl.ViewInteractionListener> implements
         MovieDetailsViewModelOnl {
 
     public static final Creator<MovieDetailsViewModelOnlImpl> CREATOR = new Creator<MovieDetailsViewModelOnlImpl>() {
@@ -91,7 +91,7 @@ public class MovieDetailsViewModelOnlImpl extends
 
     @Override
     protected void onMovieDeletedOnePane() {
-        mView.showSnackbar(R.string.snackbar_removed_from_favorites, null);
+        mView.showSnackbar(R.string.snackbar_movie_removed_from_favorites, null);
     }
 
     @Override
@@ -113,7 +113,6 @@ public class MovieDetailsViewModelOnlImpl extends
     @Override
     public void onMovieDetailsOnlineLoadFailed() {
         mView.removeQueryMovieDetailsWorker();
-
-        mView.showSnackbar(R.string.snackbar_error_reviews_videos, null);
+        mView.showSnackbar(R.string.snackbar_movie_load_reviews_videos_failed, null);
     }
 }

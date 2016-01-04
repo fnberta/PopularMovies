@@ -16,7 +16,8 @@
 
 package ch.berta.fabio.popularmovies.ui.fragments;
 
-import android.app.Activity;
+import android.content.ContentProviderResult;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -27,7 +28,6 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,12 +38,13 @@ import android.view.MenuItem;
 import android.view.View;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.data.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
 import ch.berta.fabio.popularmovies.ui.adapters.MovieDetailsRecyclerAdapter;
-import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel;
-import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
+import rx.Observable;
 
 /**
  * Provides a base class for the display of detail information about a movie, including poster
@@ -54,7 +55,6 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
         MovieDetailsViewModel.ViewInteractionListener {
 
     static final String KEY_VIEW_MODEL = "KEY_VIEW_MODEL";
-    private static final String QUERY_MOVIE_DETAILS_WORKER = "QUERY_MOVIE_DETAILS_WORKER";
     private static final String LOG_TAG = MovieDetailsBaseFragment.class.getSimpleName();
     FragmentInteractionListener mActivity;
     boolean mUseTwoPane;
@@ -69,12 +69,13 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
         try {
-            mActivity = (FragmentInteractionListener) activity;
+            mActivity = (FragmentInteractionListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement FragmentInteractionListener");
         }
     }
@@ -86,7 +87,7 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
         setHasOptionsMenu(true);
 
         mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
-        mMovieRepo = new MovieRepository();
+        mMovieRepo = new MovieRepositoryImpl();
 
         mShareYoutubeIntent = new Intent(Intent.ACTION_SEND);
         mShareYoutubeIntent.setType("text/plain");
@@ -136,13 +137,6 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-
-        mMovieRepo.cancelLocalOperations();
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
 
@@ -174,24 +168,6 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     }
 
     @Override
-    public void loadQueryMovieDetailsWorker(int movieDbId) {
-        FragmentManager fragmentManager = getFragmentManager();
-        Fragment worker = WorkerUtils.findWorker(fragmentManager, QUERY_MOVIE_DETAILS_WORKER);
-
-        if (worker == null) {
-            worker = QueryMovieDetailsWorker.newInstance(movieDbId);
-            fragmentManager.beginTransaction()
-                    .add(worker, QUERY_MOVIE_DETAILS_WORKER)
-                    .commit();
-        }
-    }
-
-    @Override
-    public void removeQueryMovieDetailsWorker() {
-        WorkerUtils.removeWorker(getFragmentManager(), QUERY_MOVIE_DETAILS_WORKER);
-    }
-
-    @Override
     public void invalidateOptionsMenu() {
         getActivity().invalidateOptionsMenu();
     }
@@ -202,13 +178,13 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     }
 
     @Override
-    public void deleteMovieLocal() {
-        mMovieRepo.deleteMovieLocal(getActivity(), mViewModel);
+    public rx.Observable<Integer> deleteMovieLocal(long movieRowId) {
+        return mMovieRepo.deleteMovieLocal(getActivity(), movieRowId);
     }
 
     @Override
-    public void insertMovieLocal() {
-        mMovieRepo.insertMovieLocal(getActivity(), mViewModel);
+    public Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Movie movie) {
+        return mMovieRepo.insertMovieLocal(getActivity(), movie);
     }
 
     @Override

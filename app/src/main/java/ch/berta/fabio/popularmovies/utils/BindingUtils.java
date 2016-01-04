@@ -32,16 +32,16 @@ public class BindingUtils {
         // class cannot be instantiated
     }
 
+    @BindingAdapter({"colorScheme"})
+    public static void setColorScheme(SwipeRefreshLayout view, int[] colorScheme) {
+        view.setColorSchemeColors(colorScheme);
+    }
+
     @BindingAdapter({"backdropUrl"})
     public static void loadBackdrop(ImageView view, String backdropUrl) {
         Glide.with(view.getContext())
                 .load(backdropUrl)
                 .into(view);
-    }
-
-    @BindingAdapter({"colorScheme"})
-    public static void setColorScheme(SwipeRefreshLayout view, int[] colorScheme) {
-        view.setColorSchemeColors(colorScheme);
     }
 
     @BindingAdapter({"imageUrl", "fallback"})

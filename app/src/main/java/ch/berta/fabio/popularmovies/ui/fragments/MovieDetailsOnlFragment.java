@@ -19,6 +19,8 @@ package ch.berta.fabio.popularmovies.ui.fragments;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -29,8 +31,10 @@ import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.data.models.Movie;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsBinding;
+import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel;
 import ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModelOnl;
+import ch.berta.fabio.popularmovies.workerfragments.QueryMovieDetailsWorker;
 
 /**
  * Displays detail information about a movie, including poster image, release date, rating, an
@@ -137,6 +141,24 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
         super.onStop();
 
         mViewModel.detachView();
+    }
+
+    @Override
+    public void loadQueryMovieDetailsWorker(int movieDbId) {
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment worker = WorkerUtils.findWorker(fragmentManager, QueryMovieDetailsWorker.WORKER_TAG);
+
+        if (worker == null) {
+            worker = QueryMovieDetailsWorker.newInstance(movieDbId);
+            fragmentManager.beginTransaction()
+                    .add(worker, QueryMovieDetailsWorker.WORKER_TAG)
+                    .commit();
+        }
+    }
+
+    @Override
+    public void removeQueryMovieDetailsWorker() {
+        WorkerUtils.removeWorker(getFragmentManager(), QueryMovieDetailsWorker.WORKER_TAG);
     }
 
     @Override
