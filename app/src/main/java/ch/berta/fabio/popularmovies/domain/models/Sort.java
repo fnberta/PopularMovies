@@ -53,8 +53,8 @@ public class Sort implements Parcelable {
     }
 
     protected Sort(Parcel in) {
-        this.mOption = in.readString();
-        this.mReadableValue = in.readString();
+        mOption = in.readString();
+        mReadableValue = in.readString();
     }
 
     public String getOption() {
@@ -85,7 +85,7 @@ public class Sort implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mOption);
-        dest.writeString(this.mReadableValue);
+        dest.writeString(mOption);
+        dest.writeString(mReadableValue);
     }
 }

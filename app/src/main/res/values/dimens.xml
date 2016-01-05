@@ -30,7 +30,6 @@
     <dimen name="detail_poster_width">150dp</dimen>
     <dimen name="detail_review_row_height">104dp</dimen>
     <dimen name="detail_video_row_height">88dp</dimen>
-    <dimen name="detail_video_thumb_width">72dp</dimen>
     <dimen name="detail_two_pane_header_height">280dp</dimen>
 
     <!-- Toolbar -->
