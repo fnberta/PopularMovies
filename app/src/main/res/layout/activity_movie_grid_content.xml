@@ -13,13 +13,30 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<FrameLayout
-    android:id="@+id/container_main"
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:ignore="MergeRootFrame"
-    />
+    >
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel"
+            />
+
+        <variable
+            name="viewModelDetails"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel"
+            />
+    </data>
+
+    <FrameLayout
+        android:id="@+id/container_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:ignore="MergeRootFrame"
+        />
+</layout>

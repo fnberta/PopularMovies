@@ -13,56 +13,91 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<LinearLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:baselineAligned="false"
-    android:divider="?android:attr/dividerHorizontal"
-    android:orientation="horizontal"
-    android:showDividers="middle"
-    android:weightSum="100"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".ui.MainActivity"
-    >
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <FrameLayout
-        android:id="@+id/container_main"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="@integer/two_pane_list_width_percentage"
-        tools:ignore="MergeRootFrame"
-        tools:layout="@layout/fragment_movie_grid"
-        />
+    <data>
 
-    <FrameLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="@integer/two_pane_detail_width_percentage"
-        >
+        <import type="android.view.View"/>
 
-        <FrameLayout
-            android:id="@+id/container_details"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel"
             />
 
-        <TextView
-            android:id="@+id/empty_view"
-            style="@style/TextAppearance.AppCompat.Title"
+        <variable
+            name="viewModelDetails"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel"
+            />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:baselineAligned="false"
+            android:divider="?android:attr/dividerHorizontal"
+            android:orientation="horizontal"
+            android:showDividers="middle"
+            android:weightSum="100"
+            tools:context=".presentation.ui.MainActivity"
+            >
+
+            <FrameLayout
+                android:id="@+id/container_main"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="@integer/two_pane_list_width_percentage"
+                tools:ignore="MergeRootFrame"
+                tools:layout="@layout/fragment_movie_grid"
+                />
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="@integer/two_pane_detail_width_percentage"
+                >
+
+                <FrameLayout
+                    android:id="@+id/container_details"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    />
+
+                <TextView
+                    android:id="@+id/empty_view"
+                    style="@style/TextAppearance.AppCompat.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:drawablePadding="@dimen/small_space"
+                    android:drawableTop="@drawable/ic_movie_white_144dp"
+                    android:gravity="center_horizontal"
+                    android:text="@string/no_movie_selected"
+                    android:visibility="@{viewModel.userSelectedMovie ? View.GONE : View.VISIBLE}"
+                    />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_grid_favorite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:drawablePadding="@dimen/small_space"
-            android:drawableTop="@drawable/ic_movie_white_144dp"
-            android:gravity="center_horizontal"
-            android:text="@string/no_movie_selected"
-            android:visibility="gone"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/normal_space"
+            android:onClick="@{viewModelDetails.onFabClick}"
+            android:src="@{viewModelDetails.movieFavoured ? @drawable/ic_favorite_white_24dp : @drawable/ic_favorite_outline_white_24dp}"
+            android:visibility="@{viewModel.userSelectedMovie ? View.VISIBLE : View.GONE}"
             />
 
     </FrameLayout>
-
-</LinearLayout>
+</layout>

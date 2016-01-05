@@ -43,14 +43,16 @@ import static ch.berta.fabio.popularmovies.data.storage.MovieContract.PATH_VIDEO
  */
 public class MovieProvider extends ContentProvider {
 
-    private static final int URI_TYPE_MOVIE = 100;
+    private static final int URI_TYPE_MOVIES = 100;
     private static final int URI_TYPE_MOVIE_ID = 101;
     private static final int URI_TYPE_MOVIE_DB_ID = 102;
-    private static final int URI_TYPE_MOVIE_REVIEW_TRAILER_ID = 103;
-    private static final int URI_TYPE_REVIEW = 200;
+    private static final int URI_TYPE_MOVIE_ID_WITH_REVIEWS_TRAILERS = 103;
+    private static final int URI_TYPE_REVIEWS = 200;
     private static final int URI_TYPE_REVIEW_ID = 201;
-    private static final int URI_TYPE_VIDEO = 300;
+    private static final int URI_TYPE_REVIEWS_FROM_MOVIE_ID = 202;
+    private static final int URI_TYPE_VIDEOS = 300;
     private static final int URI_TYPE_VIDEO_ID = 301;
+    private static final int URI_TYPE_VIDEOS_FROM_MOVIE_ID = 302;
     private static final UriMatcher URI_MATCHER = buildUriMatcher();
     private SQLiteOpenHelper mOpenHelper;
 
@@ -60,18 +62,22 @@ public class MovieProvider extends ContentProvider {
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE, URI_TYPE_MOVIE);
+        matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE, URI_TYPE_MOVIES);
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE + "/#", URI_TYPE_MOVIE_ID);
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE + "/" + Movie.COLUMN_DB_ID + "/#",
                 URI_TYPE_MOVIE_DB_ID);
         matcher.addURI(CONTENT_AUTHORITY, PATH_MOVIE + "/" + PATH_REVIEW + "/" + PATH_VIDEO + "/#",
-                URI_TYPE_MOVIE_REVIEW_TRAILER_ID);
+                URI_TYPE_MOVIE_ID_WITH_REVIEWS_TRAILERS);
 
-        matcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW, URI_TYPE_REVIEW);
+        matcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW, URI_TYPE_REVIEWS);
         matcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW + "/#", URI_TYPE_REVIEW_ID);
+        matcher.addURI(CONTENT_AUTHORITY, PATH_REVIEW + "/" + PATH_MOVIE + "/#",
+                URI_TYPE_REVIEWS_FROM_MOVIE_ID);
 
-        matcher.addURI(CONTENT_AUTHORITY, PATH_VIDEO, URI_TYPE_VIDEO);
+        matcher.addURI(CONTENT_AUTHORITY, PATH_VIDEO, URI_TYPE_VIDEOS);
         matcher.addURI(CONTENT_AUTHORITY, PATH_VIDEO + "/#", URI_TYPE_VIDEO_ID);
+        matcher.addURI(CONTENT_AUTHORITY, PATH_VIDEO + "/" + PATH_MOVIE + "/#",
+                URI_TYPE_VIDEOS_FROM_MOVIE_ID);
 
         return matcher;
     }
@@ -86,22 +92,26 @@ public class MovieProvider extends ContentProvider {
     public String getType(@NonNull Uri uri) {
         int match = URI_MATCHER.match(uri);
         switch (match) {
-            case URI_TYPE_MOVIE:
+            case URI_TYPE_MOVIES:
                 return Movie.CONTENT_TYPE;
             case URI_TYPE_MOVIE_ID:
                 return Movie.CONTENT_ITEM_TYPE;
             case URI_TYPE_MOVIE_DB_ID:
                 return Movie.CONTENT_ITEM_TYPE;
-            case URI_TYPE_MOVIE_REVIEW_TRAILER_ID:
+            case URI_TYPE_MOVIE_ID_WITH_REVIEWS_TRAILERS:
                 return Movie.CONTENT_TYPE;
-            case URI_TYPE_REVIEW:
+            case URI_TYPE_REVIEWS:
                 return Review.CONTENT_TYPE;
             case URI_TYPE_REVIEW_ID:
                 return Review.CONTENT_ITEM_TYPE;
-            case URI_TYPE_VIDEO:
+            case URI_TYPE_REVIEWS_FROM_MOVIE_ID:
+                return Review.CONTENT_TYPE;
+            case URI_TYPE_VIDEOS:
                 return Video.CONTENT_TYPE;
             case URI_TYPE_VIDEO_ID:
                 return Video.CONTENT_ITEM_TYPE;
+            case URI_TYPE_VIDEOS_FROM_MOVIE_ID:
+                return Video.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -114,7 +124,7 @@ public class MovieProvider extends ContentProvider {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         int match = URI_MATCHER.match(uri);
         switch (match) {
-            case URI_TYPE_MOVIE:
+            case URI_TYPE_MOVIES:
                 queryBuilder.setTables(Movie.TABLE_NAME);
                 // no selection
                 break;
@@ -126,7 +136,7 @@ public class MovieProvider extends ContentProvider {
                 queryBuilder.setTables(Movie.TABLE_NAME);
                 queryBuilder.appendWhere(Movie.COLUMN_DB_ID + " = " + ContentUris.parseId(uri));
                 break;
-            case URI_TYPE_MOVIE_REVIEW_TRAILER_ID:
+            case URI_TYPE_MOVIE_ID_WITH_REVIEWS_TRAILERS:
                 queryBuilder.setTables(Movie.TABLE_NAME
                                 + " LEFT JOIN "
                                 + Review.TABLE_NAME
@@ -143,7 +153,7 @@ public class MovieProvider extends ContentProvider {
                 );
                 queryBuilder.appendWhere(Movie.TABLE_NAME + "." + Movie._ID + " = " + Movie.getMovieIdFromUri(uri));
                 break;
-            case URI_TYPE_REVIEW:
+            case URI_TYPE_REVIEWS:
                 queryBuilder.setTables(Review.TABLE_NAME);
                 // no selection
                 break;
@@ -151,13 +161,21 @@ public class MovieProvider extends ContentProvider {
                 queryBuilder.setTables(Review.TABLE_NAME);
                 queryBuilder.appendWhere(Review._ID + " = " + ContentUris.parseId(uri));
                 break;
-            case URI_TYPE_VIDEO:
+            case URI_TYPE_REVIEWS_FROM_MOVIE_ID:
+                queryBuilder.setTables(Review.TABLE_NAME);
+                queryBuilder.appendWhere(Review.COLUMN_MOVIE_ID + " = " + Review.getMovieIdFromUri(uri));
+                break;
+            case URI_TYPE_VIDEOS:
                 queryBuilder.setTables(Video.TABLE_NAME);
                 // no selection
                 break;
             case URI_TYPE_VIDEO_ID:
                 queryBuilder.setTables(Video.TABLE_NAME);
                 queryBuilder.appendWhere(Video._ID + " = " + ContentUris.parseId(uri));
+                break;
+            case URI_TYPE_VIDEOS_FROM_MOVIE_ID:
+                queryBuilder.setTables(Video.TABLE_NAME);
+                queryBuilder.appendWhere(Video.COLUMN_MOVIE_ID + " = " + Video.getMovieIdFromUri(uri));
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -178,7 +196,7 @@ public class MovieProvider extends ContentProvider {
         Uri returnUri;
         int match = URI_MATCHER.match(uri);
         switch (match) {
-            case URI_TYPE_MOVIE: {
+            case URI_TYPE_MOVIES: {
                 long id = db.insert(Movie.TABLE_NAME, null, values);
                 if (id > 0) {
                     returnUri = Movie.buildMovieUri(id);
@@ -188,7 +206,7 @@ public class MovieProvider extends ContentProvider {
 
                 break;
             }
-            case URI_TYPE_REVIEW: {
+            case URI_TYPE_REVIEWS: {
                 long id = db.insert(Review.TABLE_NAME, null, values);
                 if (id > 0) {
                     returnUri = Review.buildReviewUri(id);
@@ -198,7 +216,7 @@ public class MovieProvider extends ContentProvider {
 
                 break;
             }
-            case URI_TYPE_VIDEO: {
+            case URI_TYPE_VIDEOS: {
                 long id = db.insert(Video.TABLE_NAME, null, values);
                 if (id > 0) {
                     returnUri = Video.buildVideoUri(id);
@@ -229,11 +247,11 @@ public class MovieProvider extends ContentProvider {
 
         final int match = URI_MATCHER.match(uri);
         switch (match) {
-            case URI_TYPE_MOVIE:
+            case URI_TYPE_MOVIES:
                 return bulkInsert(uri, values, db, Movie.TABLE_NAME);
-            case URI_TYPE_REVIEW:
+            case URI_TYPE_REVIEWS:
                 return bulkInsert(uri, values, db, Review.TABLE_NAME);
-            case URI_TYPE_VIDEO:
+            case URI_TYPE_VIDEOS:
                 return bulkInsert(uri, values, db, Video.TABLE_NAME);
             default:
                 return super.bulkInsert(uri, values);
@@ -271,7 +289,7 @@ public class MovieProvider extends ContentProvider {
 
         final int match = URI_MATCHER.match(uri);
         switch (match) {
-            case URI_TYPE_MOVIE:
+            case URI_TYPE_MOVIES:
                 rowsUpdated = db.update(Movie.TABLE_NAME, values, selection, selectionArgs);
                 break;
             case URI_TYPE_MOVIE_ID: {
@@ -290,7 +308,7 @@ public class MovieProvider extends ContentProvider {
                 rowsUpdated = db.update(Movie.TABLE_NAME, values, where, selectionArgs);
                 break;
             }
-            case URI_TYPE_REVIEW: {
+            case URI_TYPE_REVIEWS: {
                 rowsUpdated = db.update(Review.TABLE_NAME, values, selection, selectionArgs);
                 break;
             }
@@ -302,7 +320,7 @@ public class MovieProvider extends ContentProvider {
                 rowsUpdated = db.update(Review.TABLE_NAME, values, where, selectionArgs);
                 break;
             }
-            case URI_TYPE_VIDEO: {
+            case URI_TYPE_VIDEOS: {
                 rowsUpdated = db.update(Video.TABLE_NAME, values, selection, selectionArgs);
                 break;
             }
@@ -331,7 +349,7 @@ public class MovieProvider extends ContentProvider {
 
         final int match = URI_MATCHER.match(uri);
         switch (match) {
-            case URI_TYPE_MOVIE:
+            case URI_TYPE_MOVIES:
                 rowsDeleted = db.delete(Movie.TABLE_NAME, selection, selectionArgs);
                 break;
             case URI_TYPE_MOVIE_ID: {
@@ -350,7 +368,7 @@ public class MovieProvider extends ContentProvider {
                 rowsDeleted = db.delete(Movie.TABLE_NAME, where, selectionArgs);
                 break;
             }
-            case URI_TYPE_REVIEW: {
+            case URI_TYPE_REVIEWS: {
                 rowsDeleted = db.delete(Review.TABLE_NAME, selection, selectionArgs);
                 break;
             }
@@ -362,12 +380,28 @@ public class MovieProvider extends ContentProvider {
                 rowsDeleted = db.delete(Review.TABLE_NAME, where, selectionArgs);
                 break;
             }
-            case URI_TYPE_VIDEO: {
+            case URI_TYPE_REVIEWS_FROM_MOVIE_ID: {
+                String where = Review.COLUMN_MOVIE_ID + " = " + Review.getMovieIdFromUri(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsDeleted = db.delete(Review.TABLE_NAME, where, selectionArgs);
+                break;
+            }
+            case URI_TYPE_VIDEOS: {
                 rowsDeleted = db.delete(Video.TABLE_NAME, selection, selectionArgs);
                 break;
             }
             case URI_TYPE_VIDEO_ID: {
                 String where = Video._ID + " = " + ContentUris.parseId(uri);
+                if (!TextUtils.isEmpty(selection)) {
+                    where += " AND " + selection;
+                }
+                rowsDeleted = db.delete(Video.TABLE_NAME, where, selectionArgs);
+                break;
+            }
+            case URI_TYPE_VIDEOS_FROM_MOVIE_ID: {
+                String where = Video.COLUMN_MOVIE_ID + " = " + Video.getMovieIdFromUri(uri);
                 if (!TextUtils.isEmpty(selection)) {
                     where += " AND " + selection;
                 }

@@ -14,16 +14,26 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<TextView
-    android:id="@+id/tv_header"
-    style="@style/SubHeader"
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/sub_header_height"
-    android:gravity="center_vertical"
-    android:paddingEnd="@dimen/key_line_1"
-    android:paddingStart="@dimen/key_line_1"
-    tools:text="Items"
-    />
+    >
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.rows.HeaderRowViewModelImpl"
+            />
+    </data>
+
+    <TextView
+        android:id="@+id/tv_header"
+        style="@style/SubHeader"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sub_header_height"
+        android:gravity="center_vertical"
+        android:paddingEnd="@dimen/key_line_1"
+        android:paddingStart="@dimen/key_line_1"
+        android:text="@{viewModel.header}"
+        />
+</layout>
