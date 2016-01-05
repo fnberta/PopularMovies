@@ -35,16 +35,16 @@ import com.mugen.Mugen;
 
 import ch.berta.fabio.popularmovies.BuildConfig;
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridOnlBinding;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
-import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridBinding;
 import ch.berta.fabio.popularmovies.presentation.ui.activities.MovieDetailsActivity;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MoviesRecyclerAdapter;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.decorators.PosterGridItemDecoration;
-import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelOnl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorker;
+import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 
 /**
  * Displays a grid of movie poster images.
@@ -55,7 +55,7 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment implements
     public static final String INTENT_MOVIE_SELECTED = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED";
     private static final String LOG_TAG = MovieGridOnlFragment.class.getSimpleName();
     private MoviesRecyclerAdapter mRecyclerAdapter;
-    private FragmentMovieGridBinding mBinding;
+    private FragmentMovieGridOnlBinding mBinding;
     private MovieGridViewModelOnl mViewModel;
     private FragmentInteractionListener mActivity;
 
@@ -99,7 +99,7 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mBinding = FragmentMovieGridBinding.inflate(inflater, container, false);
+        mBinding = FragmentMovieGridOnlBinding.inflate(inflater, container, false);
         mBinding.setViewModel(mViewModel);
         return mBinding.getRoot();
     }

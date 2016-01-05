@@ -56,7 +56,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="@integer/two_pane_list_width_percentage"
                 tools:ignore="MergeRootFrame"
-                tools:layout="@layout/fragment_movie_grid"
+                tools:layout="@layout/fragment_movie_grid_onl"
                 />
 
             <FrameLayout

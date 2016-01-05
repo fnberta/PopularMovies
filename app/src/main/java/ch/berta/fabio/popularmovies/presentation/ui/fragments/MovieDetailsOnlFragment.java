@@ -29,12 +29,12 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsOnlBinding;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
-import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsBinding;
-import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorker;
+import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 
 /**
  * Displays detail information about a movie, including poster image, release date, rating, an
@@ -49,7 +49,7 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
 
     private static final String LOG_TAG = MovieDetailsOnlFragment.class.getSimpleName();
     private static final int LOADER_IS_FAV = 0;
-    private FragmentMovieDetailsBinding mBinding;
+    private FragmentMovieDetailsOnlBinding mBinding;
 
     public MovieDetailsOnlFragment() {
         // Required empty public constructor
@@ -84,7 +84,7 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mBinding = FragmentMovieDetailsBinding.inflate(inflater, container, false);
+        mBinding = FragmentMovieDetailsOnlBinding.inflate(inflater, container, false);
         mBinding.setViewModel(mViewModel);
         return mBinding.getRoot();
     }
