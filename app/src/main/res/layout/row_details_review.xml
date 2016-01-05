@@ -75,7 +75,7 @@
             android:layout_height="1dp"
             android:layout_gravity="bottom"
             android:background="?android:listDivider"
-            android:visibility="@{viewModel.reviewLastPosition ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewModel.reviewLastPosition ? View.GONE : View.VISIBLE}"
             />
 
     </FrameLayout>
