@@ -24,12 +24,12 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModel"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel"
             />
 
         <variable
             name="viewModelDetails"
-            type="ch.berta.fabio.popularmovies.viewmodels.MovieDetailsViewModel"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel"
             />
     </data>
 

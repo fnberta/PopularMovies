@@ -29,12 +29,12 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.viewmodels.rows.DetailsInfoRowViewModelImpl"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.rows.DetailsInfoRowViewModelImpl"
             />
 
         <variable
             name="detailsListener"
-            type="ch.berta.fabio.popularmovies.ui.adapters.listeners.MovieDetailsInteractionListener"
+            type="ch.berta.fabio.popularmovies.presentation.ui.adapters.listeners.MovieDetailsInteractionListener"
             />
     </data>
 

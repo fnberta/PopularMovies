@@ -24,7 +24,7 @@
 
         <variable
             name="video"
-            type="ch.berta.fabio.popularmovies.data.models.Video"
+            type="ch.berta.fabio.popularmovies.domain.models.Video"
             />
     </data>
 

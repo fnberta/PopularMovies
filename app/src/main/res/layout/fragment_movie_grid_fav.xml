@@ -28,14 +28,14 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.viewmodels.MovieGridViewModelFav"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelFav"
             />
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.fragments.MovieGridFavFragment"
+        tools:context=".presentation.ui.fragments.MovieGridFavFragment"
         >
 
         <android.support.v7.widget.RecyclerView

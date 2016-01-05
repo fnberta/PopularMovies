@@ -26,7 +26,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.viewmodels.rows.MovieRowViewModelImpl"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.rows.MovieRowViewModelImpl"
             />
     </data>
 

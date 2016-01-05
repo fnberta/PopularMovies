@@ -30,8 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import ch.berta.fabio.popularmovies.data.models.MovieDetails;
-import ch.berta.fabio.popularmovies.data.models.MoviesPage;
+import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
+import ch.berta.fabio.popularmovies.domain.models.MoviesPage;
 import retrofit.Call;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;

@@ -22,7 +22,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.viewmodels.rows.HeaderRowViewModelImpl"
+            type="ch.berta.fabio.popularmovies.presentation.viewmodels.rows.HeaderRowViewModelImpl"
             />
     </data>
 
