@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.data.repositories;
 
+import android.app.Application;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -29,13 +30,13 @@ import java.util.Date;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.data.rest.MovieService;
+import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import ch.berta.fabio.popularmovies.domain.models.MoviesPage;
 import ch.berta.fabio.popularmovies.domain.models.Review;
 import ch.berta.fabio.popularmovies.domain.models.Video;
-import ch.berta.fabio.popularmovies.data.rest.MovieDbClient;
-import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -98,17 +99,21 @@ public class MovieRepositoryImpl implements MovieRepository {
             MovieContract.Video.COLUMN_SIZE,
             MovieContract.Video.COLUMN_TYPE
     };
+    private final Context mAppContext;
+    private final MovieService mMovieService;
 
     /**
      * Constructs a new {@link MovieRepositoryImpl}.
      */
-    public MovieRepositoryImpl() {
+    public MovieRepositoryImpl(@NonNull Application app, @NonNull MovieService movieService) {
+        mAppContext = app;
+        mMovieService = movieService;
     }
 
     @Override
-    public Observable<List<Movie>> getMoviesOnline(@NonNull Context context, int page, @NonNull String sort) {
-        return MovieDbClient.getService().loadMoviePosters(page, sort,
-                context.getString(R.string.movie_db_key))
+    public Observable<List<Movie>> getMoviesOnline(int page, @NonNull String sort) {
+        return mMovieService.loadMoviePosters(page, sort,
+                mAppContext.getString(R.string.movie_db_key))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<MoviesPage, List<Movie>>() {
@@ -120,9 +125,9 @@ public class MovieRepositoryImpl implements MovieRepository {
     }
 
     @Override
-    public Observable<MovieDetails> getMovieDetailsOnline(@NonNull Context context, int movieDbId) {
-        return MovieDbClient.getService().loadMovieDetails(movieDbId,
-                context.getString(R.string.movie_db_key), "reviews,videos")
+    public Observable<MovieDetails> getMovieDetailsOnline(int movieDbId) {
+        return mMovieService.loadMovieDetails(movieDbId,
+                mAppContext.getString(R.string.movie_db_key), "reviews,videos")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -234,8 +239,7 @@ public class MovieRepositoryImpl implements MovieRepository {
     }
 
     @Override
-    public Observable<ContentProviderResult[]> insertMovieLocal(@NonNull final Context context,
-                                                                @NonNull Movie movie) {
+    public Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Movie movie) {
         return Observable.just(movie)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -249,7 +253,7 @@ public class MovieRepositoryImpl implements MovieRepository {
                     @Override
                     public ContentProviderResult[] call(ArrayList<ContentProviderOperation> ops) {
                         try {
-                            final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+                            final ContentResolver contentResolver = mAppContext.getApplicationContext().getContentResolver();
                             return contentResolver.applyBatch(MovieContract.CONTENT_AUTHORITY, ops);
                         } catch (Throwable t) {
                             throw Exceptions.propagate(t);
@@ -297,22 +301,21 @@ public class MovieRepositoryImpl implements MovieRepository {
     }
 
     @Override
-    public Observable<Integer> deleteMovieLocal(@NonNull final Context context, long movieRowId) {
+    public Observable<Integer> deleteMovieLocal(long movieRowId) {
         return Observable.just(movieRowId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<Long, Integer>() {
                     @Override
                     public Integer call(Long aLong) {
-                        final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+                        final ContentResolver contentResolver = mAppContext.getApplicationContext().getContentResolver();
                         return contentResolver.delete(MovieContract.Movie.buildMovieUri(aLong), null, null);
                     }
                 });
     }
 
     @Override
-    public Observable<ContentProviderResult[]> updateMovieLocal(@NonNull final Context context,
-                                                                @NonNull final MovieDetails movieDetails,
+    public Observable<ContentProviderResult[]> updateMovieLocal(@NonNull final MovieDetails movieDetails,
                                                                 final long movieRowId) {
         return Observable.just(movieDetails)
                 .subscribeOn(Schedulers.io())
@@ -327,7 +330,7 @@ public class MovieRepositoryImpl implements MovieRepository {
                     @Override
                     public ContentProviderResult[] call(ArrayList<ContentProviderOperation> contentProviderOperations) {
                         try {
-                            final ContentResolver contentResolver = context.getApplicationContext().getContentResolver();
+                            final ContentResolver contentResolver = mAppContext.getApplicationContext().getContentResolver();
                             return contentResolver.applyBatch(MovieContract.CONTENT_AUTHORITY,
                                     contentProviderOperations);
                         } catch (Throwable t) {

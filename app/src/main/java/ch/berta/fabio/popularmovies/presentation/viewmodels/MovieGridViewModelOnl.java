@@ -27,7 +27,6 @@ import com.mugen.MugenCallbacks;
 
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
-import ch.berta.fabio.popularmovies.domain.models.Sort;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorker;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorkerListener;
 
@@ -51,8 +50,9 @@ public interface MovieGridViewModelOnl
 
     SwipeRefreshLayout.OnRefreshListener getOnRefreshListener();
 
-    void onSortOptionSelected(@NonNull Sort sortSelected);
-
+    /**
+     * Loads the movies onto the screen.
+     */
     void loadMovies();
 
     /**
@@ -74,7 +74,7 @@ public interface MovieGridViewModelOnl
     /**
      * Defines the interaction with the view.
      */
-    interface ViewInteractionListener {
+    interface ViewInteractionListener extends MovieGridViewModel.ViewInteractionListener {
         /**
          * Shows a snackbar with an optional click action
          *
@@ -135,5 +135,10 @@ public interface MovieGridViewModelOnl
          * @param posterSharedElement the poster image to use for the shared element transition
          */
         void launchDetailsScreen(@NonNull Movie movie, @NonNull View posterSharedElement);
+
+        /**
+         * Switches the main view to showing the user's favoured movies.
+         */
+        void showFavoriteMovies();
     }
 }

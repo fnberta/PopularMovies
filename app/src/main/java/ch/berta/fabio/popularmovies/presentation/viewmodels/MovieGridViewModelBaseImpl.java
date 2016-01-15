@@ -18,41 +18,50 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.os.Parcel;
+import android.os.Bundle;
+import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.view.View;
+import android.widget.AdapterView;
 
 import ch.berta.fabio.popularmovies.BR;
+import ch.berta.fabio.popularmovies.domain.models.Sort;
 
 /**
  * Provides an abstract base class that implements {@link MovieGridViewModel}.
  * <p/>
  * Subclass of {@link BaseObservable}.
  */
-public abstract class MovieGridViewModelBaseImpl<T>
-        extends BaseObservable
+public abstract class MovieGridViewModelBaseImpl<T extends MovieGridViewModel.ViewInteractionListener>
+        extends ViewModelBaseImpl<T>
         implements MovieGridViewModel<T> {
 
-    T mView;
+    private static final String STATE_MOVIES_AVAILABLE = "STATE_MOVIES_AVAILABLE";
+    private static final String STATE_MOVIES_LOADED = "STATE_MOVIES_LOADED";
+    private static final String STATE_USER_SELECTED_MOVIE = "STATE_USER_SELECTED_MOVIE";
+    private static final String STATE_DB_ID_SELECTED = "STATE_DB_ID_SELECTED";
+    int mMovieDbIdSelected;
     private boolean mMoviesAvailable;
     private boolean mMoviesLoaded;
     private boolean mUserSelectedMovie;
 
-    public MovieGridViewModelBaseImpl() {
-    }
-
-    protected MovieGridViewModelBaseImpl(Parcel in) {
-        mMoviesAvailable = in.readByte() != 0;
-        mMoviesLoaded = in.readByte() != 0;
-        mUserSelectedMovie = in.readByte() != 0;
-    }
-
-    @Override
-    public void attachView(T view) {
-        mView = view;
+    public MovieGridViewModelBaseImpl(@Nullable Bundle savedState) {
+        if (savedState != null) {
+            mMoviesAvailable = savedState.getBoolean(STATE_MOVIES_AVAILABLE);
+            mMoviesLoaded = savedState.getBoolean(STATE_MOVIES_LOADED);
+            mUserSelectedMovie = savedState.getBoolean(STATE_USER_SELECTED_MOVIE);
+            mMovieDbIdSelected = savedState.getInt(STATE_DB_ID_SELECTED);
+        }
     }
 
     @Override
-    public void detachView() {
-        mView = null;
+    @CallSuper
+    public void saveState(@NonNull Bundle outState) {
+        outState.putBoolean(STATE_MOVIES_AVAILABLE, mMoviesAvailable);
+        outState.putBoolean(STATE_MOVIES_LOADED, mMoviesLoaded);
+        outState.putBoolean(STATE_USER_SELECTED_MOVIE, mUserSelectedMovie);
+        outState.putInt(STATE_DB_ID_SELECTED, mMovieDbIdSelected);
     }
 
     @Override
@@ -92,14 +101,12 @@ public abstract class MovieGridViewModelBaseImpl<T>
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public void onSortSelected(AdapterView<?> parent, View view, int position, long id) {
+        final Sort sort = ((Sort) parent.getSelectedItem());
+        mView.persistSort(sort, position);
+        mView.hideDetailsView();
+        switchSort(sort);
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte(mMoviesAvailable ? (byte) 1 : (byte) 0);
-        dest.writeByte(mMoviesLoaded ? (byte) 1 : (byte) 0);
-        dest.writeByte(mUserSelectedMovie ? (byte) 1 : (byte) 0);
-    }
+    protected abstract void switchSort(@NonNull Sort sort);
 }

@@ -17,8 +17,9 @@
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
 import android.databinding.Bindable;
-import android.os.Parcel;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 
@@ -40,43 +41,44 @@ public class MovieGridViewModelOnlImpl extends
         MovieGridViewModelBaseImpl<MovieGridViewModelOnl.ViewInteractionListener> implements
         MovieGridViewModelOnl {
 
-    public static final Creator<MovieGridViewModelOnlImpl> CREATOR = new Creator<MovieGridViewModelOnlImpl>() {
-        public MovieGridViewModelOnlImpl createFromParcel(Parcel source) {
-            return new MovieGridViewModelOnlImpl(source);
-        }
-
-        public MovieGridViewModelOnlImpl[] newArray(int size) {
-            return new MovieGridViewModelOnlImpl[size];
-        }
-    };
+    private static final String STATE_MOVIE_PAGE = "STATE_MOVIE_PAGE";
+    private static final String STATE_REFRESHING = "STATE_REFRESHING";
+    private static final String STATE_LOADING_MORE = "STATE_LOADING_MORE";
+    private static final String STATE_LOADING_NEW_SORT = "STATE_LOADING_NEW_SORT";
     private final List<Movie> mMovies;
     private int mMoviePage;
     private boolean mRefreshing;
     private boolean mLoadingMore;
     private boolean mLoadingNewSort;
     private Sort mSortSelected;
-    private int mMovieDbIdSelected;
 
     /**
      * Constructs a new {@link MovieGridViewModelOnlImpl}.
      *
      * @param sortSelected the currently selected sort option
      */
-    public MovieGridViewModelOnlImpl(@NonNull Sort sortSelected) {
+    public MovieGridViewModelOnlImpl(@Nullable Bundle savedState, @NonNull Sort sortSelected) {
+        super(savedState);
+
         mSortSelected = sortSelected;
         mMovies = new ArrayList<>();
+
+        if (savedState != null) {
+            mMoviePage = savedState.getInt(STATE_MOVIE_PAGE);
+            mRefreshing = savedState.getBoolean(STATE_REFRESHING);
+            mLoadingMore = savedState.getBoolean(STATE_LOADING_MORE);
+            mLoadingNewSort = savedState.getBoolean(STATE_LOADING_NEW_SORT);
+        }
     }
 
-    protected MovieGridViewModelOnlImpl(Parcel in) {
-        super(in);
+    @Override
+    public void saveState(@NonNull Bundle outState) {
+        super.saveState(outState);
 
-        mMovies = in.createTypedArrayList(Movie.CREATOR);
-        mMoviePage = in.readInt();
-        mRefreshing = in.readByte() != 0;
-        mLoadingMore = in.readByte() != 0;
-        mLoadingNewSort = in.readByte() != 0;
-        mSortSelected = in.readParcelable(Sort.class.getClassLoader());
-        mMovieDbIdSelected = in.readInt();
+        outState.putInt(STATE_MOVIE_PAGE, mMoviePage);
+        outState.putBoolean(STATE_REFRESHING, mRefreshing);
+        outState.putBoolean(STATE_LOADING_MORE, mLoadingMore);
+        outState.putBoolean(STATE_LOADING_NEW_SORT, mLoadingNewSort);
     }
 
     @Override
@@ -101,19 +103,6 @@ public class MovieGridViewModelOnlImpl extends
                 mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
             }
         };
-    }
-
-    @Override
-    public void onSortOptionSelected(@NonNull Sort sortSelected) {
-        mSortSelected = sortSelected;
-
-        setMoviesLoaded(false);
-        setRefreshing(false);
-        mLoadingMore = false;
-        mLoadingNewSort = true;
-        mMoviePage = 1;
-
-        mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), true);
     }
 
     @Override
@@ -266,15 +255,20 @@ public class MovieGridViewModelOnlImpl extends
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+    protected void switchSort(@NonNull Sort sort) {
+        if (sort.getOption().equals(Sort.SORT_FAVORITE)) {
+            mView.showFavoriteMovies();
+            return;
+        }
 
-        dest.writeTypedList(mMovies);
-        dest.writeInt(mMoviePage);
-        dest.writeByte(mRefreshing ? (byte) 1 : (byte) 0);
-        dest.writeByte(mLoadingMore ? (byte) 1 : (byte) 0);
-        dest.writeByte(mLoadingNewSort ? (byte) 1 : (byte) 0);
-        dest.writeParcelable(mSortSelected, 0);
-        dest.writeInt(mMovieDbIdSelected);
+        mSortSelected = sort;
+
+        setMoviesLoaded(false);
+        setRefreshing(false);
+        mLoadingMore = false;
+        mLoadingNewSort = true;
+        mMoviePage = 1;
+
+        mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), true);
     }
 }

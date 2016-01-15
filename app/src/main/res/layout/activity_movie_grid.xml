@@ -59,6 +59,7 @@
                     android:id="@+id/sp_grid_sort"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:onItemSelected="@{viewModel.onSortSelected}"
                     />
 
             </android.support.v7.widget.Toolbar>

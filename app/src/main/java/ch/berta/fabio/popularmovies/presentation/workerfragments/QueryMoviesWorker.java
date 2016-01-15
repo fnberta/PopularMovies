@@ -22,9 +22,9 @@ import android.text.TextUtils;
 
 import java.util.List;
 
+
+import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
-import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
 import rx.Subscriber;
 
 /**
@@ -38,7 +38,6 @@ public class QueryMoviesWorker extends BaseWorker<QueryMoviesWorkerListener> {
     private static final String LOG_TAG = QueryMoviesWorker.class.getSimpleName();
     private static final String BUNDLE_PAGE = "BUNDLE_PAGE";
     private static final String BUNDLE_SORT = "BUNDLE_SORT";
-    private final MovieRepository mMovieRepo = new MovieRepositoryImpl();
 
     /**
      * Returns a new instance of a {@link QueryMoviesWorker} with a page and sort options
@@ -60,6 +59,11 @@ public class QueryMoviesWorker extends BaseWorker<QueryMoviesWorkerListener> {
     }
 
     @Override
+    protected void injectDependencies(@NonNull WorkerComponent workerComponent) {
+        workerComponent.inject(this);
+    }
+
+    @Override
     protected void onWorkerError() {
         if (mActivity != null) {
             mActivity.onMoviesOnlineLoadFailed();
@@ -75,7 +79,7 @@ public class QueryMoviesWorker extends BaseWorker<QueryMoviesWorkerListener> {
             return;
         }
 
-        mSubscriptions.add(mMovieRepo.getMoviesOnline(getActivity(), page, sort)
+        mSubscriptions.add(mMovieRepo.getMoviesOnline(page, sort)
                 .subscribe(new Subscriber<List<Movie>>() {
                     @Override
                     public void onCompleted() {

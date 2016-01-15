@@ -16,7 +16,6 @@
 
 package ch.berta.fabio.popularmovies.presentation.ui.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -29,68 +28,50 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import javax.inject.Inject;
+
 import ch.berta.fabio.popularmovies.BuildConfig;
+import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
-import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridFavBinding;
+import ch.berta.fabio.popularmovies.di.components.DaggerMovieGridComponent;
+import ch.berta.fabio.popularmovies.di.modules.MovieGridViewModelModule;
+import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
+import ch.berta.fabio.popularmovies.domain.models.Sort;
+import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.presentation.ui.activities.MovieDetailsActivity;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MoviesFavRecyclerAdapter;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.decorators.PosterGridItemDecoration;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelFav;
 
 /**
  * Displays a grid of movie poster images.
  */
-public class MovieGridFavFragment extends MovieGridBaseFragment implements
+public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewModelFav, MovieGridBaseFragment.ActivityListener> implements
         MovieGridViewModelFav.ViewInteractionListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String INTENT_MOVIE_SELECTED_ROW_ID = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED_ROW_ID";
     private static final int FAV_MOVIES_LOADER = 0;
+    @Inject
+    MovieRepository mMovieRepo;
     private MoviesFavRecyclerAdapter mRecyclerAdapter;
-    private MovieRepository mMovieRepo;
     private FragmentMovieGridFavBinding mBinding;
-    private MovieGridViewModelFav mViewModel;
-    private FragmentInteractionListener mActivity;
 
     public MovieGridFavFragment() {
         // required empty constructor
-    }
-
-    public static MovieGridFavFragment newInstance(@NonNull MovieGridViewModel viewModel) {
-        MovieGridFavFragment fragment = new MovieGridFavFragment();
-
-        Bundle args = new Bundle();
-        args.putParcelable(KEY_VIEW_MODEL, viewModel);
-
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            mActivity = (FragmentInteractionListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement FragmentInteractionListener");
-        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle args = getArguments();
-        if (args != null) {
-            mViewModel = args.getParcelable(KEY_VIEW_MODEL);
-        }
-
-        mMovieRepo = new MovieRepositoryImpl();
+        DaggerMovieGridComponent.builder()
+                .applicationComponent(PopularMovies.getAppComponent(getActivity()))
+                .movieRepositoryModule(new MovieRepositoryModule())
+                .movieGridViewModelModule(new MovieGridViewModelModule(savedInstanceState))
+                .build()
+                .inject(this);
     }
 
     @Nullable
@@ -154,13 +135,6 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-
-        mActivity = null;
-    }
-
-    @Override
     public void launchDetailsScreen(int moviePosition, @NonNull View posterSharedElement) {
         if (!mUseTwoPane) {
             final Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
@@ -171,20 +145,19 @@ public class MovieGridFavFragment extends MovieGridBaseFragment implements
             final int dbId = mRecyclerAdapter.getMovieDbIdForPosition(moviePosition);
             if (!mViewModel.isMovieSelected(dbId)) {
                 final long rowId = mRecyclerAdapter.getItemId(moviePosition);
-                mActivity.showDetailsFavFragment(rowId);
+                showDetailsFavFragment(rowId);
             }
         }
     }
 
-    /**
-     * Defines the interaction with the hosting activity
-     */
-    public interface FragmentInteractionListener {
-        /**
-         * Shows the details screen for a favoured movie.
-         *
-         * @param rowId the row id of the movie
-         */
-        void showDetailsFavFragment(long rowId);
+    private void showDetailsFavFragment(long rowId) {
+        final MovieDetailsFavFragment fragment = MovieDetailsFavFragment.newInstance(rowId);
+        replaceDetailsFragment(fragment);
+    }
+
+    @Override
+    public void showOnlineMovies(@NonNull Sort sortSelected) {
+        MovieGridOnlFragment fragment = MovieGridOnlFragment.newInstance(sortSelected);
+        replaceFragment(fragment);
     }
 }

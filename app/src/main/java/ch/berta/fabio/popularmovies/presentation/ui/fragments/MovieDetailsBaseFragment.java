@@ -16,7 +16,6 @@
 
 package ch.berta.fabio.popularmovies.presentation.ui.fragments;
 
-import android.content.ContentProviderResult;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -27,7 +26,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,29 +35,28 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import javax.inject.Inject;
+
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
-import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MovieDetailsRecyclerAdapter;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
-import rx.Observable;
 
 /**
  * Provides a base class for the display of detail information about a movie, including poster
  * image, release date, rating, an overview of the plot, reviews and trailers.
  */
-public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> extends Fragment implements
+public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> extends
+        BaseFragment<T> implements
         LoaderManager.LoaderCallbacks<Cursor>,
         MovieDetailsViewModel.ViewInteractionListener {
 
-    static final String KEY_VIEW_MODEL = "KEY_VIEW_MODEL";
     private static final String LOG_TAG = MovieDetailsBaseFragment.class.getSimpleName();
-    FragmentInteractionListener mActivity;
+    ActivityListener mActivity;
     boolean mUseTwoPane;
-    T mViewModel;
     RecyclerView mRecyclerView;
+    @Inject
     MovieRepository mMovieRepo;
     private MovieDetailsRecyclerAdapter mRecyclerAdapter;
     private Intent mShareYoutubeIntent;
@@ -73,10 +70,10 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
         super.onAttach(context);
 
         try {
-            mActivity = (FragmentInteractionListener) context;
+            mActivity = (ActivityListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + " must implement FragmentInteractionListener");
+                    + " must implement ActivityListener");
         }
     }
 
@@ -87,7 +84,6 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
         setHasOptionsMenu(true);
 
         mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
-        mMovieRepo = new MovieRepositoryImpl();
 
         mShareYoutubeIntent = new Intent(Intent.ACTION_SEND);
         mShareYoutubeIntent.setType("text/plain");
@@ -105,6 +101,13 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     }
 
     protected abstract RecyclerView getRecyclerView();
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mActivity.setViewModel(mViewModel);
+    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -178,16 +181,6 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     }
 
     @Override
-    public rx.Observable<Integer> deleteMovieLocal(long movieRowId) {
-        return mMovieRepo.deleteMovieLocal(getActivity(), movieRowId);
-    }
-
-    @Override
-    public Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Movie movie) {
-        return mMovieRepo.insertMovieLocal(getActivity(), movie);
-    }
-
-    @Override
     public void startVideoActivity(@NonNull Uri videoUri) {
         Intent intent = new Intent(Intent.ACTION_VIEW, videoUri);
         startActivity(intent);
@@ -196,7 +189,10 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     /**
      * Defines the interaction with the hosting activity.
      */
-    public interface FragmentInteractionListener {
+    public interface ActivityListener {
+
+        void setViewModel(@NonNull MovieDetailsViewModel viewModel);
+
         /**
          * Hides the details fragment in a two pane layout (on tablets).
          */

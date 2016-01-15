@@ -19,6 +19,8 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels;
 import android.support.annotation.NonNull;
 import android.view.View;
 
+import ch.berta.fabio.popularmovies.domain.models.Sort;
+
 /**
  * Defines a view model for a list of locally stored favoured movie posters.
  * <p/>
@@ -37,7 +39,7 @@ public interface MovieGridViewModelFav extends MovieGridViewModel<MovieGridViewM
     /**
      * Defines the interaction with the view.
      */
-    interface ViewInteractionListener {
+    interface ViewInteractionListener extends MovieGridViewModel.ViewInteractionListener {
         /**
          * Launches the detail screen for a movie
          *
@@ -45,5 +47,12 @@ public interface MovieGridViewModelFav extends MovieGridViewModel<MovieGridViewM
          * @param posterSharedElement the poster image to use for the shared element transition
          */
         void launchDetailsScreen(int moviePosition, @NonNull View posterSharedElement);
+
+        /**
+         * Switches the main view to show the movies queried online.
+         *
+         * @param sortSelected the sort option selected
+         */
+        void showOnlineMovies(@NonNull Sort sortSelected);
     }
 }

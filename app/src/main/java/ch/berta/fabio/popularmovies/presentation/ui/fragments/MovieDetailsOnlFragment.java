@@ -29,9 +29,12 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsOnlBinding;
+import ch.berta.fabio.popularmovies.di.components.DaggerMovieDetailsComponent;
+import ch.berta.fabio.popularmovies.di.modules.MovieDetailsViewModelModule;
+import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorker;
 import ch.berta.fabio.popularmovies.utils.WorkerUtils;
@@ -48,6 +51,7 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
         implements MovieDetailsViewModelOnl.ViewInteractionListener {
 
     private static final String LOG_TAG = MovieDetailsOnlFragment.class.getSimpleName();
+    private static final String KEY_MOVIE = "MOVIE";
     private static final int LOADER_IS_FAV = 0;
     private FragmentMovieDetailsOnlBinding mBinding;
 
@@ -55,30 +59,27 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
         // Required empty public constructor
     }
 
-    /**
-     * Returns a new instance of a {@link MovieDetailsOnlFragment}.
-     *
-     * @param viewModel the view model for the view
-     * @return a new instance of a {@link MovieDetailsOnlFragment}
-     */
-    public static MovieDetailsOnlFragment newInstance(@NonNull MovieDetailsViewModel viewModel) {
+    public static MovieDetailsOnlFragment newInstance(@NonNull Movie movie) {
         MovieDetailsOnlFragment fragment = new MovieDetailsOnlFragment();
-
         Bundle args = new Bundle();
-        args.putParcelable(KEY_VIEW_MODEL, viewModel);
+        args.putParcelable(KEY_MOVIE, movie);
         fragment.setArguments(args);
-
         return fragment;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle args = getArguments();
-        if (args != null) {
-            mViewModel = args.getParcelable(KEY_VIEW_MODEL);
-        }
+        final Movie movie = getArguments().getParcelable(KEY_MOVIE);
+        DaggerMovieDetailsComponent.builder()
+                .applicationComponent(PopularMovies.getAppComponent(getActivity()))
+                .movieRepositoryModule(new MovieRepositoryModule())
+                .movieDetailsViewModelModule(new MovieDetailsViewModelModule(savedInstanceState,
+                        movie, mUseTwoPane))
+                .build()
+                .inject(this);
     }
 
     @Override

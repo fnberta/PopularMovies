@@ -18,7 +18,6 @@ package ch.berta.fabio.popularmovies.presentation.ui.fragments;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -29,15 +28,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import ch.berta.fabio.popularmovies.domain.models.Movie;
+import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsFavBinding;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsInfoBinding;
+import ch.berta.fabio.popularmovies.di.components.DaggerMovieDetailsComponent;
+import ch.berta.fabio.popularmovies.di.modules.MovieDetailsViewModelModule;
+import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
+import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MovieDetailsRecyclerAdapter.InfoRow;
-import ch.berta.fabio.popularmovies.utils.Utils;
-import ch.berta.fabio.popularmovies.utils.WorkerUtils;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFav;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDetailsWorker;
+import ch.berta.fabio.popularmovies.utils.Utils;
+import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 
 /**
  * Displays detail information about a movie, including poster image, release date, rating, an
@@ -48,6 +50,7 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
         MovieDetailsViewModelFav.ViewInteractionListener {
 
     public static final int RESULT_UNFAVOURED = 2;
+    private static final String KEY_MOVIE_ROW_ID = "MOVIE_ROW_ID";
     private static final int LOADER_FAV = 0;
     private static final String LOG_TAG = MovieDetailsFavFragment.class.getSimpleName();
     private FragmentMovieDetailsFavBinding mBinding;
@@ -56,16 +59,10 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
         // Required empty public constructor
     }
 
-    /**
-     * Returns a new instance of a {@link MovieDetailsFavFragment}.
-     *
-     * @param viewModel the view model to use for the view
-     * @return a new instance of a {@link MovieDetailsFavFragment}
-     */
-    public static MovieDetailsFavFragment newInstance(@NonNull MovieDetailsViewModel viewModel) {
+    public static MovieDetailsFavFragment newInstance(long movieRowId) {
         MovieDetailsFavFragment fragment = new MovieDetailsFavFragment();
         Bundle args = new Bundle();
-        args.putParcelable(KEY_VIEW_MODEL, viewModel);
+        args.putLong(KEY_MOVIE_ROW_ID, movieRowId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -74,10 +71,14 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle args = getArguments();
-        if (args != null) {
-            mViewModel = args.getParcelable(KEY_VIEW_MODEL);
-        }
+        final long movieRowId = getArguments().getLong(KEY_MOVIE_ROW_ID);
+        DaggerMovieDetailsComponent.builder()
+                .applicationComponent(PopularMovies.getAppComponent(getActivity()))
+                .movieRepositoryModule(new MovieRepositoryModule())
+                .movieDetailsViewModelModule(new MovieDetailsViewModelModule(savedInstanceState,
+                        movieRowId, mUseTwoPane))
+                .build()
+                .inject(this);
     }
 
     @Override
@@ -159,7 +160,7 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     }
 
     @Override
-    public void hideDetailsScreen() {
+    public void hideDetailsView() {
         mActivity.hideDetailsFragment();
     }
 

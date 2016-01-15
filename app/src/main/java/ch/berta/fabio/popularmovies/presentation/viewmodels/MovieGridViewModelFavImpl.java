@@ -16,9 +16,12 @@
 
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
-import android.os.Parcel;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
+
+import ch.berta.fabio.popularmovies.domain.models.Sort;
 
 /**
  * Provides an implementation of the {@link MovieGridViewModelFav} interface.
@@ -29,24 +32,8 @@ public class MovieGridViewModelFavImpl extends
         MovieGridViewModelBaseImpl<MovieGridViewModelFav.ViewInteractionListener> implements
         MovieGridViewModelFav {
 
-    public static final Creator<MovieGridViewModelFavImpl> CREATOR = new Creator<MovieGridViewModelFavImpl>() {
-        public MovieGridViewModelFavImpl createFromParcel(Parcel source) {
-            return new MovieGridViewModelFavImpl(source);
-        }
-
-        public MovieGridViewModelFavImpl[] newArray(int size) {
-            return new MovieGridViewModelFavImpl[size];
-        }
-    };
-    private int mMovieDbIdSelected;
-
-    public MovieGridViewModelFavImpl() {
-    }
-
-    protected MovieGridViewModelFavImpl(Parcel in) {
-        super(in);
-
-        mMovieDbIdSelected = in.readInt();
+    public MovieGridViewModelFavImpl(@Nullable Bundle savedState) {
+        super(savedState);
     }
 
     @Override
@@ -65,9 +52,9 @@ public class MovieGridViewModelFavImpl extends
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-
-        dest.writeInt(mMovieDbIdSelected);
+    protected void switchSort(@NonNull Sort sort) {
+        if (!sort.getOption().equals(Sort.SORT_FAVORITE)) {
+            mView.showOnlineMovies(sort);
+        }
     }
 }

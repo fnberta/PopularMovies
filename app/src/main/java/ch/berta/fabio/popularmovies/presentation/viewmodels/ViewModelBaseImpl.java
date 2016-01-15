@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Fabio Berta
+ * Copyright (c) 2016 Fabio Berta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,25 @@
 
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
+import android.databinding.BaseObservable;
+import android.support.annotation.CallSuper;
+
 /**
- * Defines the methods that attach and detach a view from the view model.
+ * Provides an abstract base implementation of the {@link ViewModel} interface.
  */
-public interface InteractionViewModel<T> {
+public abstract class ViewModelBaseImpl<T> extends BaseObservable implements ViewModel<T> {
 
-    /**
-     * Attaches the view to the view model.
-     *
-     * @param view the view to attach
-     */
-    void attachView(T view);
+    T mView;
 
-    /**
-     * Detaches the view from the view model.
-     */
-    void detachView();
+    @Override
+    @CallSuper
+    public void attachView(T view) {
+        mView = view;
+    }
+
+    @Override
+    @CallSuper
+    public void detachView() {
+        mView = null;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Fabio Berta
+ * Copyright (c) 2016 Fabio Berta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.presentation.ui.adapters.rows;
+package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
+import android.databinding.Observable;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-
-import ch.berta.fabio.popularmovies.databinding.RowHeaderBinding;
-
 
 /**
- * Provides a {@link RecyclerView} row that display a header view.
+ * Defines a basic view model that view models for specific screens can inherit from.
  * <p/>
- * Subclass of {@link BaseBindingRow}.
+ * Extends {@link Observable}.
  */
-public class HeaderRow extends BaseBindingRow<RowHeaderBinding> {
+public interface ViewModel<T> extends Observable {
+
+    void saveState(@NonNull Bundle outState);
 
     /**
-     * Constructs a new {@link HeaderRow}.
+     * Attaches the view to the view model.
      *
-     * @param binding the binding to use
+     * @param view the view to attach
      */
-    public HeaderRow(@NonNull RowHeaderBinding binding) {
-        super(binding);
-    }
+    void attachView(T view);
+
+    /**
+     * Detaches the view from the view model.
+     */
+    void detachView();
 }

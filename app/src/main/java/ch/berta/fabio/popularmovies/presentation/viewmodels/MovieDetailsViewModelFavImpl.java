@@ -17,8 +17,9 @@
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
 import android.databinding.Bindable;
-import android.os.Parcel;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 
@@ -26,6 +27,7 @@ import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
+import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 
 /**
  * Provides an implementation of the {@link MovieDetailsViewModelFav} interface.
@@ -36,32 +38,34 @@ public class MovieDetailsViewModelFavImpl extends
         MovieDetailsViewModelBaseImpl<MovieDetailsViewModelFav.ViewInteractionListener> implements
         MovieDetailsViewModelFav {
 
-    public static final Creator<MovieDetailsViewModelFavImpl> CREATOR = new Creator<MovieDetailsViewModelFavImpl>() {
-        public MovieDetailsViewModelFavImpl createFromParcel(Parcel source) {
-            return new MovieDetailsViewModelFavImpl(source);
-        }
-
-        public MovieDetailsViewModelFavImpl[] newArray(int size) {
-            return new MovieDetailsViewModelFavImpl[size];
-        }
-    };
+    private static final String STATE_REFRESHING = "STATE_REFRESHING";
     private boolean mRefreshing;
 
     /**
      * Constructs a new {@link MovieDetailsViewModelFavImpl}.
      *
-     * @param rowId      the row id of the movie
-     * @param useTwoPane whether the view uses two panes or not
+     * @param savedState      the bundle to recover the state from
+     * @param movieRepository the movie repository for local inserts and deletes
+     * @param rowId           the row id of the movie
+     * @param useTwoPane      whether the view uses two panes or not
      */
-    public MovieDetailsViewModelFavImpl(long rowId, boolean useTwoPane) {
-        super(useTwoPane);
+    public MovieDetailsViewModelFavImpl(@Nullable Bundle savedState,
+                                        @NonNull MovieRepository movieRepository, long rowId,
+                                        boolean useTwoPane) {
+        super(savedState, movieRepository, useTwoPane);
 
         mMovieRowId = rowId;
+
+        if (savedState != null) {
+            mRefreshing = savedState.getBoolean(STATE_REFRESHING);
+        }
     }
 
-    protected MovieDetailsViewModelFavImpl(Parcel in) {
-        super(in);
-        mRefreshing = in.readByte() != 0;
+    @Override
+    public void saveState(@NonNull Bundle outState) {
+        super.saveState(outState);
+
+        outState.putBoolean(STATE_REFRESHING, mRefreshing);
     }
 
     @Override
@@ -126,7 +130,7 @@ public class MovieDetailsViewModelFavImpl extends
         super.onMovieDeleted();
 
         if (mUseTwoPane) {
-            mView.hideDetailsScreen();
+            mView.hideDetailsView();
         }
     }
 
@@ -156,11 +160,5 @@ public class MovieDetailsViewModelFavImpl extends
                 mView.loadUpdateMovieDetailsWorker(mMovie.getDbId(), mMovieRowId);
             }
         };
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeByte(mRefreshing ? (byte) 1 : (byte) 0);
     }
 }

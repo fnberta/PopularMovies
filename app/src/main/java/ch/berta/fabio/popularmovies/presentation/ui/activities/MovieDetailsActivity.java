@@ -20,7 +20,6 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 
 import ch.berta.fabio.popularmovies.R;
@@ -34,9 +33,7 @@ import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieGridFavFragme
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieGridOnlFragment;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFav;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFavImpl;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnl;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnlImpl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorkerListener;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDetailsWorkerListener;
 
@@ -44,14 +41,13 @@ import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDeta
  * Presents the backdrop image of a selected movie in a collapsing toolbar and hosts a
  * {@link MovieDetailsOnlFragment} that displays other information about the movie.
  */
-public class MovieDetailsActivity extends AppCompatActivity implements
-        MovieDetailsOnlFragment.FragmentInteractionListener,
+public class MovieDetailsActivity extends BaseActivity<MovieDetailsViewModel> implements
+        MovieDetailsBaseFragment.ActivityListener,
         QueryMovieDetailsWorkerListener, UpdateMovieDetailsWorkerListener {
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
-    private static final String STATE_VIEW_MODEL = "STATE_VIEW_MODEL";
-    private MovieDetailsViewModel mViewModel;
+    private ActivityMovieDetailsBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +56,9 @@ public class MovieDetailsActivity extends AppCompatActivity implements
         // enter transition will start when movie poster is loaded
         supportPostponeEnterTransition();
 
-        final ActivityMovieDetailsBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_movie_details);
-        setSupportActionBar(binding.toolbar);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_details);
+
+        setSupportActionBar(mBinding.toolbar);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -69,33 +66,26 @@ public class MovieDetailsActivity extends AppCompatActivity implements
         }
 
         if (savedInstanceState == null) {
-            final MovieDetailsBaseFragment fragment;
             final long rowId = getIntent().getLongExtra(
                     MovieGridFavFragment.INTENT_MOVIE_SELECTED_ROW_ID, RecyclerView.NO_ID);
+            final MovieDetailsBaseFragment fragment;
             if (rowId != RecyclerView.NO_ID) {
-                mViewModel = new MovieDetailsViewModelFavImpl(rowId, false);
-                fragment = MovieDetailsFavFragment.newInstance(mViewModel);
+                fragment = MovieDetailsFavFragment.newInstance(rowId);
             } else {
                 final Movie movie = getIntent().getParcelableExtra(MovieGridOnlFragment.INTENT_MOVIE_SELECTED);
-                mViewModel = new MovieDetailsViewModelOnlImpl(movie, false);
-                fragment = MovieDetailsOnlFragment.newInstance(mViewModel);
+                fragment = MovieDetailsOnlFragment.newInstance(movie);
             }
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, fragment, DETAILS_FRAGMENT)
                     .commit();
-        } else {
-            mViewModel = savedInstanceState.getParcelable(STATE_VIEW_MODEL);
         }
-
-        binding.setViewModel(mViewModel);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelable(STATE_VIEW_MODEL, mViewModel);
+    public void setViewModel(@NonNull MovieDetailsViewModel viewModel) {
+        mViewModel = viewModel;
+        mBinding.setViewModel(viewModel);
     }
 
     @Override

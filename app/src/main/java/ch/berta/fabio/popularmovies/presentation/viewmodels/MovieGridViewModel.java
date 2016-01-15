@@ -17,16 +17,17 @@
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
 import android.databinding.Bindable;
-import android.databinding.Observable;
-import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.view.View;
+import android.widget.AdapterView;
 
+import ch.berta.fabio.popularmovies.domain.models.Sort;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.listeners.MovieInteractionListener;
 
 /**
  * Defines a view model for a list of movie posters.
  */
-public interface MovieGridViewModel<T> extends
-        Parcelable, Observable, InteractionViewModel<T>, MovieInteractionListener {
+public interface MovieGridViewModel<T extends MovieGridViewModel.ViewInteractionListener> extends ViewModel<T>, MovieInteractionListener {
 
     @Bindable
     boolean isMoviesAvailable();
@@ -42,4 +43,21 @@ public interface MovieGridViewModel<T> extends
     boolean isUserSelectedMovie();
 
     void setUserSelectedMovie(boolean movieSelected);
+
+    void onSortSelected(AdapterView<?> parent, View view, int position, long id);
+
+    interface ViewInteractionListener {
+        /**
+         * Persists the currently selected sort option across app restarts.
+         *
+         * @param sort     the sort option selected
+         * @param position the position of the option
+         */
+        void persistSort(@NonNull Sort sort, int position);
+
+        /**
+         * Hides the view that displays the details of a movie in two-pane (tablets) mode.
+         */
+        void hideDetailsView();
+    }
 }

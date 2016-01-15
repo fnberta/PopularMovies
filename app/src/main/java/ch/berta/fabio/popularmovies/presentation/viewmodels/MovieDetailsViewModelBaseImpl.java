@@ -20,16 +20,20 @@ import android.content.ContentProviderResult;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.net.Uri;
-import android.os.Parcel;
+import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
+
+import javax.inject.Inject;
 
 import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.Review;
 import ch.berta.fabio.popularmovies.domain.models.Video;
+import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.Observable;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
@@ -40,11 +44,15 @@ import rx.subscriptions.CompositeSubscription;
  * Subclass of {@link BaseObservable}.
  */
 public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewModel.ViewInteractionListener>
-        extends BaseObservable
+        extends ViewModelBaseImpl<T>
         implements MovieDetailsViewModel<T> {
 
+    private static final String STATE_REVIEWS_COUNT = "STATE_REVIEWS_COUNT";
+    private static final String STATE_VIDEOS_COUNT = "STATE_VIDEOS_COUNT";
+    private static final String STATE_MOVIE_ROW_ID = "STATE_MOVIE_ROW_ID";
     final boolean mUseTwoPane;
-    T mView;
+    @Inject
+    MovieRepository mMovieRepo;
     Movie mMovie;
     int mReviewsCount;
     int mVideosCount;
@@ -53,30 +61,41 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
     /**
      * Constructs a new {@link MovieDetailsViewModelBaseImpl}.
-     *
-     * @param useTwoPane whether the view is using two panes or not
+     *  @param savedState      the saved state of the view model
+     * @param movieRepository the movie repository for local inserts and deletes
+     * @param useTwoPane      whether the view is using two panes or not
      */
-    public MovieDetailsViewModelBaseImpl(boolean useTwoPane) {
+    public MovieDetailsViewModelBaseImpl(@Nullable Bundle savedState,
+                                         @NonNull MovieRepository movieRepository, boolean useTwoPane) {
+        mMovieRepo = movieRepository;
         mUseTwoPane = useTwoPane;
+
+        if (savedState != null) {
+            mReviewsCount = savedState.getInt(STATE_REVIEWS_COUNT);
+            mVideosCount = savedState.getInt(STATE_VIDEOS_COUNT);
+            mMovieRowId = savedState.getLong(STATE_MOVIE_ROW_ID);
+        }
     }
 
-    protected MovieDetailsViewModelBaseImpl(Parcel in) {
-        mMovie = in.readParcelable(Movie.class.getClassLoader());
-        mReviewsCount = in.readInt();
-        mVideosCount = in.readInt();
-        mMovieRowId = in.readLong();
-        mUseTwoPane = in.readByte() != 0;
+    @Override
+    @CallSuper
+    public void saveState(@NonNull Bundle outState) {
+        outState.putInt(STATE_REVIEWS_COUNT, mReviewsCount);
+        outState.putInt(STATE_VIDEOS_COUNT, mVideosCount);
+        outState.putLong(STATE_MOVIE_ROW_ID, mMovieRowId);
     }
 
     @Override
     public void attachView(T view) {
-        mView = view;
+        super.attachView(view);
+
         mSubscriptions = new CompositeSubscription();
     }
 
     @Override
     public void detachView() {
-        mView = null;
+        super.detachView();
+
         if (mSubscriptions.hasSubscriptions()) {
             mSubscriptions.unsubscribe();
         }
@@ -226,7 +245,7 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
     public void onFabClick(View view) {
         if (mMovie.isFavoured()) {
             setMovieFavoured(false);
-            final Observable<Integer> observable = mView.deleteMovieLocal(mMovieRowId);
+            final Observable<Integer> observable = mMovieRepo.deleteMovieLocal(mMovieRowId);
             mSubscriptions.add(observable.subscribe(new Subscriber<Integer>() {
                 @Override
                 public void onCompleted() {
@@ -245,7 +264,7 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
             }));
         } else {
             setMovieFavoured(true);
-            final Observable<ContentProviderResult[]> observable = mView.insertMovieLocal(mMovie);
+            final Observable<ContentProviderResult[]> observable = mMovieRepo.insertMovieLocal(mMovie);
             mSubscriptions.add(observable.subscribe(new Subscriber<ContentProviderResult[]>() {
                         @Override
                         public void onCompleted() {
@@ -294,20 +313,5 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
             final String url = firstVideo.getYoutubeUrl();
             mView.setYoutubeShareUrl(url);
         }
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    @CallSuper
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mMovie, 0);
-        dest.writeInt(mReviewsCount);
-        dest.writeInt(mVideosCount);
-        dest.writeLong(mMovieRowId);
-        dest.writeByte(mUseTwoPane ? (byte) 1 : (byte) 0);
     }
 }

@@ -19,9 +19,8 @@ package ch.berta.fabio.popularmovies.presentation.workerfragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
-import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
 import rx.Subscriber;
 
 /**
@@ -34,8 +33,13 @@ public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerL
     public static final String WORKER_TAG = "WORKER_TAG";
     private static final String LOG_TAG = QueryMovieDetailsWorker.class.getSimpleName();
     private static final String BUNDLE_MOVIE_DB_ID = "BUNDLE_MOVIE_DB_ID";
-    private final MovieRepository mMovieRepo = new MovieRepositoryImpl();
 
+    /**
+     * Returns a new instance of a {@link QueryMovieDetailsWorker}.
+     *
+     * @param movieDbId the TheMovieDB db id of the movie to query details for.
+     * @return a new instance of a {@link QueryMovieDetailsWorker}
+     */
     public static QueryMovieDetailsWorker newInstance(int movieDbId) {
         QueryMovieDetailsWorker fragment = new QueryMovieDetailsWorker();
 
@@ -44,6 +48,11 @@ public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerL
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    @Override
+    protected void injectDependencies(@NonNull WorkerComponent workerComponent) {
+        workerComponent.inject(this);
     }
 
     @Override
@@ -61,7 +70,7 @@ public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerL
             return;
         }
 
-        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(getActivity(), movieDbId)
+        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(movieDbId)
                 .subscribe(new Subscriber<MovieDetails>() {
                     @Override
                     public void onCompleted() {

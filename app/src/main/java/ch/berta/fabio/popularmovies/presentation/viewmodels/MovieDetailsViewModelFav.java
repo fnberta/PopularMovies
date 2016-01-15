@@ -62,7 +62,7 @@ public interface MovieDetailsViewModelFav extends
         /**
          * Hides the movie details screen.
          */
-        void hideDetailsScreen();
+        void hideDetailsView();
 
         /**
          * Finishes the current screen.

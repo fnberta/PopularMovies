@@ -17,7 +17,6 @@
 package ch.berta.fabio.popularmovies.domain.repositories;
 
 import android.content.ContentProviderResult;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
@@ -39,20 +38,17 @@ import rx.Observable;
 public interface MovieRepository {
     /**
      * Loads a list of movies from TheMovieDB, including their basic information.
-     *
-     * @param context the context to get the api key string
-     * @param page    the page of movies to load
+     *  @param page    the page of movies to load
      * @param sort    the sorting scheme to decide which movies to load
      */
-    Observable<List<Movie>> getMoviesOnline(@NonNull Context context, int page, @NonNull String sort);
+    Observable<List<Movie>> getMoviesOnline(int page, @NonNull String sort);
 
     /**
      * Loads the detail information of a movie from TheMovieDB.
      *
-     * @param context   the context to get the api key string
      * @param movieDbId the db id of the movie
      */
-    Observable<MovieDetails> getMovieDetailsOnline(@NonNull Context context, int movieDbId);
+    Observable<MovieDetails> getMovieDetailsOnline(int movieDbId);
 
     /**
      * Returns a {@link CursorLoader} that loads the favourite movies of the user.
@@ -138,28 +134,22 @@ public interface MovieRepository {
     /**
      * Inserts a {@link Movie} into the local content provider.
      *
-     * @param context the context to get the {@link ContentResolver}
      * @param movie   the movie to insert
      */
-    Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Context context,
-                                                         @NonNull Movie movie);
+    Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Movie movie);
 
     /**
      * Deletes a movie from the local content provider.
      *
-     * @param context    the context to get the {@link ContentResolver}
      * @param movieRowId the row id of the movie to delete
      */
-    Observable<Integer> deleteMovieLocal(@NonNull Context context, long movieRowId);
+    Observable<Integer> deleteMovieLocal(long movieRowId);
 
     /**
      * Update a movie from the local content provider with new data fetched online.
-     *
-     * @param context      the context to get the {@link ContentResolver}
-     * @param movieDetails the new online data
+     *  @param movieDetails the new online data
      * @param movieRowId   the row id of the movie to update
      */
-    Observable<ContentProviderResult[]> updateMovieLocal(@NonNull Context context,
-                                                         @NonNull MovieDetails movieDetails,
+    Observable<ContentProviderResult[]> updateMovieLocal(@NonNull MovieDetails movieDetails,
                                                          long movieRowId);
 }

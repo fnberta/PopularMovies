@@ -17,13 +17,11 @@
 package ch.berta.fabio.popularmovies.presentation.workerfragments;
 
 import android.content.ContentProviderResult;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
-import ch.berta.fabio.popularmovies.data.repositories.MovieRepositoryImpl;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Func1;
@@ -40,8 +38,14 @@ public class UpdateMovieDetailsWorker extends BaseWorker<UpdateMovieDetailsWorke
     private static final String LOG_TAG = UpdateMovieDetailsWorker.class.getSimpleName();
     private static final String BUNDLE_MOVIE_DB_ID = "BUNDLE_MOVIE_DB_ID";
     private static final String BUNDLE_MOVIE_ROW_ID = "BUNDLE_MOVIE_ROW_ID";
-    private final MovieRepository mMovieRepo = new MovieRepositoryImpl();
 
+    /**
+     * Returns a new instance of a {@link UpdateMovieDetailsWorker}.
+     *
+     * @param movieDbId  the TheMovieDB db id of the movie to update
+     * @param movieRowId the row id in the local content provider of the movie to update
+     * @return a new instance of a {@link UpdateMovieDetailsWorker}
+     */
     public static UpdateMovieDetailsWorker newInstance(int movieDbId, long movieRowId) {
         UpdateMovieDetailsWorker fragment = new UpdateMovieDetailsWorker();
 
@@ -51,6 +55,11 @@ public class UpdateMovieDetailsWorker extends BaseWorker<UpdateMovieDetailsWorke
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    @Override
+    protected void injectDependencies(@NonNull WorkerComponent workerComponent) {
+        workerComponent.inject(this);
     }
 
     @Override
@@ -69,12 +78,11 @@ public class UpdateMovieDetailsWorker extends BaseWorker<UpdateMovieDetailsWorke
             return;
         }
 
-        final Context context = getContext();
-        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(context, movieDbId)
+        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(movieDbId)
                 .flatMap(new Func1<MovieDetails, Observable<ContentProviderResult[]>>() {
                     @Override
                     public Observable<ContentProviderResult[]> call(MovieDetails movieDetails) {
-                        return mMovieRepo.updateMovieLocal(context, movieDetails, movieRowId);
+                        return mMovieRepo.updateMovieLocal(movieDetails, movieRowId);
                     }
                 })
                 .subscribe(new Subscriber<ContentProviderResult[]>() {

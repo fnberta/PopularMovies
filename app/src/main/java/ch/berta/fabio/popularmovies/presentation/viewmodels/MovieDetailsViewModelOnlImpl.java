@@ -17,12 +17,14 @@
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
 import android.databinding.Bindable;
-import android.os.Parcel;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
+import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 
 /**
  * Provides an implementation of the {@link MovieDetailsViewModelOnl} interface.
@@ -33,30 +35,20 @@ public class MovieDetailsViewModelOnlImpl extends
         MovieDetailsViewModelBaseImpl<MovieDetailsViewModelOnl.ViewInteractionListener> implements
         MovieDetailsViewModelOnl {
 
-    public static final Creator<MovieDetailsViewModelOnlImpl> CREATOR = new Creator<MovieDetailsViewModelOnlImpl>() {
-        public MovieDetailsViewModelOnlImpl createFromParcel(Parcel source) {
-            return new MovieDetailsViewModelOnlImpl(source);
-        }
-
-        public MovieDetailsViewModelOnlImpl[] newArray(int size) {
-            return new MovieDetailsViewModelOnlImpl[size];
-        }
-    };
-
     /**
      * Constructs a new {@link MovieDetailsViewModelFavImpl}.
      *
-     * @param movie      the movie to use
-     * @param useTwoPane whether the view uses two panes or not
+     * @param savedState      the bundle to recover state from
+     * @param movieRepository the movie repository for local inserts and deletes
+     * @param movie           the movie to use
+     * @param useTwoPane      whether the view uses two panes or not
      */
-    public MovieDetailsViewModelOnlImpl(@NonNull Movie movie, boolean useTwoPane) {
-        super(useTwoPane);
+    public MovieDetailsViewModelOnlImpl(@Nullable Bundle savedState,
+                                        @NonNull MovieRepository movieRepository,
+                                        @NonNull Movie movie, boolean useTwoPane) {
+        super(savedState, movieRepository, useTwoPane);
 
         mMovie = movie;
-    }
-
-    protected MovieDetailsViewModelOnlImpl(Parcel in) {
-        super(in);
     }
 
     @Override

@@ -22,6 +22,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
+import javax.inject.Inject;
+
+import ch.berta.fabio.popularmovies.PopularMovies;
+import ch.berta.fabio.popularmovies.di.components.DaggerWorkerComponent;
+import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
+import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
+import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.subscriptions.CompositeSubscription;
 
 /**
@@ -34,6 +41,8 @@ public abstract class BaseWorker<T> extends Fragment {
     final CompositeSubscription mSubscriptions = new CompositeSubscription();
     @Nullable
     T mActivity;
+    @Inject
+    MovieRepository mMovieRepo;
 
     public BaseWorker() {
         // required empty constructor
@@ -64,8 +73,16 @@ public abstract class BaseWorker<T> extends Fragment {
             return;
         }
 
+        final WorkerComponent repoComp = DaggerWorkerComponent.builder()
+                .applicationComponent(PopularMovies.getAppComponent(getActivity()))
+                .movieRepositoryModule(new MovieRepositoryModule())
+                .build();
+        injectDependencies(repoComp);
+
         startWork(args);
     }
+
+    protected abstract void injectDependencies(@NonNull WorkerComponent workerComponent);
 
     protected abstract void onWorkerError();
 

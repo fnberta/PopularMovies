@@ -16,31 +16,54 @@
 
 package ch.berta.fabio.popularmovies.presentation.ui.fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.view.View;
 
+import javax.inject.Inject;
+
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.domain.models.Sort;
+import ch.berta.fabio.popularmovies.presentation.ui.activities.MovieGridActivity;
+import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel;
 import ch.berta.fabio.popularmovies.utils.Utils;
 
 /**
  * Provides an abstract base class for the display of movies in a grid of posters.
  */
-public abstract class MovieGridBaseFragment extends Fragment {
+public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S extends MovieGridBaseFragment.ActivityListener> extends BaseFragment<T> implements
+        MovieGridViewModel.ViewInteractionListener {
 
     public static final int REQUEST_MOVIE_DETAILS = 1;
-    static final String STATE_VIEW_MODEL = "STATE_VIEW_MODEL";
-    static final String KEY_VIEW_MODEL = "KEY_VIEW_MODEL";
     private static final String LOG_TAG = MovieGridBaseFragment.class.getSimpleName();
+    S mActivity;
+    @Inject
+    SharedPreferences mSharedPrefs;
     boolean mUseTwoPane;
 
     public MovieGridBaseFragment() {
         // required empty constructor
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        try {
+            mActivity = (S) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement ActivityListener");
+        }
     }
 
     @Override
@@ -59,6 +82,13 @@ public abstract class MovieGridBaseFragment extends Fragment {
 
     protected abstract void setupRecyclerView();
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        mActivity.setViewModel(mViewModel);
+    }
+
     final int getLayoutWidth() {
         int screenWidth = Utils.getScreenWidth(getResources());
         return mUseTwoPane ? screenWidth / 100 *
@@ -72,5 +102,48 @@ public abstract class MovieGridBaseFragment extends Fragment {
         final ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
                 activity, posterSharedElement, transitionName);
         activity.startActivityForResult(intent, REQUEST_MOVIE_DETAILS, options.toBundle());
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        mActivity = null;
+    }
+
+    @Override
+    public void persistSort(@NonNull Sort sort, int position) {
+        mSharedPrefs.edit().putInt(MovieGridActivity.PERSIST_SORT, position).apply();
+    }
+
+    @Override
+    public void hideDetailsView() {
+        mActivity.hideDetailsFragment();
+    }
+
+    final void replaceFragment(@NonNull MovieGridBaseFragment fragment) {
+        getFragmentManager().beginTransaction()
+                .replace(R.id.container_main, fragment, MovieGridActivity.FRAGMENT_MOVIES)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .commit();
+    }
+
+    final void replaceDetailsFragment(@NonNull MovieDetailsBaseFragment fragment) {
+        getFragmentManager().beginTransaction()
+                .replace(R.id.container_details, fragment, MovieGridActivity.FRAGMENT_TWO_PANE_DETAILS)
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .commit();
+
+        mViewModel.setUserSelectedMovie(true);
+    }
+
+    /**
+     * Defines the interaction with the hosting activity
+     */
+    public interface ActivityListener {
+
+        void setViewModel(@NonNull MovieGridViewModel viewModel);
+
+        void hideDetailsFragment();
     }
 }

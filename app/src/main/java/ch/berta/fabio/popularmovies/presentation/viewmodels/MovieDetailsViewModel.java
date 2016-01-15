@@ -16,11 +16,8 @@
 
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
-import android.content.ContentProviderResult;
 import android.databinding.Bindable;
-import android.databinding.Observable;
 import android.net.Uri;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -36,8 +33,7 @@ import ch.berta.fabio.popularmovies.presentation.ui.adapters.listeners.MovieDeta
  * Defines a view model for the details screen of a movie.
  */
 public interface MovieDetailsViewModel<T extends MovieDetailsViewModel.ViewInteractionListener> extends
-        Parcelable, Observable, InteractionViewModel<T>, AdapterViewModel,
-        MovieDetailsInteractionListener {
+        ViewModel<T>, AdapterViewModel, MovieDetailsInteractionListener {
 
     int TYPE_HEADER = 0;
     int TYPE_TWO_PANE_HEADER = 1;
@@ -116,20 +112,6 @@ public interface MovieDetailsViewModel<T extends MovieDetailsViewModel.ViewInter
          * Restarts the loader associated with the view.
          */
         void restartLoader();
-
-        /**
-         * Inserts a movie to the local content provider.
-         *
-         * @param movie the movie to insert
-         */
-        rx.Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Movie movie);
-
-        /**
-         * Deletes a movie from the local content provider.
-         *
-         * @param movieRowId the row id of the movie to delete
-         */
-        rx.Observable<Integer> deleteMovieLocal(long movieRowId);
 
         /**
          * Starts the postponed enter transition.

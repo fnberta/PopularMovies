@@ -20,7 +20,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -28,34 +27,28 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.databinding.ActivityMovieGridBinding;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
-import ch.berta.fabio.popularmovies.databinding.ActivityMovieGridBinding;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieDetailsBaseFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieDetailsFavFragment;
-import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieDetailsOnlFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieGridBaseFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieGridFavFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieGridOnlFragment;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFav;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFavImpl;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnl;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnlImpl;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelFav;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelFavImpl;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelOnl;
-import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelOnlImpl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorkerListener;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorkerListener;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDetailsWorkerListener;
@@ -63,23 +56,19 @@ import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDeta
 /**
  * Provides the main entry point to the app and hosts a {@link MovieGridOnlFragment}.
  */
-public class MovieGridActivity extends AppCompatActivity implements
-        MovieGridOnlFragment.FragmentInteractionListener,
-        MovieGridFavFragment.FragmentInteractionListener,
+public class MovieGridActivity extends BaseActivity<MovieGridViewModel> implements
+        MovieGridBaseFragment.ActivityListener,
+        MovieDetailsBaseFragment.ActivityListener,
         QueryMoviesWorkerListener,
         QueryMovieDetailsWorkerListener,
-        UpdateMovieDetailsWorkerListener,
-        MovieDetailsBaseFragment.FragmentInteractionListener {
+        UpdateMovieDetailsWorkerListener {
 
+    public static final String FRAGMENT_MOVIES = "FRAGMENT_MOVIES";
+    public static final String FRAGMENT_TWO_PANE_DETAILS = "FRAGMENT_TWO_PANE_DETAILS";
+    public static final String PERSIST_SORT = "PERSIST_SORT";
     private static final String LOG_TAG = MovieGridActivity.class.getSimpleName();
-    private static final String FRAGMENT_MOVIES = "FRAGMENT_MOVIES";
-    private static final String FRAGMENT_TWO_PANE_DETAILS = "FRAGMENT_TWO_PANE_DETAILS";
-    private static final String PERSIST_SORT = "PERSIST_SORT";
-    private static final String STATE_VIEW_MODEL = "STATE_VIEW_MODEL";
-    private static final String STATE_VIEW_MODEL_DETAILS = "STATE_VIEW_MODEL_DETAILS";
-    private SharedPreferences mSharedPrefs;
-    private boolean mUseTwoPane;
-    private MovieGridViewModel mViewModel;
+    @Inject
+    SharedPreferences mSharedPrefs;
     private MovieDetailsViewModel mDetailsViewModel;
     private ActivityMovieGridBinding mBinding;
 
@@ -88,6 +77,7 @@ public class MovieGridActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_grid);
+        PopularMovies.getAppComponent(this).inject(this);
 
         setSupportActionBar(mBinding.toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -95,109 +85,37 @@ public class MovieGridActivity extends AppCompatActivity implements
             actionBar.setTitle(null);
         }
 
-        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
         setupSorting();
 
         if (savedInstanceState == null) {
-            final Sort sortSelected = (Sort) mBinding.spGridSort.getSelectedItem();
-
-            final MovieGridBaseFragment fragment;
-            if (sortSelected.getOption().equals(Sort.SORT_FAVORITE)) {
-                mViewModel = new MovieGridViewModelFavImpl();
-                fragment = MovieGridFavFragment.newInstance(mViewModel);
-            } else {
-                mViewModel = new MovieGridViewModelOnlImpl(sortSelected);
-                fragment = MovieGridOnlFragment.newInstance(mViewModel);
-            }
-
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container_main, fragment, FRAGMENT_MOVIES)
-                    .commit();
-        } else {
-            mViewModel = savedInstanceState.getParcelable(STATE_VIEW_MODEL);
-            if (mUseTwoPane) {
-                mDetailsViewModel = savedInstanceState.getParcelable(STATE_VIEW_MODEL_DETAILS);
-                mBinding.setViewModelDetails(mDetailsViewModel);
-            }
-        }
-
-        mBinding.setViewModel(mViewModel);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelable(STATE_VIEW_MODEL, mViewModel);
-        if (mUseTwoPane) {
-            outState.putParcelable(STATE_VIEW_MODEL_DETAILS, mDetailsViewModel);
+            addFragment();
         }
     }
 
     private void setupSorting() {
-        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        int sortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
-
+        final int sortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
         Sort[] sortOptions = new Sort[]{
                 new Sort(Sort.SORT_POPULARITY, getString(R.string.sort_popularity)),
                 new Sort(Sort.SORT_RATING, getString(R.string.sort_rating)),
                 new Sort(Sort.SORT_RELEASE_DATE, getString(R.string.sort_release_date)),
                 new Sort(Sort.SORT_FAVORITE, getString(R.string.sort_favorite))
         };
+
         ArrayAdapter<Sort> spinnerAdapter = new ArrayAdapter<>(this,
                 R.layout.spinner_item_toolbar, sortOptions);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mBinding.spGridSort.setAdapter(spinnerAdapter);
         mBinding.spGridSort.setSelection(sortSelected, false);
-        mBinding.spGridSort.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onSortOptionSelected((Sort) parent.getSelectedItem(), position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
     }
 
-    private void onSortOptionSelected(Sort sortSelected, int position) {
-        mSharedPrefs.edit().putInt(PERSIST_SORT, position).apply();
-
-        if (mUseTwoPane) {
-            hideDetailsFragment();
-        }
-
-        if (!sortSelected.getOption().equals(Sort.SORT_FAVORITE)) {
-            if (mViewModel instanceof MovieGridViewModelOnl) {
-                ((MovieGridViewModelOnl) mViewModel).onSortOptionSelected(sortSelected);
-            } else {
-                showMovieOnlFragment(sortSelected);
-            }
-        } else if (!(mViewModel instanceof MovieGridViewModelFav)) {
-            showMovieFavFragment();
-        }
-    }
-
-    private void showMovieOnlFragment(@NonNull Sort sortSelected) {
-        mViewModel = new MovieGridViewModelOnlImpl(sortSelected);
-        MovieGridOnlFragment fragment = MovieGridOnlFragment.newInstance(mViewModel);
-        replaceFragment(fragment);
-    }
-
-    private void showMovieFavFragment() {
-        mViewModel = new MovieGridViewModelFavImpl();
-        MovieGridFavFragment fragment = MovieGridFavFragment.newInstance(mViewModel);
-        replaceFragment(fragment);
-    }
-
-    private void replaceFragment(Fragment newFragment) {
-        mBinding.setViewModel(mViewModel);
+    private void addFragment() {
+        final Sort sortSelected = (Sort) mBinding.spGridSort.getSelectedItem();
+        final MovieGridBaseFragment fragment = sortSelected.getOption().equals(Sort.SORT_FAVORITE)
+                ? new MovieGridFavFragment()
+                : MovieGridOnlFragment.newInstance(sortSelected);
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container_main, newFragment, FRAGMENT_MOVIES)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .add(R.id.container_main, fragment, FRAGMENT_MOVIES)
                 .commit();
     }
 
@@ -205,11 +123,37 @@ public class MovieGridActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == MovieGridBaseFragment.REQUEST_MOVIE_DETAILS &&
-                resultCode == MovieDetailsFavFragment.RESULT_UNFAVOURED) {
+        if (requestCode == MovieGridBaseFragment.REQUEST_MOVIE_DETAILS
+                && resultCode == MovieDetailsFavFragment.RESULT_UNFAVOURED) {
             Snackbar.make(mBinding.clMain, R.string.snackbar_movie_removed_from_favorites,
                     Snackbar.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public void setViewModel(@NonNull MovieGridViewModel viewModel) {
+        mViewModel = viewModel;
+        mBinding.setViewModel(viewModel);
+    }
+
+    @Override
+    public void setViewModel(@NonNull MovieDetailsViewModel viewModel) {
+        mDetailsViewModel = viewModel;
+        mBinding.setViewModelDetails(viewModel);
+    }
+
+    @Override
+    public void hideDetailsFragment() {
+        final FragmentManager fragmentManager = getSupportFragmentManager();
+        final Fragment detailsFragment = fragmentManager.findFragmentByTag(FRAGMENT_TWO_PANE_DETAILS);
+        if (detailsFragment != null) {
+            fragmentManager.beginTransaction()
+                    .remove(detailsFragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
+                    .commit();
+        }
+
+        mViewModel.setUserSelectedMovie(false);
     }
 
     @Override
@@ -220,44 +164,6 @@ public class MovieGridActivity extends AppCompatActivity implements
     @Override
     public void onMoviesOnlineLoadFailed() {
         ((MovieGridViewModelOnl) mViewModel).onMoviesOnlineLoadFailed();
-    }
-
-    @Override
-    public void showDetailsFavFragment(long rowId) {
-        mDetailsViewModel = new MovieDetailsViewModelFavImpl(rowId, true);
-
-        final MovieDetailsFavFragment fragment = MovieDetailsFavFragment.newInstance(mDetailsViewModel);
-        replaceDetailsFragment(fragment);
-    }
-
-    @Override
-    public void showDetailsOnlFragment(@NonNull Movie movie) {
-        mDetailsViewModel = new MovieDetailsViewModelOnlImpl(movie, true);
-
-        final MovieDetailsOnlFragment fragment = MovieDetailsOnlFragment.newInstance(mDetailsViewModel);
-        replaceDetailsFragment(fragment);
-    }
-
-    private void replaceDetailsFragment(@NonNull MovieDetailsBaseFragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container_details, fragment, FRAGMENT_TWO_PANE_DETAILS)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commit();
-
-        mViewModel.setUserSelectedMovie(true);
-        mBinding.setViewModelDetails(mDetailsViewModel);
-    }
-
-    @Override
-    public void hideDetailsFragment() {
-        final FragmentManager fragmentManager = getSupportFragmentManager();
-        final Fragment detailsFragment = fragmentManager.findFragmentByTag(FRAGMENT_TWO_PANE_DETAILS);
-        fragmentManager.beginTransaction()
-                .remove(detailsFragment)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE)
-                .commit();
-
-        mViewModel.setUserSelectedMovie(false);
     }
 
     @Override
