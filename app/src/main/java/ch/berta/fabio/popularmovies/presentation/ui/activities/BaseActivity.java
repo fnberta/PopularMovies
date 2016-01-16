@@ -17,9 +17,11 @@
 package ch.berta.fabio.popularmovies.presentation.ui.activities;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 
 import ch.berta.fabio.popularmovies.presentation.viewmodels.ViewModel;
+import ch.berta.fabio.popularmovies.presentation.workerfragments.BaseWorkerListener;
 
 /**
  * Provides an abstract base class for {@link Activity} to inherit from.
@@ -27,7 +29,13 @@ import ch.berta.fabio.popularmovies.presentation.viewmodels.ViewModel;
  * Subclass of {@link AppCompatActivity}.
  */
 public abstract class BaseActivity<T extends ViewModel>
-        extends AppCompatActivity {
+        extends AppCompatActivity
+        implements BaseWorkerListener {
 
     T mViewModel;
+
+    @Override
+    public void onWorkerError(@NonNull String workerTag) {
+        mViewModel.onWorkerError(workerTag);
+    }
 }

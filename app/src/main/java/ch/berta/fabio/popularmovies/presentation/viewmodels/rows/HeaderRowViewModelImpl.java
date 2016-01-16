@@ -19,6 +19,7 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels.rows;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 
 import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.rows.HeaderRow;
@@ -30,25 +31,27 @@ import ch.berta.fabio.popularmovies.presentation.ui.adapters.rows.HeaderRow;
  */
 public class HeaderRowViewModelImpl extends BaseObservable implements HeaderRowViewModel {
 
-    private String mHeader;
+    @StringRes
+    private int mHeader;
 
     /**
      * Constructs a new {@link HeaderRow}.
      *
      * @param header the header to display
      */
-    public HeaderRowViewModelImpl(@NonNull String header) {
+    public HeaderRowViewModelImpl(@StringRes int header) {
         setHeader(header);
     }
 
     @Override
+    @StringRes
     @Bindable
-    public String getHeader() {
+    public int getHeader() {
         return mHeader;
     }
 
     @Override
-    public void setHeader(@NonNull String header) {
+    public void setHeader(@StringRes int header) {
         mHeader = header;
         notifyPropertyChanged(BR.header);
     }

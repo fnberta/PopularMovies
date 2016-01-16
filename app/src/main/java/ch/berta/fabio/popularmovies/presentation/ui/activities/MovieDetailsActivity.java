@@ -101,11 +101,6 @@ public class MovieDetailsActivity extends BaseActivity<MovieDetailsViewModel>
     }
 
     @Override
-    public void onWorkerError(@NonNull String workerTag) {
-        mViewModel.onWorkerError(workerTag);
-    }
-
-    @Override
     public void hideDetailsFragment() {
         // do nothing, only relevant for two pane view
     }

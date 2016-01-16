@@ -107,7 +107,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
                 final RowHeaderBinding binding = headerRow.getBinding();
 
                 final int header = mViewModel.getHeaderTitle(position);
-                final HeaderRowViewModelImpl viewModel = new HeaderRowViewModelImpl(mContext.getString(header));
+                final HeaderRowViewModelImpl viewModel = new HeaderRowViewModelImpl(header);
                 binding.setViewModel(viewModel);
                 binding.executePendingBindings();
 
@@ -124,7 +124,8 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
             case MovieDetailsViewModel.TYPE_INFO: {
                 final InfoRow infoRow = (InfoRow) holder;
                 final int plotMaxLines = mContext.getResources().getInteger(R.integer.plot_max_lines);
-                final DetailsInfoRowViewModelImpl viewModel = new DetailsInfoRowViewModelImpl(mViewModel.getMovie(), plotMaxLines);
+                final DetailsInfoRowViewModelImpl viewModel =
+                        new DetailsInfoRowViewModelImpl(mViewModel.getMovie(), plotMaxLines);
 
                 final RowDetailsInfoBinding binding = infoRow.getBinding();
                 binding.setViewModel(viewModel);

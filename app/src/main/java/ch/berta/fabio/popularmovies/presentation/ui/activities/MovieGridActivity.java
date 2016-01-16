@@ -172,9 +172,4 @@ public class MovieGridActivity extends BaseActivity<MovieGridViewModel>
     public void setUpdateMovieDetailsStream(@NonNull Observable<ContentProviderResult[]> observable, @NonNull String workerTag) {
         ((MovieDetailsViewModelFav) mDetailsViewModel).setUpdateMovieDetailsStream(observable, workerTag);
     }
-
-    @Override
-    public void onWorkerError(@NonNull String workerTag) {
-        mViewModel.onWorkerError(workerTag);
-    }
 }

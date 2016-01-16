@@ -19,6 +19,7 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels.rows;
 import android.databinding.Bindable;
 import android.databinding.Observable;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 
 /**
  * Defines a view model for a generic header row.
@@ -27,8 +28,9 @@ import android.support.annotation.NonNull;
  */
 public interface HeaderRowViewModel extends Observable {
 
+    @StringRes
     @Bindable
-    String getHeader();
+    int getHeader();
 
-    void setHeader(@NonNull String header);
+    void setHeader(@StringRes int header);
 }
