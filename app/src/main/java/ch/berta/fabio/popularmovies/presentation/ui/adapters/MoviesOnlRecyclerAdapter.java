@@ -34,14 +34,14 @@ import ch.berta.fabio.popularmovies.presentation.viewmodels.rows.MovieRowViewMod
 /**
  * Provides the adapter for a movie poster images grid.
  */
-public class MoviesRecyclerAdapter extends RecyclerView.Adapter {
+public class MoviesOnlRecyclerAdapter extends RecyclerView.Adapter {
 
-    private static final String LOG_TAG = MoviesRecyclerAdapter.class.getSimpleName();
+    private static final String LOG_TAG = MoviesOnlRecyclerAdapter.class.getSimpleName();
     private final MovieGridViewModelOnl mViewModel;
     private final int mItemHeight;
 
-    public MoviesRecyclerAdapter(@NonNull MovieGridViewModelOnl fragmentViewModel,
-                                 int layoutWidth, int columnCount) {
+    public MoviesOnlRecyclerAdapter(@NonNull MovieGridViewModelOnl fragmentViewModel,
+                                    int layoutWidth, int columnCount) {
         mViewModel = fragmentViewModel;
         mItemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
     }

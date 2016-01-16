@@ -40,7 +40,7 @@ import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
 import ch.berta.fabio.popularmovies.presentation.ui.activities.MovieDetailsActivity;
-import ch.berta.fabio.popularmovies.presentation.ui.adapters.MoviesRecyclerAdapter;
+import ch.berta.fabio.popularmovies.presentation.ui.adapters.MoviesOnlRecyclerAdapter;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.decorators.PosterGridItemDecoration;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelOnl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorker;
@@ -56,7 +56,7 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
     public static final String INTENT_MOVIE_SELECTED = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED";
     private static final String LOG_TAG = MovieGridOnlFragment.class.getSimpleName();
     private static final String KEY_SORT_SELECTED = "SORT_SELECTED";
-    private MoviesRecyclerAdapter mRecyclerAdapter;
+    private MoviesOnlRecyclerAdapter mRecyclerAdapter;
     private FragmentMovieGridOnlBinding mBinding;
 
     public MovieGridOnlFragment() {
@@ -126,7 +126,7 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
         mBinding.rvGrid.setHasFixedSize(true);
         mBinding.rvGrid.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesRecyclerAdapter(mViewModel, getLayoutWidth(), spanCount);
+        mRecyclerAdapter = new MoviesOnlRecyclerAdapter(mViewModel, getLayoutWidth(), spanCount);
         mBinding.rvGrid.setAdapter(mRecyclerAdapter);
         Mugen.with(mBinding.rvGrid, mViewModel).start();
     }
