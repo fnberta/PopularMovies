@@ -18,23 +18,39 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
 import android.databinding.BaseObservable;
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
+
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Provides an abstract base implementation of the {@link ViewModel} interface.
  */
-public abstract class ViewModelBaseImpl<T> extends BaseObservable implements ViewModel<T> {
+public abstract class ViewModelBaseImpl<T extends ViewModel.ViewInteractionListener> extends BaseObservable implements ViewModel<T> {
 
     T mView;
+    CompositeSubscription mSubscriptions;
 
     @Override
     @CallSuper
     public void attachView(T view) {
         mView = view;
+        if (mSubscriptions == null || mSubscriptions.isUnsubscribed()) {
+            mSubscriptions = new CompositeSubscription();
+        }
     }
 
     @Override
     @CallSuper
     public void detachView() {
         mView = null;
+        if (mSubscriptions.hasSubscriptions()) {
+            mSubscriptions.unsubscribe();
+        }
+    }
+
+    @Override
+    @CallSuper
+    public void onWorkerError(@NonNull String workerTag) {
+        mView.removeWorker(workerTag);
     }
 }

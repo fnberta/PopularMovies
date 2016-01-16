@@ -19,20 +19,19 @@ package ch.berta.fabio.popularmovies.presentation.workerfragments;
 import android.support.annotation.NonNull;
 
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
+import rx.Observable;
 
 /**
  * Defines the actions after a query for movie details was attempted.
  */
-public interface QueryMovieDetailsWorkerListener {
-    /**
-     * Handles a successful movie details query
-     *
-     * @param movieDetails the queried movie details
-     */
-    void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails);
+public interface QueryMovieDetailsWorkerListener extends BaseWorkerListener {
 
     /**
-     * Handles a failed movie details query.
+     * Sets the observable with the movie details query.
+     *
+     * @param observable the observable to set
+     * @param workerTag  the tag of the worker fragment
      */
-    void onMovieDetailsOnlineLoadFailed();
+    void setQueryMovieDetailsStream(@NonNull Observable<MovieDetails> observable,
+                                    @NonNull String workerTag);
 }

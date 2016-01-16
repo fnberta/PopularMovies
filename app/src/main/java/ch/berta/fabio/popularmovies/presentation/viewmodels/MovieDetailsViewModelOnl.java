@@ -51,10 +51,5 @@ public interface MovieDetailsViewModelOnl extends
          * @param movieDbId the TheMovieDB id of the movie
          */
         void loadQueryMovieDetailsWorker(int movieDbId);
-
-        /**
-         * Removes the worker fragment that queried for movie details.
-         */
-        void removeQueryMovieDetailsWorker();
     }
 }

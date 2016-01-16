@@ -20,8 +20,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -40,7 +38,6 @@ import ch.berta.fabio.popularmovies.di.components.DaggerMovieGridComponent;
 import ch.berta.fabio.popularmovies.di.modules.MovieGridViewModelModule;
 import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
-import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
 import ch.berta.fabio.popularmovies.presentation.ui.activities.MovieDetailsActivity;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MoviesRecyclerAdapter;
@@ -149,6 +146,11 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
     }
 
     @Override
+    protected View getSnackbarView() {
+        return mBinding.rvGrid;
+    }
+
+    @Override
     public void loadQueryMoviesWorker(int moviePage, @NonNull String sortOption,
                                       boolean forceNewQuery) {
         FragmentManager fragmentManager = getFragmentManager();
@@ -165,11 +167,6 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
             worker = QueryMoviesWorker.newInstance(moviePage, sortOption);
             transaction.add(worker, QueryMoviesWorker.WORKER_TAG).commit();
         }
-    }
-
-    @Override
-    public void removeQueryMoviesWorker() {
-        WorkerUtils.removeWorker(getFragmentManager(), QueryMoviesWorker.WORKER_TAG);
     }
 
     @Override
@@ -195,15 +192,6 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
     @Override
     public void notifyLoadMoreRemoved(int position) {
         mRecyclerAdapter.notifyItemRemoved(position);
-    }
-
-    @Override
-    public void showSnackbar(@StringRes int text, @Nullable SnackbarAction action) {
-        Snackbar snackbar = Snackbar.make(mBinding.rvGrid, text, Snackbar.LENGTH_LONG);
-        if (action != null) {
-            snackbar.setAction(action.getActionText(), action);
-        }
-        snackbar.show();
     }
 
     @Override

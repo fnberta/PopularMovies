@@ -18,15 +18,12 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
 import android.databinding.Bindable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 
 import com.mugen.MugenCallbacks;
 
 import ch.berta.fabio.popularmovies.domain.models.Movie;
-import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorker;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorkerListener;
 
@@ -75,13 +72,6 @@ public interface MovieGridViewModelOnl
      * Defines the interaction with the view.
      */
     interface ViewInteractionListener extends MovieGridViewModel.ViewInteractionListener {
-        /**
-         * Shows a snackbar with an optional click action
-         *
-         * @param text   the text to display
-         * @param action the click action
-         */
-        void showSnackbar(@StringRes int text, @Nullable SnackbarAction action);
 
         /**
          * Scrolls the view to the position.
@@ -122,11 +112,6 @@ public interface MovieGridViewModelOnl
          * @param forceNewQuery whether to force a new query when there is already one going on
          */
         void loadQueryMoviesWorker(int moviePage, @NonNull String sortOption, boolean forceNewQuery);
-
-        /**
-         * Removes the {@link QueryMoviesWorker} instance from the activity's fragment stack.
-         */
-        void removeQueryMoviesWorker();
 
         /**
          * Launches the detail screen for a movie

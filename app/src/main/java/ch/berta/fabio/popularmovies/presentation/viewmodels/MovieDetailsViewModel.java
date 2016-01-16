@@ -19,13 +19,11 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels;
 import android.databinding.Bindable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.view.View;
 
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.Review;
-import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.domain.models.Video;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.listeners.MovieDetailsInteractionListener;
 
@@ -99,14 +97,7 @@ public interface MovieDetailsViewModel<T extends MovieDetailsViewModel.ViewInter
     /**
      * Defines the interaction with the view.
      */
-    interface ViewInteractionListener {
-        /**
-         * Shows a snackbar with an optional click action
-         *
-         * @param text   the text to display
-         * @param action the click action
-         */
-        void showSnackbar(@StringRes int text, @Nullable SnackbarAction action);
+    interface ViewInteractionListener extends ViewModel.ViewInteractionListener {
 
         /**
          * Restarts the loader associated with the view.

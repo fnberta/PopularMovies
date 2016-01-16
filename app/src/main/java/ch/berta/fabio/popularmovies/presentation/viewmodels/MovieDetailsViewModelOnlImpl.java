@@ -25,6 +25,8 @@ import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Provides an implementation of the {@link MovieDetailsViewModelOnl} interface.
@@ -83,28 +85,43 @@ public class MovieDetailsViewModelOnlImpl extends
 
     @Override
     protected void onMovieDeletedOnePane() {
-        mView.showSnackbar(R.string.snackbar_movie_removed_from_favorites, null);
+        mView.showMessage(R.string.snackbar_movie_removed_from_favorites, null);
     }
 
     @Override
-    public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
-        mView.removeQueryMovieDetailsWorker();
+    public void setQueryMovieDetailsStream(@NonNull Observable<MovieDetails> observable, @NonNull final String workerTag) {
+        mSubscriptions.add(observable.subscribe(new Subscriber<MovieDetails>() {
+            @Override
+            public void onCompleted() {
+                mView.removeWorker(workerTag);
+            }
 
-        mMovie.setReviews(movieDetails.getReviewsPage().getReviews());
-        mMovie.setVideos(movieDetails.getVideosPage().getVideos());
-        mMovie.setReviewsAndVideosSet(true);
+            @Override
+            public void onError(Throwable e) {
+                mView.removeWorker(workerTag);
+                mView.showMessage(R.string.snackbar_movie_load_reviews_videos_failed, null);
+            }
 
-        setYoutubeShareUrl();
-        mView.invalidateOptionsMenu();
+            @Override
+            public void onNext(MovieDetails movieDetails) {
+                mMovie.setReviews(movieDetails.getReviewsPage().getReviews());
+                mMovie.setVideos(movieDetails.getVideosPage().getVideos());
+                mMovie.setReviewsAndVideosSet(true);
 
-        setReviewsAndVideosCount();
-        mView.notifyItemRangeInserted(adjustPosForTwoPane(1),
-                getNumberOfHeaderRows() + mReviewsCount + mVideosCount);
+                setYoutubeShareUrl();
+                mView.invalidateOptionsMenu();
+
+                setReviewsAndVideosCount();
+                mView.notifyItemRangeInserted(adjustPosForTwoPane(1),
+                        getNumberOfHeaderRows() + mReviewsCount + mVideosCount);
+            }
+        }));
     }
 
     @Override
-    public void onMovieDetailsOnlineLoadFailed() {
-        mView.removeQueryMovieDetailsWorker();
-        mView.showSnackbar(R.string.snackbar_movie_load_reviews_videos_failed, null);
+    public void onWorkerError(@NonNull String workerTag) {
+        super.onWorkerError(workerTag);
+
+        mView.showMessage(R.string.snackbar_movie_load_reviews_videos_failed, null);
     }
 }

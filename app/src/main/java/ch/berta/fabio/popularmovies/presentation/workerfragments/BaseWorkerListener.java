@@ -16,22 +16,12 @@
 
 package ch.berta.fabio.popularmovies.presentation.workerfragments;
 
-import android.content.ContentProviderResult;
 import android.support.annotation.NonNull;
 
-import rx.Observable;
-
 /**
- * Defines the actions after an update of locally stored movies was attempted.
+ * Defines the action to take when the worker fragment fails to perform its action.
  */
-public interface UpdateMovieDetailsWorkerListener extends BaseWorkerListener {
+public interface BaseWorkerListener {
 
-    /**
-     * Sets the observable with the update movie details query.
-     *
-     * @param observable the observable to set
-     * @param workerTag  the tag of the worker fragment
-     */
-    void setUpdateMovieDetailsStream(@NonNull Observable<ContentProviderResult[]> observable,
-                                     @NonNull String workerTag);
+    void onWorkerError(@NonNull String workerTag);
 }

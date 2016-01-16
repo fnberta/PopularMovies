@@ -29,20 +29,22 @@ import ch.berta.fabio.popularmovies.di.components.DaggerWorkerComponent;
 import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
 import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
-import rx.subscriptions.CompositeSubscription;
+import rx.Observable;
+import rx.Subscription;
+import rx.subjects.PublishSubject;
 
 /**
  * Provides an abstract base class for worker fragments that are retained across configuration
  * changes in order to to async tasks.
  */
-public abstract class BaseWorker<T> extends Fragment {
+public abstract class BaseWorker<T, S extends BaseWorkerListener> extends Fragment {
 
     private static final String LOG_TAG = BaseWorker.class.getSimpleName();
-    final CompositeSubscription mSubscriptions = new CompositeSubscription();
-    @Nullable
-    T mActivity;
+    S mActivity;
     @Inject
     MovieRepository mMovieRepo;
+    private Subscription mSubscription;
+    private final PublishSubject<T> mSubject = PublishSubject.create();
 
     public BaseWorker() {
         // required empty constructor
@@ -54,7 +56,7 @@ public abstract class BaseWorker<T> extends Fragment {
         super.onAttach(context);
 
         try {
-            mActivity = (T) context;
+            mActivity = (S) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement WorkerInteractionListener");
@@ -79,14 +81,20 @@ public abstract class BaseWorker<T> extends Fragment {
                 .build();
         injectDependencies(repoComp);
 
-        startWork(args);
+        final Observable<T> observable = getObservable(args);
+        if (observable != null) {
+            mSubscription = observable.subscribe(mSubject);
+        } else {
+            onWorkerError();
+        }
     }
 
-    protected abstract void injectDependencies(@NonNull WorkerComponent workerComponent);
+    @Override
+    public void onStart() {
+        super.onStart();
 
-    protected abstract void onWorkerError();
-
-    protected abstract void startWork(@NonNull Bundle args);
+        setStream(mSubject.asObservable());
+    }
 
     @Override
     public void onDetach() {
@@ -99,8 +107,17 @@ public abstract class BaseWorker<T> extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
-        if (mSubscriptions.hasSubscriptions()) {
-            mSubscriptions.unsubscribe();
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
+            mSubscription.unsubscribe();
         }
     }
+
+    protected abstract void injectDependencies(@NonNull WorkerComponent workerComponent);
+
+    @Nullable
+    protected abstract Observable<T> getObservable(@NonNull Bundle args);
+
+    protected abstract void onWorkerError();
+
+    protected abstract void setStream(@NonNull Observable<T> observable);
 }

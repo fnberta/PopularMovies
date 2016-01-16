@@ -46,7 +46,7 @@ public interface MovieGridViewModel<T extends MovieGridViewModel.ViewInteraction
 
     void onSortSelected(AdapterView<?> parent, View view, int position, long id);
 
-    interface ViewInteractionListener {
+    interface ViewInteractionListener extends ViewModel.ViewInteractionListener {
         /**
          * Persists the currently selected sort option across app restarts.
          *

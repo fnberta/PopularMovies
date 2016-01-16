@@ -17,18 +17,25 @@
 package ch.berta.fabio.popularmovies.presentation.ui.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.view.View;
 
 import javax.inject.Inject;
 
+import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.ViewModel;
+import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 
 /**
  * Provides an abstract base class for {@link Fragment} to extend from.
  * <p/>
  * Subclass of {@link Fragment}.
  */
-public abstract class BaseFragment<T extends ViewModel> extends Fragment {
+public abstract class BaseFragment<T extends ViewModel> extends Fragment implements ViewModel.ViewInteractionListener {
 
     @Inject
     T mViewModel;
@@ -42,5 +49,21 @@ public abstract class BaseFragment<T extends ViewModel> extends Fragment {
         super.onSaveInstanceState(outState);
 
         mViewModel.saveState(outState);
+    }
+
+    @Override
+    public void showMessage(@StringRes int text, @Nullable SnackbarAction action) {
+        Snackbar snackbar = Snackbar.make(getSnackbarView(), text, Snackbar.LENGTH_LONG);
+        if (action != null) {
+            snackbar.setAction(action.getActionText(), action);
+        }
+        snackbar.show();
+    }
+
+    protected abstract View getSnackbarView();
+
+    @Override
+    public void removeWorker(@NonNull String workerTag) {
+        WorkerUtils.removeWorker(getFragmentManager(), workerTag);
     }
 }

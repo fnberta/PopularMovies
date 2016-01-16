@@ -54,12 +54,6 @@ public interface MovieDetailsViewModelFav extends
         void loadUpdateMovieDetailsWorker(int movieDbId, long movieRowId);
 
         /**
-         * Removes the worker fragment that queried for movie details and updated them in the local
-         * content provider.
-         */
-        void removeUpdateMovieDetailsWorker();
-
-        /**
          * Hides the movie details screen.
          */
         void hideDetailsView();

@@ -158,11 +158,6 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
     }
 
     @Override
-    public void removeQueryMovieDetailsWorker() {
-        WorkerUtils.removeWorker(getFragmentManager(), QueryMovieDetailsWorker.WORKER_TAG);
-    }
-
-    @Override
     public void restartLoader() {
         getLoaderManager().restartLoader(LOADER_IS_FAV, null, this);
     }

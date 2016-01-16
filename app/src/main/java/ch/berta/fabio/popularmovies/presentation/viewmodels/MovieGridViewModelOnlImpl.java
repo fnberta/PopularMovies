@@ -31,6 +31,8 @@ import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Provides an implementation of the {@link MovieGridViewModelOnl} interface.
@@ -124,19 +126,61 @@ public class MovieGridViewModelOnlImpl extends
     }
 
     @Override
-    public void onMoviesOnlineLoaded(@NonNull List<Movie> movies) {
-        mView.removeQueryMoviesWorker();
+    public void setQueryMoviesStream(@NonNull Observable<List<Movie>> observable, @NonNull final String workerTag) {
+        mSubscriptions.add(observable.subscribe(new Subscriber<List<Movie>>() {
+            @Override
+            public void onCompleted() {
+                mView.removeWorker(workerTag);
+            }
 
-        if (mMoviePage == 1) {
-            setMovies(movies);
-        } else {
-            addMovies(movies);
-        }
+            @Override
+            public void onError(Throwable e) {
+                mView.removeWorker(workerTag);
+                onMoviesLoadFailed();
+            }
 
-        mMoviePage++;
+            @Override
+            public void onNext(List<Movie> movies) {
+                if (mMoviePage == 1) {
+                    setMovies(movies);
+                } else {
+                    addMovies(movies);
+                }
+
+                mMoviePage++;
+            }
+        }));
     }
 
-    private void setMovies(List<Movie> movies) {
+    @Override
+    public void onWorkerError(@NonNull String workerTag) {
+        super.onWorkerError(workerTag);
+
+        onMoviesLoadFailed();
+    }
+
+    private void onMoviesLoadFailed() {
+        if (mMoviePage == 1) {
+            mLoadingNewSort = false;
+            setRefreshing(false);
+            setMoviesLoaded(true);
+
+            mView.showMessage(R.string.snackbar_movies_load_failed, new SnackbarAction(R.string.snackbar_retry) {
+                @Override
+                public void onClick(View v) {
+                    setRefreshing(true);
+                    mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
+                }
+            });
+        } else {
+            hideLoadMoreIndicator();
+            mLoadingMore = false;
+
+            mView.showMessage(R.string.snackbar_movies_load_failed, null);
+        }
+    }
+
+    private void setMovies(@NonNull List<Movie> movies) {
         // finished loading
         mLoadingNewSort = false;
         setRefreshing(false);
@@ -154,7 +198,7 @@ public class MovieGridViewModelOnlImpl extends
         setMoviesAvailable(!movies.isEmpty());
     }
 
-    private void addMovies(List<Movie> movies) {
+    private void addMovies(@NonNull List<Movie> movies) {
         // remove load more indicator
         hideLoadMoreIndicator();
 
@@ -170,30 +214,6 @@ public class MovieGridViewModelOnlImpl extends
         final int position = getItemCount() - 1;
         mMovies.remove(position);
         mView.notifyLoadMoreRemoved(position);
-    }
-
-    @Override
-    public void onMoviesOnlineLoadFailed() {
-        mView.removeQueryMoviesWorker();
-
-        if (mMoviePage == 1) {
-            mLoadingNewSort = false;
-            setRefreshing(false);
-            setMoviesLoaded(true);
-
-            mView.showSnackbar(R.string.snackbar_movies_load_failed, new SnackbarAction(R.string.snackbar_retry) {
-                @Override
-                public void onClick(View v) {
-                    setRefreshing(true);
-                    mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
-                }
-            });
-        } else {
-            hideLoadMoreIndicator();
-            mLoadingMore = false;
-
-            mView.showSnackbar(R.string.snackbar_movies_load_failed, null);
-        }
     }
 
     @Override

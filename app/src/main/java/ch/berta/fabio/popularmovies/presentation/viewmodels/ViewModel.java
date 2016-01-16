@@ -19,14 +19,24 @@ package ch.berta.fabio.popularmovies.presentation.viewmodels;
 import android.databinding.Observable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+
+import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
+import ch.berta.fabio.popularmovies.presentation.workerfragments.BaseWorkerListener;
 
 /**
  * Defines a basic view model that view models for specific screens can inherit from.
  * <p/>
  * Extends {@link Observable}.
  */
-public interface ViewModel<T> extends Observable {
+public interface ViewModel<T> extends Observable, BaseWorkerListener {
 
+    /**
+     * Passes a {@link Bundle} where the view model can save its state in.
+     *
+     * @param outState the bundle to save the state in
+     */
     void saveState(@NonNull Bundle outState);
 
     /**
@@ -40,4 +50,22 @@ public interface ViewModel<T> extends Observable {
      * Detaches the view from the view model.
      */
     void detachView();
+
+    interface ViewInteractionListener {
+
+        /**
+         * Shows a message to the user with an optional click action
+         *
+         * @param text   the text to display
+         * @param action the click action
+         */
+        void showMessage(@StringRes int text, @Nullable SnackbarAction action);
+
+        /**
+         * Removes the headless worker fragment.
+         *
+         * @param workerTag the fragment's tag
+         */
+        void removeWorker(@NonNull String workerTag);
+    }
 }

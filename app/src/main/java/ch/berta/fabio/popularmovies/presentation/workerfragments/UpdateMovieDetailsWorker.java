@@ -19,11 +19,11 @@ package ch.berta.fabio.popularmovies.presentation.workerfragments;
 import android.content.ContentProviderResult;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import rx.Observable;
-import rx.Subscriber;
 import rx.functions.Func1;
 
 /**
@@ -32,12 +32,12 @@ import rx.functions.Func1;
  * <p/>
  * Subclass of {@link BaseWorker}.
  */
-public class UpdateMovieDetailsWorker extends BaseWorker<UpdateMovieDetailsWorkerListener> {
+public class UpdateMovieDetailsWorker extends BaseWorker<ContentProviderResult[], UpdateMovieDetailsWorkerListener> {
 
-    public static final String WORKER_TAG = "WORKER_TAG";
+    public static final String WORKER_TAG = "UPDATE_MOVIE_DETAILS_WORKER";
     private static final String LOG_TAG = UpdateMovieDetailsWorker.class.getSimpleName();
-    private static final String BUNDLE_MOVIE_DB_ID = "BUNDLE_MOVIE_DB_ID";
-    private static final String BUNDLE_MOVIE_ROW_ID = "BUNDLE_MOVIE_ROW_ID";
+    private static final String KEY_MOVIE_DB_ID = "MOVIE_DB_ID";
+    private static final String KEY_MOVIE_ROW_ID = "MOVIE_ROW_ID";
 
     /**
      * Returns a new instance of a {@link UpdateMovieDetailsWorker}.
@@ -50,8 +50,8 @@ public class UpdateMovieDetailsWorker extends BaseWorker<UpdateMovieDetailsWorke
         UpdateMovieDetailsWorker fragment = new UpdateMovieDetailsWorker();
 
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_MOVIE_DB_ID, movieDbId);
-        args.putLong(BUNDLE_MOVIE_ROW_ID, movieRowId);
+        args.putInt(KEY_MOVIE_DB_ID, movieDbId);
+        args.putLong(KEY_MOVIE_ROW_ID, movieRowId);
         fragment.setArguments(args);
 
         return fragment;
@@ -62,47 +62,31 @@ public class UpdateMovieDetailsWorker extends BaseWorker<UpdateMovieDetailsWorke
         workerComponent.inject(this);
     }
 
+    @Nullable
     @Override
-    protected void onWorkerError() {
-        if (mActivity != null) {
-            mActivity.onMovieDetailsUpdateFailed();
+    protected Observable<ContentProviderResult[]> getObservable(@NonNull Bundle args) {
+        final int movieDbId = args.getInt(KEY_MOVIE_DB_ID, -1);
+        final long movieRowId = args.getLong(KEY_MOVIE_ROW_ID, -1);
+        if (movieDbId != -1 && movieRowId != -1) {
+            return mMovieRepo.getMovieDetailsOnline(movieDbId)
+                    .flatMap(new Func1<MovieDetails, Observable<ContentProviderResult[]>>() {
+                        @Override
+                        public Observable<ContentProviderResult[]> call(MovieDetails movieDetails) {
+                            return mMovieRepo.updateMovieLocal(movieDetails, movieRowId);
+                        }
+                    });
         }
+
+        return null;
     }
 
     @Override
-    protected void startWork(@NonNull Bundle args) {
-        final int movieDbId = args.getInt(BUNDLE_MOVIE_DB_ID, -1);
-        final long movieRowId = args.getLong(BUNDLE_MOVIE_ROW_ID, -1);
-        if (movieDbId == -1 || movieRowId == -1) {
-            onWorkerError();
-            return;
-        }
+    protected void onWorkerError() {
+        mActivity.onWorkerError(WORKER_TAG);
+    }
 
-        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(movieDbId)
-                .flatMap(new Func1<MovieDetails, Observable<ContentProviderResult[]>>() {
-                    @Override
-                    public Observable<ContentProviderResult[]> call(MovieDetails movieDetails) {
-                        return mMovieRepo.updateMovieLocal(movieDetails, movieRowId);
-                    }
-                })
-                .subscribe(new Subscriber<ContentProviderResult[]>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        onWorkerError();
-                    }
-
-                    @Override
-                    public void onNext(ContentProviderResult[] contentProviderResults) {
-                        if (mActivity != null) {
-                            mActivity.onMovieDetailsUpdated();
-                        }
-                    }
-                })
-        );
+    @Override
+    protected void setStream(@NonNull Observable<ContentProviderResult[]> observable) {
+        mActivity.setUpdateMovieDetailsStream(observable, WORKER_TAG);
     }
 }

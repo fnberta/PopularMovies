@@ -18,21 +18,22 @@ package ch.berta.fabio.popularmovies.presentation.workerfragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
-import rx.Subscriber;
+import rx.Observable;
 
 /**
  * Queries TheMoviesDB for movie details.
  * <p/>
  * Subclass of {@link BaseWorker}.
  */
-public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerListener> {
+public class QueryMovieDetailsWorker extends BaseWorker<MovieDetails, QueryMovieDetailsWorkerListener> {
 
-    public static final String WORKER_TAG = "WORKER_TAG";
+    public static final String WORKER_TAG = "QUERY_MOVIE_DETAILS_WORKER";
     private static final String LOG_TAG = QueryMovieDetailsWorker.class.getSimpleName();
-    private static final String BUNDLE_MOVIE_DB_ID = "BUNDLE_MOVIE_DB_ID";
+    private static final String KEY_MOVIE_DB_ID = "MOVIE_DB_ID";
 
     /**
      * Returns a new instance of a {@link QueryMovieDetailsWorker}.
@@ -44,7 +45,7 @@ public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerL
         QueryMovieDetailsWorker fragment = new QueryMovieDetailsWorker();
 
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_MOVIE_DB_ID, movieDbId);
+        args.putInt(KEY_MOVIE_DB_ID, movieDbId);
         fragment.setArguments(args);
 
         return fragment;
@@ -55,40 +56,24 @@ public class QueryMovieDetailsWorker extends BaseWorker<QueryMovieDetailsWorkerL
         workerComponent.inject(this);
     }
 
+    @Nullable
     @Override
-    protected void onWorkerError() {
-        if (mActivity != null) {
-            mActivity.onMovieDetailsOnlineLoadFailed();
+    protected Observable<MovieDetails> getObservable(@NonNull Bundle args) {
+        final int movieDbId = args.getInt(KEY_MOVIE_DB_ID, -1);
+        if (movieDbId != -1) {
+            return mMovieRepo.getMovieDetailsOnline(movieDbId);
         }
+
+        return null;
     }
 
     @Override
-    protected void startWork(@NonNull Bundle args) {
-        final int movieDbId = args.getInt(BUNDLE_MOVIE_DB_ID, -1);
-        if (movieDbId == -1) {
-            onWorkerError();
-            return;
-        }
+    protected void onWorkerError() {
+        mActivity.onWorkerError(WORKER_TAG);
+    }
 
-        mSubscriptions.add(mMovieRepo.getMovieDetailsOnline(movieDbId)
-                .subscribe(new Subscriber<MovieDetails>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        onWorkerError();
-                    }
-
-                    @Override
-                    public void onNext(MovieDetails movieDetails) {
-                        if (mActivity != null) {
-                            mActivity.onMovieDetailsOnlineLoaded(movieDetails);
-                        }
-                    }
-                })
-        );
+    @Override
+    protected void setStream(@NonNull Observable<MovieDetails> observable) {
+        mActivity.setQueryMovieDetailsStream(observable, WORKER_TAG);
     }
 }

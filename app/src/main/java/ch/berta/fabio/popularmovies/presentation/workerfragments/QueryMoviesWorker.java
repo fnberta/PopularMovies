@@ -18,26 +18,26 @@ package ch.berta.fabio.popularmovies.presentation.workerfragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.util.List;
 
-
 import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
-import rx.Subscriber;
+import rx.Observable;
 
 /**
  * Queries TheMoviesDB for movies.
  * <p/>
  * Subclass of {@link BaseWorker}.
  */
-public class QueryMoviesWorker extends BaseWorker<QueryMoviesWorkerListener> {
+public class QueryMoviesWorker extends BaseWorker<List<Movie>, QueryMoviesWorkerListener> {
 
-    public static final String WORKER_TAG = "WORKER_TAG";
+    public static final String WORKER_TAG = "QUERY_MOVIES_WORKER";
     private static final String LOG_TAG = QueryMoviesWorker.class.getSimpleName();
-    private static final String BUNDLE_PAGE = "BUNDLE_PAGE";
-    private static final String BUNDLE_SORT = "BUNDLE_SORT";
+    private static final String KEY_MOVIE_PAGE = "MOVIE_PAGE";
+    private static final String KEY_MOVIE_SORT = "MOVIE_SORT";
 
     /**
      * Returns a new instance of a {@link QueryMoviesWorker} with a page and sort options
@@ -51,8 +51,8 @@ public class QueryMoviesWorker extends BaseWorker<QueryMoviesWorkerListener> {
         QueryMoviesWorker fragment = new QueryMoviesWorker();
 
         Bundle args = new Bundle();
-        args.putInt(BUNDLE_PAGE, page);
-        args.putString(BUNDLE_SORT, sort);
+        args.putInt(KEY_MOVIE_PAGE, page);
+        args.putString(KEY_MOVIE_SORT, sort);
         fragment.setArguments(args);
 
         return fragment;
@@ -63,41 +63,25 @@ public class QueryMoviesWorker extends BaseWorker<QueryMoviesWorkerListener> {
         workerComponent.inject(this);
     }
 
+    @Nullable
     @Override
-    protected void onWorkerError() {
-        if (mActivity != null) {
-            mActivity.onMoviesOnlineLoadFailed();
+    protected Observable<List<Movie>> getObservable(@NonNull Bundle args) {
+        int page = args.getInt(KEY_MOVIE_PAGE, 0);
+        String sort = args.getString(KEY_MOVIE_SORT, "");
+        if (page != 0 && !TextUtils.isEmpty(sort)) {
+            return mMovieRepo.getMoviesOnline(page, sort);
         }
+
+        return null;
     }
 
     @Override
-    protected void startWork(@NonNull Bundle args) {
-        int page = args.getInt(BUNDLE_PAGE, 0);
-        String sort = args.getString(BUNDLE_SORT, "");
-        if (page == 0 || TextUtils.isEmpty(sort)) {
-            onWorkerError();
-            return;
-        }
+    protected void onWorkerError() {
+        mActivity.onWorkerError(WORKER_TAG);
+    }
 
-        mSubscriptions.add(mMovieRepo.getMoviesOnline(page, sort)
-                .subscribe(new Subscriber<List<Movie>>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        onWorkerError();
-                    }
-
-                    @Override
-                    public void onNext(List<Movie> movies) {
-                        if (mActivity != null) {
-                            mActivity.onMoviesOnlineLoaded(movies);
-                        }
-                    }
-                })
-        );
+    @Override
+    protected void setStream(@NonNull Observable<List<Movie>> observable) {
+        mActivity.setQueryMoviesStream(observable, WORKER_TAG);
     }
 }

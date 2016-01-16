@@ -23,8 +23,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -38,7 +36,6 @@ import android.view.View;
 import javax.inject.Inject;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MovieDetailsRecyclerAdapter;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
@@ -140,19 +137,15 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> 
     }
 
     @Override
+    protected View getSnackbarView() {
+        return mRecyclerView;
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
 
         mActivity = null;
-    }
-
-    @Override
-    public void showSnackbar(@StringRes int text, @Nullable SnackbarAction action) {
-        Snackbar snackbar = Snackbar.make(mRecyclerView, text, Snackbar.LENGTH_LONG);
-        if (action != null) {
-            snackbar.setAction(action.getActionText(), action);
-        }
-        snackbar.show();
     }
 
     @Override

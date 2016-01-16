@@ -150,11 +150,6 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     }
 
     @Override
-    public void removeUpdateMovieDetailsWorker() {
-        WorkerUtils.removeWorker(getFragmentManager(), UpdateMovieDetailsWorker.WORKER_TAG);
-    }
-
-    @Override
     public void restartLoader() {
         getLoaderManager().restartLoader(LOADER_FAV, null, this);
     }

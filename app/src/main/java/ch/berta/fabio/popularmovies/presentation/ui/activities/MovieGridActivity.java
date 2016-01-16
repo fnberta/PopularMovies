@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.presentation.ui.activities;
 
+import android.content.ContentProviderResult;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
@@ -52,6 +53,7 @@ import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelOn
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorkerListener;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorkerListener;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDetailsWorkerListener;
+import rx.Observable;
 
 /**
  * Provides the main entry point to the app and hosts a {@link MovieGridOnlFragment}.
@@ -157,32 +159,22 @@ public class MovieGridActivity extends BaseActivity<MovieGridViewModel> implemen
     }
 
     @Override
-    public void onMoviesOnlineLoaded(@NonNull List<Movie> movies) {
-        ((MovieGridViewModelOnl) mViewModel).onMoviesOnlineLoaded(movies);
+    public void setQueryMovieDetailsStream(@NonNull Observable<MovieDetails> observable, @NonNull String workerTag) {
+        ((MovieDetailsViewModelOnl) mViewModel).setQueryMovieDetailsStream(observable, workerTag);
     }
 
     @Override
-    public void onMoviesOnlineLoadFailed() {
-        ((MovieGridViewModelOnl) mViewModel).onMoviesOnlineLoadFailed();
+    public void setQueryMoviesStream(@NonNull Observable<List<Movie>> observable, @NonNull String workerTag) {
+        ((MovieGridViewModelOnl) mViewModel).setQueryMoviesStream(observable, workerTag);
     }
 
     @Override
-    public void onMovieDetailsOnlineLoaded(@NonNull MovieDetails movieDetails) {
-        ((MovieDetailsViewModelOnl) mDetailsViewModel).onMovieDetailsOnlineLoaded(movieDetails);
+    public void setUpdateMovieDetailsStream(@NonNull Observable<ContentProviderResult[]> observable, @NonNull String workerTag) {
+        ((MovieDetailsViewModelFav) mDetailsViewModel).setUpdateMovieDetailsStream(observable, workerTag);
     }
 
     @Override
-    public void onMovieDetailsOnlineLoadFailed() {
-        ((MovieDetailsViewModelOnl) mDetailsViewModel).onMovieDetailsOnlineLoadFailed();
-    }
-
-    @Override
-    public void onMovieDetailsUpdated() {
-        ((MovieDetailsViewModelFav) mDetailsViewModel).onMovieDetailsUpdated();
-    }
-
-    @Override
-    public void onMovieDetailsUpdateFailed() {
-        ((MovieDetailsViewModelFav) mDetailsViewModel).onMovieDetailsUpdateFailed();
+    public void onWorkerError(@NonNull String workerTag) {
+        mViewModel.onWorkerError(workerTag);
     }
 }

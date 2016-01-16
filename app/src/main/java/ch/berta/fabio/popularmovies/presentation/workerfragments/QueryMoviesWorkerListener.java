@@ -21,20 +21,20 @@ import android.support.annotation.NonNull;
 import java.util.List;
 
 import ch.berta.fabio.popularmovies.domain.models.Movie;
+import rx.Observable;
 
 /**
  * Defines the actions after a query for movies was attempted.
  */
-public interface QueryMoviesWorkerListener {
-    /**
-     * Handles the event when movie query finished.
-     *
-     * @param movies the {@link List<Movie>} containing the queried movies
-     */
-    void onMoviesOnlineLoaded(@NonNull List<Movie> movies);
+public interface QueryMoviesWorkerListener extends BaseWorkerListener {
 
     /**
-     * Handles the event when movie query failed.
+     * Sets the observable with the movie query.
+     *
+     * @param observable the observable to set
+     * @param workerTag  the tag of the worker fragment
      */
-    void onMoviesOnlineLoadFailed();
+    void setQueryMoviesStream(@NonNull Observable<List<Movie>> observable,
+                              @NonNull String workerTag);
+
 }

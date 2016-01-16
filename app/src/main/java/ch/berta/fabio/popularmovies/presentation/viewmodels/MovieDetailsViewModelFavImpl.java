@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.presentation.viewmodels;
 
+import android.content.ContentProviderResult;
 import android.databinding.Bindable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +29,8 @@ import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
 import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Provides an implementation of the {@link MovieDetailsViewModelFav} interface.
@@ -111,13 +114,13 @@ public class MovieDetailsViewModelFavImpl extends
             onMovieUpdateFailed();
         } else {
             mView.startPostponedEnterTransition();
-            mView.showSnackbar(R.string.snackbar_movie_no_data, null);
+            mView.showMessage(R.string.snackbar_movie_no_data, null);
         }
     }
 
     private void onMovieUpdateFailed() {
         setRefreshing(false);
-        mView.showSnackbar(R.string.snackbar_movie_update_failed, new SnackbarAction(R.string.snackbar_retry) {
+        mView.showMessage(R.string.snackbar_movie_update_failed, new SnackbarAction(R.string.snackbar_retry) {
             @Override
             public void onClick(View v) {
                 mView.loadUpdateMovieDetailsWorker(mMovie.getDbId(), mMovieRowId);
@@ -140,14 +143,30 @@ public class MovieDetailsViewModelFavImpl extends
     }
 
     @Override
-    public void onMovieDetailsUpdated() {
-        mView.removeUpdateMovieDetailsWorker();
-        mView.restartLoader();
+    public void setUpdateMovieDetailsStream(@NonNull Observable<ContentProviderResult[]> observable, @NonNull final String workerTag) {
+        mSubscriptions.add(observable.subscribe(new Subscriber<ContentProviderResult[]>() {
+            @Override
+            public void onCompleted() {
+                mView.removeWorker(workerTag);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                mView.removeWorker(workerTag);
+                onMovieUpdateFailed();
+            }
+
+            @Override
+            public void onNext(ContentProviderResult[] contentProviderResults) {
+                mView.restartLoader();
+            }
+        }));
     }
 
     @Override
-    public void onMovieDetailsUpdateFailed() {
-        mView.removeUpdateMovieDetailsWorker();
+    public void onWorkerError(@NonNull String workerTag) {
+        super.onWorkerError(workerTag);
+
         onMovieUpdateFailed();
     }
 

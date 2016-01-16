@@ -36,7 +36,6 @@ import ch.berta.fabio.popularmovies.domain.models.Video;
 import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.Observable;
 import rx.Subscriber;
-import rx.subscriptions.CompositeSubscription;
 
 /**
  * Provides an abstract base class that implements {@link MovieDetailsViewModel}.
@@ -57,7 +56,6 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
     int mReviewsCount;
     int mVideosCount;
     long mMovieRowId;
-    private CompositeSubscription mSubscriptions;
 
     /**
      * Constructs a new {@link MovieDetailsViewModelBaseImpl}.
@@ -83,22 +81,6 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
         outState.putInt(STATE_REVIEWS_COUNT, mReviewsCount);
         outState.putInt(STATE_VIDEOS_COUNT, mVideosCount);
         outState.putLong(STATE_MOVIE_ROW_ID, mMovieRowId);
-    }
-
-    @Override
-    public void attachView(T view) {
-        super.attachView(view);
-
-        mSubscriptions = new CompositeSubscription();
-    }
-
-    @Override
-    public void detachView() {
-        super.detachView();
-
-        if (mSubscriptions.hasSubscriptions()) {
-            mSubscriptions.unsubscribe();
-        }
     }
 
     @Override
@@ -254,7 +236,7 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
                 @Override
                 public void onError(Throwable e) {
-                    mView.showSnackbar(R.string.snackbar_movie_delete_failed, null);
+                    mView.showMessage(R.string.snackbar_movie_delete_failed, null);
                 }
 
                 @Override
@@ -273,12 +255,12 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
                         @Override
                         public void onError(Throwable e) {
-                            mView.showSnackbar(R.string.snackbar_movie_insert_failed, null);
+                            mView.showMessage(R.string.snackbar_movie_insert_failed, null);
                         }
 
                         @Override
                         public void onNext(ContentProviderResult[] contentProviderResults) {
-                            mView.showSnackbar(R.string.snackbar_movie_added_to_favorites, null);
+                            mView.showMessage(R.string.snackbar_movie_added_to_favorites, null);
                         }
                     })
             );
@@ -288,7 +270,7 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
     @CallSuper
     void onMovieDeleted() {
         if (mUseTwoPane) {
-            mView.showSnackbar(R.string.snackbar_movie_removed_from_favorites, null);
+            mView.showMessage(R.string.snackbar_movie_removed_from_favorites, null);
         } else {
             onMovieDeletedOnePane();
         }

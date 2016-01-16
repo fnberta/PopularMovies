@@ -135,6 +135,11 @@ public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewMod
     }
 
     @Override
+    protected View getSnackbarView() {
+        return mBinding.rvGrid;
+    }
+
+    @Override
     public void launchDetailsScreen(int moviePosition, @NonNull View posterSharedElement) {
         if (!mUseTwoPane) {
             final Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
