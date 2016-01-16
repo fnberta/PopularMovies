@@ -32,8 +32,8 @@ import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWork
  * <p/>
  * Extends {@link MovieGridViewModel}.
  */
-public interface MovieGridViewModelOnl
-        extends MovieGridViewModel<MovieGridViewModelOnl.ViewInteractionListener>,
+public interface MovieGridViewModelOnl extends
+        MovieGridViewModel<MovieGridViewModelOnl.ViewInteractionListener>,
         MugenCallbacks, AdapterViewModel, QueryMoviesWorkerListener {
 
     int TYPE_ITEM = 0;

@@ -34,8 +34,8 @@ import rx.Subscriber;
  * Subclass of {@link MovieDetailsViewModelBaseImpl}.
  */
 public class MovieDetailsViewModelOnlImpl extends
-        MovieDetailsViewModelBaseImpl<MovieDetailsViewModelOnl.ViewInteractionListener> implements
-        MovieDetailsViewModelOnl {
+        MovieDetailsViewModelBaseImpl<MovieDetailsViewModelOnl.ViewInteractionListener>
+        implements MovieDetailsViewModelOnl {
 
     /**
      * Constructs a new {@link MovieDetailsViewModelFavImpl}.

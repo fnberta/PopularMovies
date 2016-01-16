@@ -27,7 +27,8 @@ import ch.berta.fabio.popularmovies.presentation.ui.adapters.listeners.MovieInte
 /**
  * Defines a view model for a list of movie posters.
  */
-public interface MovieGridViewModel<T extends MovieGridViewModel.ViewInteractionListener> extends ViewModel<T>, MovieInteractionListener {
+public interface MovieGridViewModel<T extends MovieGridViewModel.ViewInteractionListener>
+        extends ViewModel<T>, MovieInteractionListener {
 
     @Bindable
     boolean isMoviesAvailable();

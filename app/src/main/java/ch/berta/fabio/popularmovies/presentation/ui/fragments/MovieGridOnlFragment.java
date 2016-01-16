@@ -49,8 +49,9 @@ import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 /**
  * Displays a grid of movie poster images.
  */
-public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewModelOnl, MovieGridBaseFragment.ActivityListener> implements
-        MovieGridViewModelOnl.ViewInteractionListener {
+public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewModelOnl,
+        MovieGridBaseFragment.ActivityListener>
+        implements MovieGridViewModelOnl.ViewInteractionListener {
 
     public static final String INTENT_MOVIE_SELECTED = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED";
     private static final String LOG_TAG = MovieGridOnlFragment.class.getSimpleName();

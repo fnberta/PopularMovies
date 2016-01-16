@@ -26,7 +26,8 @@ import ch.berta.fabio.popularmovies.domain.models.Sort;
  * <p/>
  * Extends {@link MovieGridViewModel}.
  */
-public interface MovieGridViewModelFav extends MovieGridViewModel<MovieGridViewModelFav.ViewInteractionListener> {
+public interface MovieGridViewModelFav extends
+        MovieGridViewModel<MovieGridViewModelFav.ViewInteractionListener> {
 
     /**
      * Returns whether the dbId belongs to the currently selected movie.

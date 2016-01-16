@@ -44,9 +44,9 @@ import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewMode
  * Provides a base class for the display of detail information about a movie, including poster
  * image, release date, rating, an overview of the plot, reviews and trailers.
  */
-public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel> extends
-        BaseFragment<T> implements
-        LoaderManager.LoaderCallbacks<Cursor>,
+public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
+        extends BaseFragment<T>
+        implements LoaderManager.LoaderCallbacks<Cursor>,
         MovieDetailsViewModel.ViewInteractionListener {
 
     private static final String LOG_TAG = MovieDetailsBaseFragment.class.getSimpleName();

@@ -39,8 +39,9 @@ import ch.berta.fabio.popularmovies.utils.Utils;
 /**
  * Provides an abstract base class for the display of movies in a grid of posters.
  */
-public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S extends MovieGridBaseFragment.ActivityListener> extends BaseFragment<T> implements
-        MovieGridViewModel.ViewInteractionListener {
+public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S extends MovieGridBaseFragment.ActivityListener>
+        extends BaseFragment<T>
+        implements MovieGridViewModel.ViewInteractionListener {
 
     public static final int REQUEST_MOVIE_DETAILS = 1;
     private static final String LOG_TAG = MovieGridBaseFragment.class.getSimpleName();

@@ -35,7 +35,9 @@ import ch.berta.fabio.popularmovies.utils.WorkerUtils;
  * <p/>
  * Subclass of {@link Fragment}.
  */
-public abstract class BaseFragment<T extends ViewModel> extends Fragment implements ViewModel.ViewInteractionListener {
+public abstract class BaseFragment<T extends ViewModel>
+        extends Fragment
+        implements ViewModel.ViewInteractionListener {
 
     @Inject
     T mViewModel;

@@ -58,8 +58,8 @@ import rx.Observable;
 /**
  * Provides the main entry point to the app and hosts a {@link MovieGridOnlFragment}.
  */
-public class MovieGridActivity extends BaseActivity<MovieGridViewModel> implements
-        MovieGridBaseFragment.ActivityListener,
+public class MovieGridActivity extends BaseActivity<MovieGridViewModel>
+        implements MovieGridBaseFragment.ActivityListener,
         MovieDetailsBaseFragment.ActivityListener,
         QueryMoviesWorkerListener,
         QueryMovieDetailsWorkerListener,

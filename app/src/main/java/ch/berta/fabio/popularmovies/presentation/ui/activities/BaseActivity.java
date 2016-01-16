@@ -26,7 +26,8 @@ import ch.berta.fabio.popularmovies.presentation.viewmodels.ViewModel;
  * <p/>
  * Subclass of {@link AppCompatActivity}.
  */
-public abstract class BaseActivity<T extends ViewModel> extends AppCompatActivity {
+public abstract class BaseActivity<T extends ViewModel>
+        extends AppCompatActivity {
 
     T mViewModel;
 }

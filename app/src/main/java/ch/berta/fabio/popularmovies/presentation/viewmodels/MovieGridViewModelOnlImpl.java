@@ -40,8 +40,8 @@ import rx.Subscriber;
  * Subclass of {@link MovieGridViewModelBaseImpl}.
  */
 public class MovieGridViewModelOnlImpl extends
-        MovieGridViewModelBaseImpl<MovieGridViewModelOnl.ViewInteractionListener> implements
-        MovieGridViewModelOnl {
+        MovieGridViewModelBaseImpl<MovieGridViewModelOnl.ViewInteractionListener>
+        implements MovieGridViewModelOnl {
 
     private static final String STATE_MOVIE_PAGE = "STATE_MOVIE_PAGE";
     private static final String STATE_REFRESHING = "STATE_REFRESHING";

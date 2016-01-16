@@ -38,8 +38,8 @@ import rx.Subscriber;
  * Subclass of {@link MovieDetailsViewModelBaseImpl}.
  */
 public class MovieDetailsViewModelFavImpl extends
-        MovieDetailsViewModelBaseImpl<MovieDetailsViewModelFav.ViewInteractionListener> implements
-        MovieDetailsViewModelFav {
+        MovieDetailsViewModelBaseImpl<MovieDetailsViewModelFav.ViewInteractionListener>
+        implements MovieDetailsViewModelFav {
 
     private static final String STATE_REFRESHING = "STATE_REFRESHING";
     private boolean mRefreshing;

@@ -29,8 +29,8 @@ import ch.berta.fabio.popularmovies.domain.models.Sort;
  * Subclass of {@link MovieGridViewModelBaseImpl}.
  */
 public class MovieGridViewModelFavImpl extends
-        MovieGridViewModelBaseImpl<MovieGridViewModelFav.ViewInteractionListener> implements
-        MovieGridViewModelFav {
+        MovieGridViewModelBaseImpl<MovieGridViewModelFav.ViewInteractionListener>
+        implements MovieGridViewModelFav {
 
     public MovieGridViewModelFavImpl(@Nullable Bundle savedState) {
         super(savedState);

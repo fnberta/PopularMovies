@@ -27,7 +27,8 @@ import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDeta
  * Extends {@link MovieDetailsViewModel}.
  */
 public interface MovieDetailsViewModelFav extends
-        MovieDetailsViewModel<MovieDetailsViewModelFav.ViewInteractionListener>, UpdateMovieDetailsWorkerListener {
+        MovieDetailsViewModel<MovieDetailsViewModelFav.ViewInteractionListener>,
+        UpdateMovieDetailsWorkerListener {
 
     @Bindable
     boolean isRefreshing();

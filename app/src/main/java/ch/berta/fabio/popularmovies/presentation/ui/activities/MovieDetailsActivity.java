@@ -43,8 +43,8 @@ import rx.Observable;
  * Presents the backdrop image of a selected movie in a collapsing toolbar and hosts a
  * {@link MovieDetailsOnlFragment} that displays other information about the movie.
  */
-public class MovieDetailsActivity extends BaseActivity<MovieDetailsViewModel> implements
-        MovieDetailsBaseFragment.ActivityListener,
+public class MovieDetailsActivity extends BaseActivity<MovieDetailsViewModel>
+        implements MovieDetailsBaseFragment.ActivityListener,
         QueryMovieDetailsWorkerListener, UpdateMovieDetailsWorkerListener {
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();

@@ -46,8 +46,8 @@ import ch.berta.fabio.popularmovies.utils.WorkerUtils;
  * overview of the plot, reviews and videos (e.g. trailers). Queries data from the local content
  * provider.
  */
-public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetailsViewModelFav> implements
-        MovieDetailsViewModelFav.ViewInteractionListener {
+public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetailsViewModelFav>
+        implements MovieDetailsViewModelFav.ViewInteractionListener {
 
     public static final int RESULT_UNFAVOURED = 2;
     private static final String KEY_MOVIE_ROW_ID = "MOVIE_ROW_ID";

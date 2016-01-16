@@ -30,8 +30,8 @@ import ch.berta.fabio.popularmovies.presentation.ui.adapters.listeners.MovieDeta
 /**
  * Defines a view model for the details screen of a movie.
  */
-public interface MovieDetailsViewModel<T extends MovieDetailsViewModel.ViewInteractionListener> extends
-        ViewModel<T>, AdapterViewModel, MovieDetailsInteractionListener {
+public interface MovieDetailsViewModel<T extends MovieDetailsViewModel.ViewInteractionListener>
+        extends ViewModel<T>, AdapterViewModel, MovieDetailsInteractionListener {
 
     int TYPE_HEADER = 0;
     int TYPE_TWO_PANE_HEADER = 1;

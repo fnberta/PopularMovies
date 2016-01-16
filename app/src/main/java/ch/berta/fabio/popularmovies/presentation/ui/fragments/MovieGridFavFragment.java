@@ -47,8 +47,8 @@ import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelFa
 /**
  * Displays a grid of movie poster images.
  */
-public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewModelFav, MovieGridBaseFragment.ActivityListener> implements
-        MovieGridViewModelFav.ViewInteractionListener,
+public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewModelFav, MovieGridBaseFragment.ActivityListener>
+        implements MovieGridViewModelFav.ViewInteractionListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String INTENT_MOVIE_SELECTED_ROW_ID = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED_ROW_ID";
