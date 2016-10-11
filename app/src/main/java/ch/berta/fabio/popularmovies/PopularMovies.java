@@ -20,10 +20,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.support.annotation.NonNull;
 
-import ch.berta.fabio.popularmovies.di.components.ApplicationComponent;
-import ch.berta.fabio.popularmovies.di.components.DaggerApplicationComponent;
-import ch.berta.fabio.popularmovies.di.modules.ApplicationModule;
-import ch.berta.fabio.popularmovies.di.modules.MovieServiceModule;
+import ch.berta.fabio.popularmovies.di.ApplicationComponent;
+import ch.berta.fabio.popularmovies.di.ApplicationModule;
+import ch.berta.fabio.popularmovies.di.DaggerApplicationComponent;
+import ch.berta.fabio.popularmovies.di.MovieServiceModule;
 
 /**
  * Provides state across the lifecycle of the whole application. Used to build the AppComponent

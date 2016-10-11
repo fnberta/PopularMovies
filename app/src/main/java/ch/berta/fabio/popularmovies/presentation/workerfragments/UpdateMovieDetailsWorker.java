@@ -21,7 +21,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
+import ch.berta.fabio.popularmovies.presentation.common.di.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import rx.Observable;
 import rx.functions.Func1;

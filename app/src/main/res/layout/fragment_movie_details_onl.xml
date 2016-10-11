@@ -22,7 +22,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnl"
+            type="ch.berta.fabio.popularmovies.presentation.details.onl.MovieDetailsViewModelOnl"
             />
     </data>
 
@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="@dimen/small_space"
-            tools:context=".presentation.ui.fragments.MovieDetailsBaseFragment"
+            tools:context=".presentation.details.MovieDetailsBaseFragment"
             />
 
     </FrameLayout>

@@ -23,7 +23,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFav"
+            type="ch.berta.fabio.popularmovies.presentation.details.fav.MovieDetailsViewModelFav"
             />
     </data>
 
@@ -41,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="@dimen/small_space"
-            tools:context=".presentation.ui.fragments.MovieDetailsBaseFragment"
+            tools:context=".presentation.details.MovieDetailsBaseFragment"
             />
 
     </android.support.v4.widget.SwipeRefreshLayout>

@@ -23,7 +23,7 @@ import android.text.TextUtils;
 
 import java.util.List;
 
-import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
+import ch.berta.fabio.popularmovies.presentation.common.di.WorkerComponent;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import rx.Observable;
 

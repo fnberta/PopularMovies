@@ -26,14 +26,14 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModelOnl"
+            type="ch.berta.fabio.popularmovies.presentation.grid.onl.MovieGridViewModelOnl"
             />
     </data>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".presentation.ui.fragments.MovieGridOnlFragment"
+        tools:context=".presentation.grid.onl.MovieGridOnlFragment"
         >
 
         <android.support.v4.widget.SwipeRefreshLayout

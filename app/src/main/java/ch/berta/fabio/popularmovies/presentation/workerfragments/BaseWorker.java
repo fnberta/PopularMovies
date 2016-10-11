@@ -26,8 +26,8 @@ import javax.inject.Inject;
 
 import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
-import ch.berta.fabio.popularmovies.di.components.DaggerWorkerComponent;
-import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
+import ch.berta.fabio.popularmovies.presentation.common.di.DaggerWorkerComponent;
+import ch.berta.fabio.popularmovies.presentation.common.di.WorkerComponent;
 import rx.Observable;
 import rx.Subscription;
 import rx.subjects.PublishSubject;
