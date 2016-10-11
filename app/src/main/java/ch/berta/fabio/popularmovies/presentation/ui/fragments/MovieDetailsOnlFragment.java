@@ -33,7 +33,6 @@ import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsOnlBinding;
 import ch.berta.fabio.popularmovies.di.components.DaggerMovieDetailsComponent;
 import ch.berta.fabio.popularmovies.di.modules.MovieDetailsViewModelModule;
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorker;

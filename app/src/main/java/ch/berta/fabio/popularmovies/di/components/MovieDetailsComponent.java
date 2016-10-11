@@ -17,7 +17,6 @@
 package ch.berta.fabio.popularmovies.di.components;
 
 import ch.berta.fabio.popularmovies.di.modules.MovieDetailsViewModelModule;
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.di.scopes.PerFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieDetailsFavFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieDetailsOnlFragment;
@@ -29,7 +28,7 @@ import dagger.Component;
  * Defines the dependency injection component for the Movie Details screen.
  */
 @PerFragment
-@Component(modules = {MovieDetailsViewModelModule.class, MovieRepositoryModule.class},
+@Component(modules = {MovieDetailsViewModelModule.class},
         dependencies = {ApplicationComponent.class})
 public interface MovieDetailsComponent {
 

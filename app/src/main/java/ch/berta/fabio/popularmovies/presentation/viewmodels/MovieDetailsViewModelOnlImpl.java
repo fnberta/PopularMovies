@@ -22,9 +22,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.Observable;
 import rx.Subscriber;
 

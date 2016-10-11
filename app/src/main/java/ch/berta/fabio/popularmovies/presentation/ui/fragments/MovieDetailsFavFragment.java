@@ -33,7 +33,6 @@ import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsFavBinding;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsInfoBinding;
 import ch.berta.fabio.popularmovies.di.components.DaggerMovieDetailsComponent;
 import ch.berta.fabio.popularmovies.di.modules.MovieDetailsViewModelModule;
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MovieDetailsRecyclerAdapter.InfoRow;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFav;

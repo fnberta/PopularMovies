@@ -36,7 +36,6 @@ import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridOnlBinding;
 import ch.berta.fabio.popularmovies.di.components.DaggerMovieGridComponent;
 import ch.berta.fabio.popularmovies.di.modules.MovieGridViewModelModule;
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
 import ch.berta.fabio.popularmovies.presentation.ui.activities.MovieDetailsActivity;
@@ -79,7 +78,6 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
         final Sort sortSelected = getArguments().getParcelable(KEY_SORT_SELECTED);
         DaggerMovieGridComponent.builder()
                 .applicationComponent(PopularMovies.getAppComponent(getActivity()))
-                .movieRepositoryModule(new MovieRepositoryModule())
                 .movieGridViewModelModule(new MovieGridViewModelModule(savedInstanceState, sortSelected))
                 .build()
                 .inject(this);

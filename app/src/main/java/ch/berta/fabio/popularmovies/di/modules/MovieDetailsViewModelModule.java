@@ -20,8 +20,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFav;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelFavImpl;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModelOnl;

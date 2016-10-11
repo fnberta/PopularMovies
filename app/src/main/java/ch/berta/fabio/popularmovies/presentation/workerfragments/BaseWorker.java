@@ -25,10 +25,9 @@ import android.support.v4.app.Fragment;
 import javax.inject.Inject;
 
 import ch.berta.fabio.popularmovies.PopularMovies;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.di.components.DaggerWorkerComponent;
 import ch.berta.fabio.popularmovies.di.components.WorkerComponent;
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.Observable;
 import rx.Subscription;
 import rx.subjects.PublishSubject;

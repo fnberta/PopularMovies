@@ -30,10 +30,10 @@ import javax.inject.Inject;
 
 import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.Review;
 import ch.berta.fabio.popularmovies.domain.models.Video;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.Observable;
 import rx.Subscriber;
 

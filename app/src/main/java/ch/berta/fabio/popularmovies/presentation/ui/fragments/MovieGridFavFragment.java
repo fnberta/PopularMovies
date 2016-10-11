@@ -33,12 +33,11 @@ import javax.inject.Inject;
 import ch.berta.fabio.popularmovies.BuildConfig;
 import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridFavBinding;
 import ch.berta.fabio.popularmovies.di.components.DaggerMovieGridComponent;
 import ch.berta.fabio.popularmovies.di.modules.MovieGridViewModelModule;
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.presentation.ui.activities.MovieDetailsActivity;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MoviesFavRecyclerAdapter;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.decorators.PosterGridItemDecoration;
@@ -68,7 +67,6 @@ public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewMod
 
         DaggerMovieGridComponent.builder()
                 .applicationComponent(PopularMovies.getAppComponent(getActivity()))
-                .movieRepositoryModule(new MovieRepositoryModule())
                 .movieGridViewModelModule(new MovieGridViewModelModule(savedInstanceState))
                 .build()
                 .inject(this);

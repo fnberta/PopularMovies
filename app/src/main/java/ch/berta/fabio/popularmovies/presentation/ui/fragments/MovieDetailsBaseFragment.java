@@ -36,7 +36,7 @@ import android.view.View;
 import javax.inject.Inject;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.MovieDetailsRecyclerAdapter;
 import ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel;
 

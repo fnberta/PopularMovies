@@ -16,9 +16,8 @@
 
 package ch.berta.fabio.popularmovies.di.components;
 
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.di.scopes.PerFragment;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorker;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorker;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDetailsWorker;
@@ -28,8 +27,7 @@ import dagger.Component;
  * Defines the dependency injection component for the headless worker fragments.
  */
 @PerFragment
-@Component(modules = {MovieRepositoryModule.class},
-        dependencies = {ApplicationComponent.class})
+@Component(dependencies = {ApplicationComponent.class})
 public interface WorkerComponent {
 
     void inject(QueryMoviesWorker queryMoviesWorker);

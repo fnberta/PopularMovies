@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.rest.MovieService;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
@@ -37,7 +39,7 @@ import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import ch.berta.fabio.popularmovies.domain.models.MoviesPage;
 import ch.berta.fabio.popularmovies.domain.models.Review;
 import ch.berta.fabio.popularmovies.domain.models.Video;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
+import dagger.Provides;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.exceptions.Exceptions;
@@ -45,11 +47,14 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
- * Provides an implementation of the {@link MovieRepository} interface.
+ * Handles the loading of {@link Movie} data from online sources as well as from the locale content
+ * provider. Full separation between loading and display is not possible with {@link CursorLoader}
+ * and adapters using the cursor instead of POJOs. This is a best effort to provide some kind of
+ * separation.
  */
-public class MovieRepositoryImpl implements MovieRepository {
+public class MovieRepository {
 
-    private static final String LOG_TAG = MovieRepositoryImpl.class.getSimpleName();
+    private static final String LOG_TAG = MovieRepository.class.getSimpleName();
     private static final int COL_INDEX_MOVIE_ROW_ID = 0;
     private static final int COL_INDEX_MOVIE_DB_ID = 1;
     private static final int COL_INDEX_MOVIE_TITLE = 2;
@@ -103,14 +108,20 @@ public class MovieRepositoryImpl implements MovieRepository {
     private final MovieService mMovieService;
 
     /**
-     * Constructs a new {@link MovieRepositoryImpl}.
+     * Constructs a new {@link MovieRepository}.
      */
-    public MovieRepositoryImpl(@NonNull Application app, @NonNull MovieService movieService) {
+    @Inject
+    public MovieRepository(@NonNull Application app, @NonNull MovieService movieService) {
         mAppContext = app;
         mMovieService = movieService;
     }
 
-    @Override
+    /**
+     * Loads a list of movies from TheMovieDB, including their basic information.
+     *
+     * @param page the page of movies to load
+     * @param sort the sorting scheme to decide which movies to load
+     */
     public Observable<List<Movie>> getMoviesOnline(int page, @NonNull String sort) {
         return mMovieService.loadMoviePosters(page, sort,
                 mAppContext.getString(R.string.movie_db_key))
@@ -124,7 +135,11 @@ public class MovieRepositoryImpl implements MovieRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    @Override
+    /**
+     * Loads the detail information of a movie from TheMovieDB.
+     *
+     * @param movieDbId the db id of the movie
+     */
     public Observable<MovieDetails> getMovieDetailsOnline(int movieDbId) {
         return mMovieService.loadMovieDetails(movieDbId,
                 mAppContext.getString(R.string.movie_db_key), "reviews,videos")
@@ -132,7 +147,12 @@ public class MovieRepositoryImpl implements MovieRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
-    @Override
+    /**
+     * Returns a {@link CursorLoader} that loads the favourite movies of the user.
+     *
+     * @param context the context to use in the loader
+     * @return a {@link CursorLoader} that loads the favourite movies of the user
+     */
     public CursorLoader getFavMoviesLoader(@NonNull Context context) {
         return new CursorLoader(
                 context,
@@ -144,27 +164,57 @@ public class MovieRepositoryImpl implements MovieRepository {
         );
     }
 
-    @Override
+    /**
+     * Returns the db id of a user's favourite movie via the data of the cursor. Must be a cursor
+     * obtained via the {@link #getFavMoviesLoader(Context)} (Context, long)} method.
+     *
+     * @param cursor the cursor to get the data from
+     * @return the db id of a user's favourite movie
+     */
     public int getMovieDbIdFromFavMoviesCursor(@NonNull Cursor cursor) {
-        return cursor.getInt(MovieRepositoryImpl.COL_INDEX_MOVIE_DB_ID);
+        return cursor.getInt(MovieRepository.COL_INDEX_MOVIE_DB_ID);
     }
 
-    @Override
+    /**
+     * Returns the title of a user's favourite movie via the data of the cursor. Must be a cursor
+     * obtained via the {@link #getFavMoviesLoader(Context)} (Context, long)} method.
+     *
+     * @param cursor the cursor to get the data from
+     * @return the title of a user's favourite movie
+     */
     public String getMovieTitleFromFavMoviesCursor(@NonNull Cursor cursor) {
-        return cursor.getString(MovieRepositoryImpl.COL_INDEX_MOVIE_TITLE);
+        return cursor.getString(MovieRepository.COL_INDEX_MOVIE_TITLE);
     }
 
-    @Override
+    /**
+     * Returns the release date of a user's favourite movie via the data of the cursor. Must be a
+     * cursor obtained via the {@link #getFavMoviesLoader(Context)} (Context, long)} method.
+     *
+     * @param cursor the cursor to get the data from
+     * @return the release date a user's favourite movie
+     */
     public Date getMovieReleaseDateFromFavMoviesCursor(@NonNull Cursor cursor) {
-        return new Date(cursor.getLong(MovieRepositoryImpl.COL_INDEX_MOVIE_RELEASE_DATE));
+        return new Date(cursor.getLong(MovieRepository.COL_INDEX_MOVIE_RELEASE_DATE));
     }
 
-    @Override
+    /**
+     * Returns the poster of a user's favourite movie via the data of the cursor. Must be a cursor
+     * obtained via the {@link #getFavMoviesLoader(Context)} (Context, long)} method.
+     *
+     * @param cursor the cursor to get the data from
+     * @return the poster a user's favourite movie
+     */
     public String getMoviePosterFromFavMoviesCursor(@NonNull Cursor cursor) {
-        return cursor.getString(MovieRepositoryImpl.COL_INDEX_MOVIE_POSTER);
+        return cursor.getString(MovieRepository.COL_INDEX_MOVIE_POSTER);
     }
 
-    @Override
+    /**
+     * Returns a {@link CursorLoader} that loads the details of a user's favourite movie.
+     *
+     * @param context    the context to use in the loader
+     * @param movieRowId the row id of the movie
+     * @return Returns a {@link CursorLoader} that loads the details of a user's favourite movie
+     */
     public CursorLoader getFavMovieDetailsLoader(@NonNull Context context, long movieRowId) {
         return new CursorLoader(
                 context,
@@ -176,7 +226,13 @@ public class MovieRepositoryImpl implements MovieRepository {
         );
     }
 
-    @Override
+    /**
+     * Returns a new {@link Movie} object from the data in the cursor. Must be a cursor obtained
+     * via the {@link #getFavMovieDetailsLoader(Context, long)} method.
+     *
+     * @param cursor the cursor to get the data from
+     * @return a new {@link Movie} object
+     */
     public Movie getMovieFromFavMovieDetailsCursor(@NonNull Cursor cursor) {
         final int dbId = cursor.getInt(COL_INDEX_MOVIE_DETAILS_DB_ID);
         final String title = cursor.getString(COL_INDEX_MOVIE_DETAILS_TITLE);
@@ -221,7 +277,14 @@ public class MovieRepositoryImpl implements MovieRepository {
         return new Movie(videos, backdrop, dbId, plot, releaseDate, poster, title, rating, reviews, true);
     }
 
-    @Override
+    /**
+     * Returns a {@link CursorLoader} that loads only the row id of a movie to check if it exists in
+     * the database or not.
+     *
+     * @param context   the context to use in the loader
+     * @param movieDbId the db id of the movie to load
+     * @return a {@link CursorLoader} that loads only the row id of a movie
+     */
     public CursorLoader getIsFavLoader(@NonNull Context context, int movieDbId) {
         return new CursorLoader(
                 context,
@@ -233,12 +296,22 @@ public class MovieRepositoryImpl implements MovieRepository {
         );
     }
 
-    @Override
+    /**
+     * Returns the row id of the movie via the data of the cursor. Must be a cursor obtained via
+     * the {@link #getIsFavLoader(Context, int)} method.
+     *
+     * @param cursor the cursor to get the data from
+     * @return the row id of the movie
+     */
     public long getRowIdFromIsFavCursor(@NonNull Cursor cursor) {
         return cursor.getLong(0);
     }
 
-    @Override
+    /**
+     * Inserts a {@link Movie} into the local content provider.
+     *
+     * @param movie the movie to insert
+     */
     public Observable<ContentProviderResult[]> insertMovieLocal(@NonNull Movie movie) {
         return Observable.just(movie)
                 .subscribeOn(Schedulers.io())
@@ -300,7 +373,11 @@ public class MovieRepositoryImpl implements MovieRepository {
         return ops;
     }
 
-    @Override
+    /**
+     * Deletes a movie from the local content provider.
+     *
+     * @param movieRowId the row id of the movie to delete
+     */
     public Observable<Integer> deleteMovieLocal(long movieRowId) {
         return Observable.just(movieRowId)
                 .subscribeOn(Schedulers.io())
@@ -314,7 +391,12 @@ public class MovieRepositoryImpl implements MovieRepository {
                 });
     }
 
-    @Override
+    /**
+     * Update a movie from the local content provider with new data fetched online.
+     *
+     * @param movieDetails the new online data
+     * @param movieRowId   the row id of the movie to update
+     */
     public Observable<ContentProviderResult[]> updateMovieLocal(@NonNull final MovieDetails movieDetails,
                                                                 final long movieRowId) {
         return Observable.just(movieDetails)

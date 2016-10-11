@@ -17,7 +17,6 @@
 package ch.berta.fabio.popularmovies.di.components;
 
 import ch.berta.fabio.popularmovies.di.modules.MovieGridViewModelModule;
-import ch.berta.fabio.popularmovies.di.modules.MovieRepositoryModule;
 import ch.berta.fabio.popularmovies.di.scopes.PerFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieGridFavFragment;
 import ch.berta.fabio.popularmovies.presentation.ui.fragments.MovieGridOnlFragment;
@@ -29,8 +28,7 @@ import dagger.Component;
  * Defines the dependency injection component for the Movie Grid screen.
  */
 @PerFragment
-@Component(modules = {MovieGridViewModelModule.class, MovieRepositoryModule.class},
-        dependencies = ApplicationComponent.class)
+@Component(modules = {MovieGridViewModelModule.class}, dependencies = ApplicationComponent.class)
 public interface MovieGridComponent {
 
     void inject(MovieGridFavFragment movieGridFavFragment);

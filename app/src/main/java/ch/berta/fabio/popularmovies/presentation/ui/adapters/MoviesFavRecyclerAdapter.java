@@ -26,7 +26,7 @@ import android.view.ViewGroup;
 
 import java.util.Date;
 
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.databinding.RowMovieBinding;
 import ch.berta.fabio.popularmovies.presentation.ui.adapters.rows.MovieRow;
 import ch.berta.fabio.popularmovies.utils.Utils;

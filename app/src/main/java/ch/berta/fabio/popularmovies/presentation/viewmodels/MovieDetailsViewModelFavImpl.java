@@ -26,9 +26,9 @@ import android.view.View;
 
 import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.R;
+import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.domain.models.SnackbarAction;
-import ch.berta.fabio.popularmovies.domain.repositories.MovieRepository;
 import rx.Observable;
 import rx.Subscriber;
 
