@@ -20,8 +20,6 @@ import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
-
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
 /**
@@ -38,63 +36,60 @@ public class Review implements Parcelable {
             return new Review[size];
         }
     };
-    @SerializedName("author")
-    private String mAuthor;
-    @SerializedName("content")
-    private String mContent;
-    @SerializedName("url")
-    private String mUrl;
+    private String author;
+    private String content;
+    private String url;
 
     public Review() {
     }
 
     public Review(String author, String content, String url) {
-        mAuthor = author;
-        mContent = content;
-        mUrl = url;
+        this.author = author;
+        this.content = content;
+        this.url = url;
     }
 
     protected Review(Parcel in) {
-        mAuthor = in.readString();
-        mContent = in.readString();
-        mUrl = in.readString();
+        author = in.readString();
+        content = in.readString();
+        url = in.readString();
     }
 
     public String getAuthor() {
-        return mAuthor;
+        return author;
     }
 
     public void setAuthor(String author) {
-        mAuthor = author;
+        this.author = author;
     }
 
     public String getContent() {
-        return mContent;
+        return content;
     }
 
     public void setContent(String content) {
-        mContent = content;
+        this.content = content;
     }
 
     public String getUrl() {
-        return mUrl;
+        return url;
     }
 
     public void setUrl(String url) {
-        mUrl = url;
+        this.url = url;
     }
 
     public ContentValues getContentValuesEntry() {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MovieContract.Review.COLUMN_AUTHOR, mAuthor);
-        contentValues.put(MovieContract.Review.COLUMN_CONTENT, mContent);
-        contentValues.put(MovieContract.Review.COLUMN_URL, mUrl);
+        contentValues.put(MovieContract.Review.COLUMN_AUTHOR, author);
+        contentValues.put(MovieContract.Review.COLUMN_CONTENT, content);
+        contentValues.put(MovieContract.Review.COLUMN_URL, url);
         return contentValues;
     }
 
     @Override
     public String toString() {
-        return mAuthor + ": " + mContent;
+        return author + ": " + content;
     }
 
     @Override
@@ -104,8 +99,8 @@ public class Review implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mAuthor);
-        dest.writeString(mContent);
-        dest.writeString(mUrl);
+        dest.writeString(author);
+        dest.writeString(content);
+        dest.writeString(url);
     }
 }

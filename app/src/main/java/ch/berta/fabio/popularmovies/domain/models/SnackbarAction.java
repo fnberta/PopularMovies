@@ -25,18 +25,18 @@ import android.view.View;
 public abstract class SnackbarAction implements View.OnClickListener {
 
     @StringRes
-    private int mActionText;
+    private int actionText;
 
     public SnackbarAction(@StringRes int actionText) {
-        mActionText = actionText;
+        this.actionText = actionText;
     }
 
     @StringRes
     public int getActionText() {
-        return mActionText;
+        return actionText;
     }
 
     public void setActionText(@StringRes int actionText) {
-        mActionText = actionText;
+        this.actionText = actionText;
     }
 }

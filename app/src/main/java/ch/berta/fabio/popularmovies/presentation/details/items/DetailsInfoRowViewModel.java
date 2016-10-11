@@ -45,12 +45,12 @@ import ch.berta.fabio.popularmovies.utils.Utils;
  */
 public class DetailsInfoRowViewModel extends BaseObservable {
 
-    private final int mPlotMaxLines;
-    private String mMoviePosterPath;
-    private String mMoviePlot;
-    private Date mMovieDate;
-    private double mMovieRating;
-    private boolean mTransitionEnabled;
+    private final int plotMaxLines;
+    private String moviePosterPath;
+    private String moviePlot;
+    private Date movieDate;
+    private double movieRating;
+    private boolean transitionEnabled;
 
     /**
      * Constructs a new {@link DetailsInfoRowViewModel}.
@@ -64,7 +64,7 @@ public class DetailsInfoRowViewModel extends BaseObservable {
         setMovieDate(movie.getReleaseDate());
         setMovieRating(movie.getVoteAverage());
         setTransitionEnabled(true);
-        mPlotMaxLines = plotMaxLines;
+        this.plotMaxLines = plotMaxLines;
     }
 
     @BindingAdapter({"imageUrl", "fallback", "loadedListener"})
@@ -94,55 +94,55 @@ public class DetailsInfoRowViewModel extends BaseObservable {
 
     @Bindable
     public String getMoviePosterPath() {
-        return mMoviePosterPath;
+        return moviePosterPath;
     }
 
     public void setMoviePosterPath(String moviePosterPath) {
-        mMoviePosterPath = moviePosterPath;
+        this.moviePosterPath = moviePosterPath;
         notifyPropertyChanged(BR.moviePosterPath);
     }
 
     @Bindable
     public String getMoviePlot() {
-        return mMoviePlot;
+        return moviePlot;
     }
 
     public void setMoviePlot(String moviePlot) {
-        mMoviePlot = moviePlot;
+        this.moviePlot = moviePlot;
         notifyPropertyChanged(BR.moviePlot);
     }
 
     @Bindable
     public Date getMovieDate() {
-        return mMovieDate;
+        return movieDate;
     }
 
     public void setMovieDate(Date movieDate) {
-        mMovieDate = movieDate;
+        this.movieDate = movieDate;
         notifyPropertyChanged(BR.movieDate);
     }
 
     @Bindable
     public double getMovieRating() {
-        return mMovieRating;
+        return movieRating;
     }
 
     public void setMovieRating(double movieRating) {
-        mMovieRating = movieRating;
+        this.movieRating = movieRating;
         notifyPropertyChanged(BR.movieRating);
     }
 
     @Bindable
     public boolean isTransitionEnabled() {
-        return mTransitionEnabled;
+        return transitionEnabled;
     }
 
     public void setTransitionEnabled(boolean transitionEnabled) {
-        mTransitionEnabled = transitionEnabled;
+        this.transitionEnabled = transitionEnabled;
         notifyPropertyChanged(BR.transitionEnabled);
     }
 
     public void onPlotClick(View view) {
-        Utils.expandOrCollapseTextView((TextView) view, mPlotMaxLines);
+        Utils.expandOrCollapseTextView((TextView) view, plotMaxLines);
     }
 }

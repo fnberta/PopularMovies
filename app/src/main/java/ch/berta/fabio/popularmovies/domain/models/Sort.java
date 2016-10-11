@@ -28,54 +28,53 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class Sort implements Parcelable {
 
-    @StringDef({SORT_POPULARITY, SORT_RELEASE_DATE, SORT_RATING, SORT_FAVORITE})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SortOption {}
     public static final String SORT_POPULARITY = "popularity.desc";
     public static final String SORT_RATING = "vote_average.desc";
     public static final String SORT_RELEASE_DATE = "release_date.desc";
     public static final String SORT_FAVORITE = "favorite";
     public static final Parcelable.Creator<Sort> CREATOR = new Parcelable.Creator<Sort>() {
+        @Override
         public Sort createFromParcel(Parcel source) {
             return new Sort(source);
         }
 
+        @Override
         public Sort[] newArray(int size) {
             return new Sort[size];
         }
     };
-    private String mOption;
-    private String mReadableValue;
+    private String option;
+    private String readableValue;
 
     public Sort(@SortOption String option, String readableValue) {
-        mOption = option;
-        mReadableValue = readableValue;
+        this.option = option;
+        this.readableValue = readableValue;
     }
 
     protected Sort(Parcel in) {
-        mOption = in.readString();
-        mReadableValue = in.readString();
+        option = in.readString();
+        readableValue = in.readString();
     }
 
     public String getOption() {
-        return mOption;
+        return option;
     }
 
     public void setOption(@SortOption String option) {
-        mOption = option;
+        this.option = option;
     }
 
     public String getReadableValue() {
-        return mReadableValue;
+        return readableValue;
     }
 
     public void setReadableValue(String readableValue) {
-        mReadableValue = readableValue;
+        this.readableValue = readableValue;
     }
 
     @Override
     public String toString() {
-        return mReadableValue;
+        return readableValue;
     }
 
     @Override
@@ -85,7 +84,12 @@ public class Sort implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mOption);
-        dest.writeString(mReadableValue);
+        dest.writeString(option);
+        dest.writeString(readableValue);
+    }
+
+    @StringDef({SORT_POPULARITY, SORT_RELEASE_DATE, SORT_RATING, SORT_FAVORITE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SortOption {
     }
 }

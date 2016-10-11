@@ -52,19 +52,19 @@ public class MovieDetailsViewModelOnlImpl extends
                                         @NonNull Movie movie, boolean useTwoPane) {
         super(savedState, movieRepository, useTwoPane);
 
-        mMovie = movie;
+        this.movie = movie;
     }
 
     @Override
     @Bindable
     public boolean isMovieFavoured() {
-        return mMovie != null && mMovie.isFavoured();
+        return movie != null && movie.isFavoured();
     }
 
     @Override
     public void loadMovieDetails() {
-        if (!mMovie.areReviewsAndVideosSet()) {
-            mView.loadQueryMovieDetailsWorker(getMovieDbId());
+        if (!movie.areReviewsAndVideosSet()) {
+            view.loadQueryMovieDetailsWorker(getMovieDbId());
         }
     }
 
@@ -75,47 +75,47 @@ public class MovieDetailsViewModelOnlImpl extends
 
     @Override
     public int getMovieDbId() {
-        return mMovie.getDbId();
+        return movie.getDbId();
     }
 
     @Override
     public void onMovieDeleted() {
         super.onMovieDeleted();
 
-        mView.restartLoader();
+        view.restartLoader();
     }
 
     @Override
     protected void onMovieDeletedOnePane() {
-        mView.showMessage(R.string.snackbar_movie_removed_from_favorites, null);
+        view.showMessage(R.string.snackbar_movie_removed_from_favorites, null);
     }
 
     @Override
     public void setQueryMovieDetailsStream(@NonNull Observable<MovieDetails> observable, @NonNull final String workerTag) {
-        mSubscriptions.add(observable.subscribe(new Subscriber<MovieDetails>() {
+        subscriptions.add(observable.subscribe(new Subscriber<MovieDetails>() {
             @Override
             public void onCompleted() {
-                mView.removeWorker(workerTag);
+                view.removeWorker(workerTag);
             }
 
             @Override
             public void onError(Throwable e) {
-                mView.removeWorker(workerTag);
-                mView.showMessage(R.string.snackbar_movie_load_reviews_videos_failed, null);
+                view.removeWorker(workerTag);
+                view.showMessage(R.string.snackbar_movie_load_reviews_videos_failed, null);
             }
 
             @Override
             public void onNext(MovieDetails movieDetails) {
-                mMovie.setReviews(movieDetails.getReviewsPage().getReviews());
-                mMovie.setVideos(movieDetails.getVideosPage().getVideos());
-                mMovie.setReviewsAndVideosSet(true);
+                movie.setReviews(movieDetails.getReviewsPage().getReviews());
+                movie.setVideos(movieDetails.getVideosPage().getVideos());
+                movie.setReviewsAndVideosSet(true);
 
                 setYoutubeShareUrl();
-                mView.invalidateOptionsMenu();
+                view.invalidateOptionsMenu();
 
                 setReviewsAndVideosCount();
-                mView.notifyItemRangeInserted(adjustPosForTwoPane(1),
-                        getNumberOfHeaderRows() + mReviewsCount + mVideosCount);
+                view.notifyItemRangeInserted(adjustPosForTwoPane(1),
+                        getNumberOfHeaderRows() + reviewsCount + videosCount);
             }
         }));
     }
@@ -124,6 +124,6 @@ public class MovieDetailsViewModelOnlImpl extends
     public void onWorkerError(@NonNull String workerTag) {
         super.onWorkerError(workerTag);
 
-        mView.showMessage(R.string.snackbar_movie_load_reviews_videos_failed, null);
+        view.showMessage(R.string.snackbar_movie_load_reviews_videos_failed, null);
     }
 }

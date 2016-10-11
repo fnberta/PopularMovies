@@ -38,55 +38,54 @@ public class ReviewsPage implements Parcelable {
             return new ReviewsPage[size];
         }
     };
-    @SerializedName("page")
-    private int mPage;
+    private int page;
     @SerializedName("results")
-    private List<Review> mReviews = new ArrayList<>();
-    @SerializedName("totalPages")
-    private int mTotalPages;
-    @SerializedName("totalResults")
-    private int mTotalResults;
+    private List<Review> reviews = new ArrayList<>();
+    @SerializedName("total_pages")
+    private int totalPages;
+    @SerializedName("total_results")
+    private int totalResults;
 
     public ReviewsPage() {
     }
 
     protected ReviewsPage(Parcel in) {
-        mPage = in.readInt();
-        mReviews = in.createTypedArrayList(Review.CREATOR);
-        mTotalPages = in.readInt();
-        mTotalResults = in.readInt();
+        page = in.readInt();
+        reviews = in.createTypedArrayList(Review.CREATOR);
+        totalPages = in.readInt();
+        totalResults = in.readInt();
     }
 
     public int getPage() {
-        return mPage;
+        return page;
     }
 
     public void setPage(int page) {
-        mPage = page;
+        this.page = page;
     }
 
     public List<Review> getReviews() {
-        return mReviews;
+        return reviews;
     }
 
     public void setReviews(List<Review> reviews) {
-        mReviews = reviews;
+        this.reviews = reviews;
     }
 
     public int getTotalPages() {
-        return mTotalPages;
+        return totalPages;
     }
 
     public void setTotalPages(int totalPages) {
-        mTotalPages = totalPages;
+        this.totalPages = totalPages;
     }
 
     public int getTotalResults() {
-        return mTotalResults;
+        return totalResults;
     }
 
     public void setTotalResults(int totalResults) {
-        mTotalResults = totalResults;
+        this.totalResults = totalResults;
     }
 
     @Override
@@ -96,9 +95,9 @@ public class ReviewsPage implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mPage);
-        dest.writeTypedList(mReviews);
-        dest.writeInt(mTotalPages);
-        dest.writeInt(mTotalResults);
+        dest.writeInt(page);
+        dest.writeTypedList(reviews);
+        dest.writeInt(totalPages);
+        dest.writeInt(totalResults);
     }
 }

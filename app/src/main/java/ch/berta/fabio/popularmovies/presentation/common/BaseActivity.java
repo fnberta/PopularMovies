@@ -32,10 +32,10 @@ public abstract class BaseActivity<T extends ViewModel>
         extends AppCompatActivity
         implements BaseWorkerListener {
 
-    protected T mViewModel;
+    protected T viewModel;
 
     @Override
     public void onWorkerError(@NonNull String workerTag) {
-        mViewModel.onWorkerError(workerTag);
+        viewModel.onWorkerError(workerTag);
     }
 }

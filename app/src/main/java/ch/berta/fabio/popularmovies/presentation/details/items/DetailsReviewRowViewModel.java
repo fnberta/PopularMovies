@@ -34,10 +34,10 @@ import ch.berta.fabio.popularmovies.utils.Utils;
  */
 public class DetailsReviewRowViewModel extends BaseObservable {
 
-    private final int mContentMaxLines;
-    private String mReviewAuthor;
-    private String mReviewContent;
-    private boolean mReviewLastPosition;
+    private final int contentMaxLines;
+    private String reviewAuthor;
+    private String reviewContent;
+    private boolean reviewLastPosition;
 
     /**
      * Constructs a new {@link DetailsInfoRowViewModel}.
@@ -52,40 +52,40 @@ public class DetailsReviewRowViewModel extends BaseObservable {
         setReviewAuthor(review.getAuthor());
         setReviewContent(review.getContent());
         setReviewLastPosition(reviewLastPosition);
-        mContentMaxLines = contentMaxLines;
+        this.contentMaxLines = contentMaxLines;
     }
 
     @Bindable
     public String getReviewAuthor() {
-        return mReviewAuthor;
+        return reviewAuthor;
     }
 
     public void setReviewAuthor(String reviewAuthor) {
-        mReviewAuthor = reviewAuthor;
+        this.reviewAuthor = reviewAuthor;
         notifyPropertyChanged(BR.reviewAuthor);
     }
 
     @Bindable
     public String getReviewContent() {
-        return mReviewContent;
+        return reviewContent;
     }
 
     public void setReviewContent(String reviewContent) {
-        mReviewContent = reviewContent;
+        this.reviewContent = reviewContent;
         notifyPropertyChanged(BR.reviewContent);
     }
 
     @Bindable
     public boolean isReviewLastPosition() {
-        return mReviewLastPosition;
+        return reviewLastPosition;
     }
 
     public void setReviewLastPosition(boolean reviewLastPosition) {
-        mReviewLastPosition = reviewLastPosition;
+        this.reviewLastPosition = reviewLastPosition;
         notifyPropertyChanged(BR.reviewLastPosition);
     }
 
     public void onContentClick(View view) {
-        Utils.expandOrCollapseTextView((TextView) view, mContentMaxLines);
+        Utils.expandOrCollapseTextView((TextView) view, contentMaxLines);
     }
 }

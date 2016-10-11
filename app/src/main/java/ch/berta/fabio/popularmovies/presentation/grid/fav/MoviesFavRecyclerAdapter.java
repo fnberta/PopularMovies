@@ -38,49 +38,49 @@ import ch.berta.fabio.popularmovies.utils.Utils;
 public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter<MovieRow> {
 
     private static final String LOG_TAG = MoviesFavRecyclerAdapter.class.getSimpleName();
-    private Cursor mCursor;
-    private int mRowIdColumn;
-    private boolean mDataIsValid;
-    private final MovieGridViewModelFav mViewModel;
-    private final MovieRepository mMovieRepo;
-    private final int mItemHeight;
+    private final MovieGridViewModelFav viewModel;
+    private final MovieRepository movieRepo;
+    private final int itemHeight;
+    private Cursor cursor;
+    private int rowIdColumn;
+    private boolean dataValid;
 
     public MoviesFavRecyclerAdapter(@Nullable Cursor cursor,
-                                    @NonNull MovieGridViewModelFav fragmentViewModel,
+                                    @NonNull MovieGridViewModelFav viewModel,
                                     @NonNull MovieRepository movieRepo,
                                     int layoutWidth, int columnCount) {
-        mCursor = cursor;
-        mDataIsValid = cursor != null;
-        mRowIdColumn = mDataIsValid ? cursor.getColumnIndexOrThrow(BaseColumns._ID) : -1;
+        this.cursor = cursor;
+        dataValid = cursor != null;
+        rowIdColumn = dataValid ? cursor.getColumnIndexOrThrow(BaseColumns._ID) : -1;
         setHasStableIds(true);
 
-        mMovieRepo = movieRepo;
-        mViewModel = fragmentViewModel;
+        this.movieRepo = movieRepo;
+        this.viewModel = viewModel;
 
-        mItemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
+        itemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
     }
 
     @Override
     public MovieRow onCreateViewHolder(ViewGroup parent, int viewType) {
         RowMovieBinding binding = RowMovieBinding.inflate(LayoutInflater.from(parent.getContext()),
                 parent, false);
-        return new MovieRow(binding, mViewModel);
+        return new MovieRow(binding, viewModel);
     }
 
     @Override
     public void onBindViewHolder(MovieRow holder, int position) {
-        if (!mCursor.moveToPosition(position)) {
+        if (!cursor.moveToPosition(position)) {
             throw new IllegalStateException("couldn't move cursor to position " + position);
         }
 
-        String title = mMovieRepo.getMovieTitleFromFavMoviesCursor(mCursor);
-        Date date = mMovieRepo.getMovieReleaseDateFromFavMoviesCursor(mCursor);
-        String poster = mMovieRepo.getMoviePosterFromFavMoviesCursor(mCursor);
+        String title = movieRepo.getMovieTitleFromFavMoviesCursor(cursor);
+        Date date = movieRepo.getMovieReleaseDateFromFavMoviesCursor(cursor);
+        String poster = movieRepo.getMoviePosterFromFavMoviesCursor(cursor);
 
         final RowMovieBinding binding = holder.getBinding();
         final MovieRowViewModel viewModel = binding.getViewModel();
         if (viewModel == null) {
-            binding.setViewModel(new MovieRowViewModel(title, date, poster, mItemHeight));
+            binding.setViewModel(new MovieRowViewModel(title, date, poster, itemHeight));
         } else {
             viewModel.setMovieInfo(title, date, poster);
         }
@@ -89,15 +89,15 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter<MovieRow> {
 
     @Override
     public int getItemCount() {
-        return mDataIsValid ? mCursor.getCount() : 0;
+        return dataValid ? cursor.getCount() : 0;
     }
 
     @Override
     public long getItemId(int position) {
-        if (mDataIsValid) {
-            return mCursor.moveToPosition(position)
-                    ? mCursor.getLong(mRowIdColumn)
-                    : RecyclerView.NO_ID;
+        if (dataValid) {
+            return cursor.moveToPosition(position)
+                   ? cursor.getLong(rowIdColumn)
+                   : RecyclerView.NO_ID;
         } else {
             return RecyclerView.NO_ID;
         }
@@ -110,11 +110,11 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter<MovieRow> {
      * @return the TheMovieDB id
      */
     public int getMovieDbIdForPosition(int position) {
-        if (!mCursor.moveToPosition(position)) {
+        if (!cursor.moveToPosition(position)) {
             return -1;
         }
 
-        return mMovieRepo.getMovieDbIdFromFavMoviesCursor(mCursor);
+        return movieRepo.getMovieDbIdFromFavMoviesCursor(cursor);
     }
 
     /**
@@ -141,21 +141,21 @@ public class MoviesFavRecyclerAdapter extends RecyclerView.Adapter<MovieRow> {
      * Cursor, null is returned.
      */
     public Cursor swapCursor(@Nullable Cursor newCursor) {
-        if (newCursor == mCursor) {
+        if (newCursor == cursor) {
             return null;
         }
 
         final int itemCount = getItemCount();
-        final Cursor oldCursor = mCursor;
-        mCursor = newCursor;
+        final Cursor oldCursor = cursor;
+        cursor = newCursor;
 
         if (newCursor != null) {
-            mRowIdColumn = newCursor.getColumnIndexOrThrow(BaseColumns._ID);
-            mDataIsValid = true;
+            rowIdColumn = newCursor.getColumnIndexOrThrow(BaseColumns._ID);
+            dataValid = true;
             notifyDataSetChanged();
         } else {
-            mRowIdColumn = -1;
-            mDataIsValid = false;
+            rowIdColumn = -1;
+            dataValid = false;
             // notify about the lack of a data set
             notifyItemRangeRemoved(0, itemCount);
         }

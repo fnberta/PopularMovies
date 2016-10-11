@@ -24,13 +24,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.R;
-import ch.berta.fabio.popularmovies.domain.models.Review;
-import ch.berta.fabio.popularmovies.domain.models.Video;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsInfoBinding;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsReviewBinding;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsTwoPaneHeaderBinding;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsVideoBinding;
 import ch.berta.fabio.popularmovies.databinding.RowHeaderBinding;
+import ch.berta.fabio.popularmovies.domain.models.Review;
+import ch.berta.fabio.popularmovies.domain.models.Video;
 import ch.berta.fabio.popularmovies.presentation.common.rows.BaseBindingRow;
 import ch.berta.fabio.popularmovies.presentation.common.rows.HeaderRow;
 import ch.berta.fabio.popularmovies.presentation.details.items.DetailsHeaderRowViewModel;
@@ -42,8 +42,8 @@ import ch.berta.fabio.popularmovies.presentation.details.items.DetailsReviewRowV
  */
 public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
 
-    private final Context mContext;
-    private final MovieDetailsViewModel mViewModel;
+    private final Context context;
+    private final MovieDetailsViewModel viewModel;
 
     /**
      * Returns a new instance of a {@link MovieDetailsRecyclerAdapter}.
@@ -53,8 +53,8 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
      */
     public MovieDetailsRecyclerAdapter(@NonNull Context context,
                                        @NonNull MovieDetailsViewModel viewModel) {
-        mContext = context;
-        mViewModel = viewModel;
+        this.context = context;
+        this.viewModel = viewModel;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
             case MovieDetailsViewModel.TYPE_VIDEO: {
                 final RowDetailsVideoBinding binding =
                         RowDetailsVideoBinding.inflate(inflater, parent, false);
-                return new VideoRow(binding, mViewModel);
+                return new VideoRow(binding, viewModel);
             }
             default:
                 throw new RuntimeException("there is no type that matches the type " + viewType +
@@ -93,7 +93,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        return mViewModel.getItemViewType(position);
+        return viewModel.getItemViewType(position);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
                 final HeaderRow headerRow = (HeaderRow) holder;
                 final RowHeaderBinding binding = headerRow.getBinding();
 
-                final int header = mViewModel.getHeaderTitle(position);
+                final int header = viewModel.getHeaderTitle(position);
                 final DetailsHeaderRowViewModel viewModel = new DetailsHeaderRowViewModel(header);
                 binding.setViewModel(viewModel);
                 binding.executePendingBindings();
@@ -114,30 +114,30 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
             case MovieDetailsViewModel.TYPE_TWO_PANE_HEADER: {
                 final TwoPaneHeaderRow twoPaneHeaderRow = (TwoPaneHeaderRow) holder;
                 final RowDetailsTwoPaneHeaderBinding binding = twoPaneHeaderRow.getBinding();
-                binding.setMovie(mViewModel.getMovie());
+                binding.setMovie(viewModel.getMovie());
                 binding.executePendingBindings();
 
                 break;
             }
             case MovieDetailsViewModel.TYPE_INFO: {
                 final InfoRow infoRow = (InfoRow) holder;
-                final int plotMaxLines = mContext.getResources().getInteger(R.integer.plot_max_lines);
+                final int plotMaxLines = context.getResources().getInteger(R.integer.plot_max_lines);
                 final DetailsInfoRowViewModel viewModel =
-                        new DetailsInfoRowViewModel(mViewModel.getMovie(), plotMaxLines);
+                        new DetailsInfoRowViewModel(this.viewModel.getMovie(), plotMaxLines);
 
                 final RowDetailsInfoBinding binding = infoRow.getBinding();
                 binding.setViewModel(viewModel);
-                binding.setDetailsListener(mViewModel);
+                binding.setDetailsListener(this.viewModel);
                 binding.executePendingBindings();
 
                 break;
             }
             case MovieDetailsViewModel.TYPE_REVIEW: {
                 final ReviewRow reviewRow = (ReviewRow) holder;
-                final Review review = mViewModel.getMovieReviewAtPosition(position);
-                final int contentMaxLines = mContext.getResources().getInteger(R.integer.review_content_max_lines);
+                final Review review = viewModel.getMovieReviewAtPosition(position);
+                final int contentMaxLines = context.getResources().getInteger(R.integer.review_content_max_lines);
                 final DetailsReviewRowViewModel viewModel = new DetailsReviewRowViewModel(review,
-                        mViewModel.isMovieReviewLastPosition(review), contentMaxLines);
+                        this.viewModel.isMovieReviewLastPosition(review), contentMaxLines);
 
                 final RowDetailsReviewBinding binding = reviewRow.getBinding();
                 binding.setViewModel(viewModel);
@@ -147,7 +147,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
             }
             case MovieDetailsViewModel.TYPE_VIDEO: {
                 final VideoRow videoRow = (VideoRow) holder;
-                final Video video = mViewModel.getMovieVideoAtPosition(position);
+                final Video video = viewModel.getMovieVideoAtPosition(position);
 
                 final RowDetailsVideoBinding binding = videoRow.getBinding();
                 binding.setVideo(video);
@@ -160,7 +160,7 @@ public class MovieDetailsRecyclerAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return mViewModel.getItemCount();
+        return viewModel.getItemCount();
     }
 
     /**

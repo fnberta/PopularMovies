@@ -30,31 +30,33 @@ import java.util.List;
 public class VideosPage implements Parcelable {
 
     public static final Parcelable.Creator<VideosPage> CREATOR = new Parcelable.Creator<VideosPage>() {
+        @Override
         public VideosPage createFromParcel(Parcel source) {
             return new VideosPage(source);
         }
 
+        @Override
         public VideosPage[] newArray(int size) {
             return new VideosPage[size];
         }
     };
     @SerializedName("results")
-    private List<Video> mVideos = new ArrayList<>();
+    private List<Video> videos = new ArrayList<>();
 
     public VideosPage() {
     }
 
     protected VideosPage(Parcel in) {
-        mVideos = new ArrayList<>();
-        in.readList(mVideos, List.class.getClassLoader());
+        videos = new ArrayList<>();
+        in.readList(videos, List.class.getClassLoader());
     }
 
     public List<Video> getVideos() {
-        return mVideos;
+        return videos;
     }
 
     public void setVideos(List<Video> videos) {
-        mVideos = videos;
+        this.videos = videos;
     }
 
     @Override
@@ -64,6 +66,6 @@ public class VideosPage implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeList(mVideos);
+        dest.writeList(videos);
     }
 }

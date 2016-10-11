@@ -54,7 +54,7 @@ public class MovieProvider extends ContentProvider {
     private static final int URI_TYPE_VIDEO_ID = 301;
     private static final int URI_TYPE_VIDEOS_FROM_MOVIE_ID = 302;
     private static final UriMatcher URI_MATCHER = buildUriMatcher();
-    private SQLiteOpenHelper mOpenHelper;
+    private SQLiteOpenHelper openHelper;
 
     public MovieProvider() {
     }
@@ -84,7 +84,7 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mOpenHelper = new MovieDbHelper(getContext());
+        openHelper = new MovieDbHelper(getContext());
         return true;
     }
 
@@ -120,7 +120,7 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        final SQLiteDatabase db = openHelper.getReadableDatabase();
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         int match = URI_MATCHER.match(uri);
         switch (match) {
@@ -138,18 +138,18 @@ public class MovieProvider extends ContentProvider {
                 break;
             case URI_TYPE_MOVIE_ID_WITH_REVIEWS_TRAILERS:
                 queryBuilder.setTables(Movie.TABLE_NAME
-                                + " LEFT JOIN "
-                                + Review.TABLE_NAME
-                                + " ON "
-                                + Movie.TABLE_NAME + "." + Movie._ID
-                                + " = "
-                                + Review.TABLE_NAME + "." + Review.COLUMN_MOVIE_ID
-                                + " LEFT JOIN "
-                                + Video.TABLE_NAME
-                                + " ON "
-                                + Movie.TABLE_NAME + "." + Movie._ID
-                                + " = "
-                                + Video.TABLE_NAME + "." + Video.COLUMN_MOVIE_ID
+                        + " LEFT JOIN "
+                        + Review.TABLE_NAME
+                        + " ON "
+                        + Movie.TABLE_NAME + "." + Movie._ID
+                        + " = "
+                        + Review.TABLE_NAME + "." + Review.COLUMN_MOVIE_ID
+                        + " LEFT JOIN "
+                        + Video.TABLE_NAME
+                        + " ON "
+                        + Movie.TABLE_NAME + "." + Movie._ID
+                        + " = "
+                        + Video.TABLE_NAME + "." + Video.COLUMN_MOVIE_ID
                 );
                 queryBuilder.appendWhere(Movie.TABLE_NAME + "." + Movie._ID + " = " + Movie.getMovieIdFromUri(uri));
                 break;
@@ -192,7 +192,7 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final SQLiteDatabase db = openHelper.getWritableDatabase();
         Uri returnUri;
         int match = URI_MATCHER.match(uri);
         switch (match) {
@@ -243,7 +243,7 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final SQLiteDatabase db = openHelper.getWritableDatabase();
 
         final int match = URI_MATCHER.match(uri);
         switch (match) {
@@ -284,7 +284,7 @@ public class MovieProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final SQLiteDatabase db = openHelper.getWritableDatabase();
         int rowsUpdated;
 
         final int match = URI_MATCHER.match(uri);
@@ -344,7 +344,7 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final SQLiteDatabase db = openHelper.getWritableDatabase();
         int rowsDeleted;
 
         final int match = URI_MATCHER.match(uri);

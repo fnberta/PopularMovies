@@ -34,25 +34,25 @@ import dagger.Provides;
 @Module
 public class MovieGridViewModelModule {
 
-    Bundle mSavedState;
-    Sort mSortSelected;
+    private Bundle savedState;
+    private Sort sortSelected;
 
     public MovieGridViewModelModule(@Nullable Bundle savedState) {
-        mSavedState = savedState;
+        this.savedState = savedState;
     }
 
     public MovieGridViewModelModule(@Nullable Bundle savedState, @NonNull Sort sortSelected) {
-        mSavedState = savedState;
-        mSortSelected = sortSelected;
+        this.savedState = savedState;
+        this.sortSelected = sortSelected;
     }
 
     @Provides
     MovieGridViewModelOnl providesMovieGridViewModelOnl() {
-        return new MovieGridViewModelOnlImpl(mSavedState, mSortSelected);
+        return new MovieGridViewModelOnlImpl(savedState, sortSelected);
     }
 
     @Provides
     MovieGridViewModelFav providesMovieGridViewModelFav() {
-        return new MovieGridViewModelFavImpl(mSavedState);
+        return new MovieGridViewModelFavImpl(savedState);
     }
 }

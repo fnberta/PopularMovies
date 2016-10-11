@@ -43,7 +43,7 @@ public class MovieDetailsViewModelFavImpl extends
         implements MovieDetailsViewModelFav {
 
     private static final String STATE_REFRESHING = "STATE_REFRESHING";
-    private boolean mRefreshing;
+    private boolean refreshing;
 
     /**
      * Constructs a new {@link MovieDetailsViewModelFavImpl}.
@@ -58,10 +58,10 @@ public class MovieDetailsViewModelFavImpl extends
                                         boolean useTwoPane) {
         super(savedState, movieRepository, useTwoPane);
 
-        mMovieRowId = rowId;
+        movieRowId = rowId;
 
         if (savedState != null) {
-            mRefreshing = savedState.getBoolean(STATE_REFRESHING);
+            refreshing = savedState.getBoolean(STATE_REFRESHING);
         }
     }
 
@@ -69,7 +69,7 @@ public class MovieDetailsViewModelFavImpl extends
     public void saveState(@NonNull Bundle outState) {
         super.saveState(outState);
 
-        outState.putBoolean(STATE_REFRESHING, mRefreshing);
+        outState.putBoolean(STATE_REFRESHING, refreshing);
     }
 
     @Override
@@ -80,8 +80,8 @@ public class MovieDetailsViewModelFavImpl extends
         notifyPropertyChanged(BR.movieBackdropPath);
 
         setYoutubeShareUrl();
-        mView.notifyDataChanged();
-        if (mRefreshing) {
+        view.notifyDataChanged();
+        if (refreshing) {
             setRefreshing(false);
         }
     }
@@ -95,36 +95,36 @@ public class MovieDetailsViewModelFavImpl extends
     @Override
     @Bindable
     public boolean isRefreshing() {
-        return mRefreshing;
+        return refreshing;
     }
 
     @Override
     public void setRefreshing(boolean refreshing) {
-        mRefreshing = refreshing;
+        this.refreshing = refreshing;
         notifyPropertyChanged(BR.refreshing);
     }
 
     @Override
     public boolean isDataSetAndNotReloading() {
-        return mMovie != null && !mRefreshing;
+        return movie != null && !refreshing;
     }
 
     @Override
     public void onMovieDataEmpty() {
-        if (mRefreshing) {
+        if (refreshing) {
             onMovieUpdateFailed();
         } else {
-            mView.startPostponedEnterTransition();
-            mView.showMessage(R.string.snackbar_movie_no_data, null);
+            view.startPostponedEnterTransition();
+            view.showMessage(R.string.snackbar_movie_no_data, null);
         }
     }
 
     private void onMovieUpdateFailed() {
         setRefreshing(false);
-        mView.showMessage(R.string.snackbar_movie_update_failed, new SnackbarAction(R.string.snackbar_retry) {
+        view.showMessage(R.string.snackbar_movie_update_failed, new SnackbarAction(R.string.snackbar_retry) {
             @Override
             public void onClick(View v) {
-                mView.loadUpdateMovieDetailsWorker(mMovie.getDbId(), mMovieRowId);
+                view.loadUpdateMovieDetailsWorker(movie.getDbId(), movieRowId);
             }
         });
     }
@@ -133,33 +133,33 @@ public class MovieDetailsViewModelFavImpl extends
     public void onMovieDeleted() {
         super.onMovieDeleted();
 
-        if (mUseTwoPane) {
-            mView.hideDetailsView();
+        if (useTwoPane) {
+            view.hideDetailsView();
         }
     }
 
     @Override
     protected void onMovieDeletedOnePane() {
-        mView.finishScreen();
+        view.finishScreen();
     }
 
     @Override
     public void setUpdateMovieDetailsStream(@NonNull Observable<ContentProviderResult[]> observable, @NonNull final String workerTag) {
-        mSubscriptions.add(observable.subscribe(new Subscriber<ContentProviderResult[]>() {
+        subscriptions.add(observable.subscribe(new Subscriber<ContentProviderResult[]>() {
             @Override
             public void onCompleted() {
-                mView.removeWorker(workerTag);
+                view.removeWorker(workerTag);
             }
 
             @Override
             public void onError(Throwable e) {
-                mView.removeWorker(workerTag);
+                view.removeWorker(workerTag);
                 onMovieUpdateFailed();
             }
 
             @Override
             public void onNext(ContentProviderResult[] contentProviderResults) {
-                mView.restartLoader();
+                view.restartLoader();
             }
         }));
     }
@@ -177,7 +177,7 @@ public class MovieDetailsViewModelFavImpl extends
             @Override
             public void onRefresh() {
                 setRefreshing(true);
-                mView.loadUpdateMovieDetailsWorker(mMovie.getDbId(), mMovieRowId);
+                view.loadUpdateMovieDetailsWorker(movie.getDbId(), movieRowId);
             }
         };
     }

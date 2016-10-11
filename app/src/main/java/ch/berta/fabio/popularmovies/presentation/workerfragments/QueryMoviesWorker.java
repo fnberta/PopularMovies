@@ -69,7 +69,7 @@ public class QueryMoviesWorker extends BaseWorker<List<Movie>, QueryMoviesWorker
         int page = args.getInt(KEY_MOVIE_PAGE, 0);
         String sort = args.getString(KEY_MOVIE_SORT, "");
         if (page != 0 && !TextUtils.isEmpty(sort)) {
-            return mMovieRepo.getMoviesOnline(page, sort);
+            return movieRepo.getMoviesOnline(page, sort);
         }
 
         return null;
@@ -77,11 +77,11 @@ public class QueryMoviesWorker extends BaseWorker<List<Movie>, QueryMoviesWorker
 
     @Override
     protected void onWorkerError() {
-        mActivity.onWorkerError(WORKER_TAG);
+        activity.onWorkerError(WORKER_TAG);
     }
 
     @Override
     protected void setStream(@NonNull Observable<List<Movie>> observable) {
-        mActivity.setQueryMoviesStream(observable, WORKER_TAG);
+        activity.setQueryMoviesStream(observable, WORKER_TAG);
     }
 }

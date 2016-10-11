@@ -35,31 +35,31 @@ import dagger.Provides;
 @Module
 public class MovieDetailsViewModelModule {
 
-    Bundle mSavedState;
-    Movie mMovie;
-    long mRowId;
-    boolean mUseTwoPane;
+    private Bundle savedState;
+    private Movie movie;
+    private long rowId;
+    private boolean useTwoPane;
 
     public MovieDetailsViewModelModule(@Nullable Bundle savedState, @NonNull Movie movie,
                                        boolean useTwoPane) {
-        mSavedState = savedState;
-        mMovie = movie;
-        mUseTwoPane = useTwoPane;
+        this.savedState = savedState;
+        this.movie = movie;
+        this.useTwoPane = useTwoPane;
     }
 
     public MovieDetailsViewModelModule(@Nullable Bundle savedState, long rowId, boolean useTwoPane) {
-        mSavedState = savedState;
-        mRowId = rowId;
-        mUseTwoPane = useTwoPane;
+        this.savedState = savedState;
+        this.rowId = rowId;
+        this.useTwoPane = useTwoPane;
     }
 
     @Provides
     MovieDetailsViewModelOnl providesMovieDetailsViewModelOnl(@NonNull MovieRepository movieRepository) {
-        return new MovieDetailsViewModelOnlImpl(mSavedState, movieRepository, mMovie, mUseTwoPane);
+        return new MovieDetailsViewModelOnlImpl(savedState, movieRepository, movie, useTwoPane);
     }
 
     @Provides
     MovieDetailsViewModelFav providesMovieDetailsViewModelFav(@NonNull MovieRepository movieRepository) {
-        return new MovieDetailsViewModelFavImpl(mSavedState, movieRepository, mRowId, mUseTwoPane);
+        return new MovieDetailsViewModelFavImpl(savedState, movieRepository, rowId, useTwoPane);
     }
 }

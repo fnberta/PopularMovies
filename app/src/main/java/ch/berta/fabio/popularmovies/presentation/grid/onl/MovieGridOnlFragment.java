@@ -56,8 +56,8 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
     public static final String INTENT_MOVIE_SELECTED = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED";
     private static final String LOG_TAG = MovieGridOnlFragment.class.getSimpleName();
     private static final String KEY_SORT_SELECTED = "SORT_SELECTED";
-    private MoviesOnlRecyclerAdapter mRecyclerAdapter;
-    private FragmentMovieGridOnlBinding mBinding;
+    private MoviesOnlRecyclerAdapter recyclerAdapter;
+    private FragmentMovieGridOnlBinding binding;
 
     public MovieGridOnlFragment() {
         // required empty constructor
@@ -88,9 +88,9 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mBinding = FragmentMovieGridOnlBinding.inflate(inflater, container, false);
-        mBinding.setViewModel(mViewModel);
-        return mBinding.getRoot();
+        binding = FragmentMovieGridOnlBinding.inflate(inflater, container, false);
+        binding.setViewModel(viewModel);
+        return binding.getRoot();
     }
 
     @Override
@@ -98,13 +98,13 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
         super.onViewCreated(view, savedInstanceState);
 
 
-        if (mViewModel.isRefreshing()) {
+        if (viewModel.isRefreshing()) {
             // work around bug in SwipeRefreshLayout that prevents changing refresh state before it
             // is laid out, TODO: remove once bug is fixed
-            mBinding.srlGrid.post(new Runnable() {
+            binding.srlGrid.post(new Runnable() {
                 @Override
                 public void run() {
-                    mBinding.srlGrid.setRefreshing(true);
+                    binding.srlGrid.setRefreshing(true);
                 }
             });
         }
@@ -117,37 +117,37 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                int viewType = mRecyclerAdapter.getItemViewType(position);
+                int viewType = recyclerAdapter.getItemViewType(position);
                 return viewType == MovieGridViewModelOnl.TYPE_PROGRESS ? spanCount : 1;
             }
         });
-        mBinding.rvGrid.setLayoutManager(layoutManager);
-        mBinding.rvGrid.setHasFixedSize(true);
-        mBinding.rvGrid.addItemDecoration(new PosterGridItemDecoration(
+        binding.rvGrid.setLayoutManager(layoutManager);
+        binding.rvGrid.setHasFixedSize(true);
+        binding.rvGrid.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesOnlRecyclerAdapter(mViewModel, getLayoutWidth(), spanCount);
-        mBinding.rvGrid.setAdapter(mRecyclerAdapter);
-        Mugen.with(mBinding.rvGrid, mViewModel).start();
+        recyclerAdapter = new MoviesOnlRecyclerAdapter(viewModel, getLayoutWidth(), spanCount);
+        binding.rvGrid.setAdapter(recyclerAdapter);
+        Mugen.with(binding.rvGrid, viewModel).start();
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
-        mViewModel.attachView(this);
-        mViewModel.loadMovies();
+        viewModel.attachView(this);
+        viewModel.loadMovies();
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        mViewModel.detachView();
+        viewModel.detachView();
     }
 
     @Override
     protected View getSnackbarView() {
-        return mBinding.rvGrid;
+        return binding.rvGrid;
     }
 
     @Override
@@ -171,36 +171,36 @@ public class MovieGridOnlFragment extends MovieGridBaseFragment<MovieGridViewMod
 
     @Override
     public void scrollToPosition(int position) {
-        mBinding.rvGrid.scrollToPosition(position);
+        binding.rvGrid.scrollToPosition(position);
     }
 
     @Override
     public void notifyMoviesChanged() {
-        mRecyclerAdapter.notifyDataSetChanged();
+        recyclerAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void notifyMoviesInserted(int positionStart, int itemCount) {
-        mRecyclerAdapter.notifyItemRangeInserted(positionStart, itemCount);
+        recyclerAdapter.notifyItemRangeInserted(positionStart, itemCount);
     }
 
     @Override
     public void notifyLoadMoreInserted(int position) {
-        mRecyclerAdapter.notifyItemInserted(position);
+        recyclerAdapter.notifyItemInserted(position);
     }
 
     @Override
     public void notifyLoadMoreRemoved(int position) {
-        mRecyclerAdapter.notifyItemRemoved(position);
+        recyclerAdapter.notifyItemRemoved(position);
     }
 
     @Override
     public void launchDetailsScreen(@NonNull Movie movie, @NonNull View posterSharedElement) {
-        if (!mUseTwoPane) {
+        if (!useTwoPane) {
             final Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
             intent.putExtra(INTENT_MOVIE_SELECTED, movie);
             startDetailsActivity(intent, posterSharedElement);
-        } else if (!mViewModel.isMovieSelected(movie)) {
+        } else if (!viewModel.isMovieSelected(movie)) {
             showDetailsOnlFragment(movie);
         }
     }

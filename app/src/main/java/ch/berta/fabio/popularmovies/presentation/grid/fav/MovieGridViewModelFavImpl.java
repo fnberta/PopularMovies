@@ -39,23 +39,23 @@ public class MovieGridViewModelFavImpl extends
 
     @Override
     public boolean isMovieSelected(int dbId) {
-        if (dbId == mMovieDbIdSelected) {
+        if (dbId == movieDbIdSelected) {
             return true;
         }
 
-        mMovieDbIdSelected = dbId;
+        movieDbIdSelected = dbId;
         return false;
     }
 
     @Override
     public void onMovieRowItemClick(int position, @NonNull View sharedView) {
-        mView.launchDetailsScreen(position, sharedView);
+        view.launchDetailsScreen(position, sharedView);
     }
 
     @Override
     protected void switchSort(@NonNull Sort sort) {
         if (!sort.getOption().equals(Sort.SORT_FAVORITE)) {
-            mView.showOnlineMovies(sort);
+            view.showOnlineMovies(sort);
         }
     }
 }

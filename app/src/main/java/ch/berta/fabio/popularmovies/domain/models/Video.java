@@ -22,8 +22,6 @@ import android.databinding.Bindable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.annotations.SerializedName;
-
 import ch.berta.fabio.popularmovies.BR;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 
@@ -33,26 +31,23 @@ import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 public class Video extends BaseObservable implements Parcelable {
 
     public static final Parcelable.Creator<Video> CREATOR = new Parcelable.Creator<Video>() {
+        @Override
         public Video createFromParcel(Parcel source) {
             return new Video(source);
         }
 
+        @Override
         public Video[] newArray(int size) {
             return new Video[size];
         }
     };
     private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
     private static final String YOU_TUBE = "YouTube";
-    @SerializedName("name")
-    private String mName;
-    @SerializedName("key")
-    private String mKey;
-    @SerializedName("site")
-    private String mSite;
-    @SerializedName("size")
-    private int mSize;
-    @SerializedName("type")
-    private String mType;
+    private String name;
+    private String key;
+    private String site;
+    private int size;
+    private String type;
 
     public Video() {
     }
@@ -66,63 +61,63 @@ public class Video extends BaseObservable implements Parcelable {
     }
 
     protected Video(Parcel in) {
-        mName = in.readString();
-        mKey = in.readString();
-        mSite = in.readString();
-        mSize = in.readInt();
-        mType = in.readString();
+        name = in.readString();
+        key = in.readString();
+        site = in.readString();
+        size = in.readInt();
+        type = in.readString();
     }
 
     @Bindable
     public String getName() {
-        return mName;
+        return name;
     }
 
     public void setName(String name) {
-        mName = name;
+        this.name = name;
         notifyPropertyChanged(BR.name);
     }
 
     @Bindable
     public String getKey() {
-        return mKey;
+        return key;
     }
 
     public void setKey(String key) {
-        mKey = key;
+        this.key = key;
         notifyPropertyChanged(BR.key);
     }
 
     @Bindable
     public String getSite() {
-        return mSite;
+        return site;
     }
 
     public void setSite(String site) {
-        mSite = site;
+        this.site = site;
         notifyPropertyChanged(BR.site);
     }
 
     @Bindable
     public int getSize() {
-        return mSize;
+        return size;
     }
 
     public void setSize(int size) {
-        mSize = size;
+        this.size = size;
         notifyPropertyChanged(BR.size);
     }
 
     public String getType() {
-        return mType;
+        return type;
     }
 
     public void setType(String type) {
-        mType = type;
+        this.type = type;
     }
 
     public boolean siteIsYouTube() {
-        return mSite.equals(YOU_TUBE);
+        return site.equals(YOU_TUBE);
     }
 
     public String getYoutubeUrl() {
@@ -131,11 +126,11 @@ public class Video extends BaseObservable implements Parcelable {
 
     public ContentValues getContentValuesEntry() {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MovieContract.Video.COLUMN_NAME, mName);
-        contentValues.put(MovieContract.Video.COLUMN_KEY, mKey);
-        contentValues.put(MovieContract.Video.COLUMN_SITE, mSite);
-        contentValues.put(MovieContract.Video.COLUMN_SIZE, mSize);
-        contentValues.put(MovieContract.Video.COLUMN_TYPE, mType);
+        contentValues.put(MovieContract.Video.COLUMN_NAME, name);
+        contentValues.put(MovieContract.Video.COLUMN_KEY, key);
+        contentValues.put(MovieContract.Video.COLUMN_SITE, site);
+        contentValues.put(MovieContract.Video.COLUMN_SIZE, size);
+        contentValues.put(MovieContract.Video.COLUMN_TYPE, type);
         return contentValues;
     }
 
@@ -146,10 +141,10 @@ public class Video extends BaseObservable implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mName);
-        dest.writeString(mKey);
-        dest.writeString(mSite);
-        dest.writeInt(mSize);
-        dest.writeString(mType);
+        dest.writeString(name);
+        dest.writeString(key);
+        dest.writeString(site);
+        dest.writeInt(size);
+        dest.writeString(type);
     }
 }

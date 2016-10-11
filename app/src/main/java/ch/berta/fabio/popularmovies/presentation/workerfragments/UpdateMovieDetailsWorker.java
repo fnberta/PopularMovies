@@ -68,11 +68,11 @@ public class UpdateMovieDetailsWorker extends BaseWorker<ContentProviderResult[]
         final int movieDbId = args.getInt(KEY_MOVIE_DB_ID, -1);
         final long movieRowId = args.getLong(KEY_MOVIE_ROW_ID, -1);
         if (movieDbId != -1 && movieRowId != -1) {
-            return mMovieRepo.getMovieDetailsOnline(movieDbId)
+            return movieRepo.getMovieDetailsOnline(movieDbId)
                     .flatMap(new Func1<MovieDetails, Observable<ContentProviderResult[]>>() {
                         @Override
                         public Observable<ContentProviderResult[]> call(MovieDetails movieDetails) {
-                            return mMovieRepo.updateMovieLocal(movieDetails, movieRowId);
+                            return movieRepo.updateMovieLocal(movieDetails, movieRowId);
                         }
                     });
         }
@@ -82,11 +82,11 @@ public class UpdateMovieDetailsWorker extends BaseWorker<ContentProviderResult[]
 
     @Override
     protected void onWorkerError() {
-        mActivity.onWorkerError(WORKER_TAG);
+        activity.onWorkerError(WORKER_TAG);
     }
 
     @Override
     protected void setStream(@NonNull Observable<ContentProviderResult[]> observable) {
-        mActivity.setUpdateMovieDetailsStream(observable, WORKER_TAG);
+        activity.setUpdateMovieDetailsStream(observable, WORKER_TAG);
     }
 }

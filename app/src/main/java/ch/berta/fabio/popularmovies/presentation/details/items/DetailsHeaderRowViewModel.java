@@ -32,7 +32,7 @@ import ch.berta.fabio.popularmovies.presentation.common.viewmodels.items.HeaderR
 public class DetailsHeaderRowViewModel extends BaseObservable implements HeaderRowViewModel {
 
     @StringRes
-    private int mHeader;
+    private int header;
 
     /**
      * Constructs a new {@link HeaderRow}.
@@ -47,12 +47,12 @@ public class DetailsHeaderRowViewModel extends BaseObservable implements HeaderR
     @StringRes
     @Bindable
     public int getHeader() {
-        return mHeader;
+        return header;
     }
 
     @Override
     public void setHeader(@StringRes int header) {
-        mHeader = header;
+        this.header = header;
         notifyPropertyChanged(BR.header);
     }
 }

@@ -22,12 +22,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.databinding.RowMovieBinding;
+import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.presentation.common.rows.MovieRow;
 import ch.berta.fabio.popularmovies.presentation.common.rows.ProgressRow;
-import ch.berta.fabio.popularmovies.utils.Utils;
 import ch.berta.fabio.popularmovies.presentation.grid.items.MovieRowViewModel;
+import ch.berta.fabio.popularmovies.utils.Utils;
 
 /**
  * Provides the adapter for a movie poster images grid.
@@ -35,13 +35,13 @@ import ch.berta.fabio.popularmovies.presentation.grid.items.MovieRowViewModel;
 public class MoviesOnlRecyclerAdapter extends RecyclerView.Adapter {
 
     private static final String LOG_TAG = MoviesOnlRecyclerAdapter.class.getSimpleName();
-    private final MovieGridViewModelOnl mViewModel;
-    private final int mItemHeight;
+    private final MovieGridViewModelOnl viewModel;
+    private final int itemHeight;
 
-    public MoviesOnlRecyclerAdapter(@NonNull MovieGridViewModelOnl fragmentViewModel,
+    public MoviesOnlRecyclerAdapter(@NonNull MovieGridViewModelOnl viewModel,
                                     int layoutWidth, int columnCount) {
-        mViewModel = fragmentViewModel;
-        mItemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
+        this.viewModel = viewModel;
+        itemHeight = Utils.calcPosterHeight(columnCount, layoutWidth);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class MoviesOnlRecyclerAdapter extends RecyclerView.Adapter {
         switch (viewType) {
             case MovieGridViewModelOnl.TYPE_ITEM: {
                 final RowMovieBinding binding = RowMovieBinding.inflate(inflater, parent, false);
-                return new MovieRow(binding, mViewModel);
+                return new MovieRow(binding, viewModel);
             }
             case MovieGridViewModelOnl.TYPE_PROGRESS: {
                 final View view = inflater.inflate(ProgressRow.VIEW_RESOURCE, parent, false);
@@ -70,11 +70,11 @@ public class MoviesOnlRecyclerAdapter extends RecyclerView.Adapter {
             case MovieGridViewModelOnl.TYPE_ITEM:
                 final MovieRow movieRow = (MovieRow) holder;
                 final RowMovieBinding binding = movieRow.getBinding();
-                final Movie movie = mViewModel.getMovieAtPosition(position);
+                final Movie movie = viewModel.getMovieAtPosition(position);
 
                 final MovieRowViewModel viewModel = binding.getViewModel();
                 if (viewModel == null) {
-                    binding.setViewModel(new MovieRowViewModel(movie, mItemHeight));
+                    binding.setViewModel(new MovieRowViewModel(movie, itemHeight));
                 } else {
                     viewModel.setMovieInfo(movie);
                 }
@@ -89,11 +89,11 @@ public class MoviesOnlRecyclerAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        return mViewModel.getItemViewType(position);
+        return viewModel.getItemViewType(position);
     }
 
     @Override
     public int getItemCount() {
-        return mViewModel.getItemCount();
+        return viewModel.getItemCount();
     }
 }

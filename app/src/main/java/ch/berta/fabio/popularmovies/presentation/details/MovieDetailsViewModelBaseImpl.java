@@ -50,13 +50,13 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
     private static final String STATE_REVIEWS_COUNT = "STATE_REVIEWS_COUNT";
     private static final String STATE_VIDEOS_COUNT = "STATE_VIDEOS_COUNT";
     private static final String STATE_MOVIE_ROW_ID = "STATE_MOVIE_ROW_ID";
-    protected final boolean mUseTwoPane;
+    protected final boolean useTwoPane;
     @Inject
-    protected MovieRepository mMovieRepo;
-    protected Movie mMovie;
-    protected int mReviewsCount;
-    protected int mVideosCount;
-    protected long mMovieRowId;
+    protected MovieRepository movieRepo;
+    protected Movie movie;
+    protected int reviewsCount;
+    protected int videosCount;
+    protected long movieRowId;
 
     /**
      * Constructs a new {@link MovieDetailsViewModelBaseImpl}.
@@ -67,112 +67,112 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
      */
     public MovieDetailsViewModelBaseImpl(@Nullable Bundle savedState,
                                          @NonNull MovieRepository movieRepository, boolean useTwoPane) {
-        mMovieRepo = movieRepository;
-        mUseTwoPane = useTwoPane;
+        movieRepo = movieRepository;
+        this.useTwoPane = useTwoPane;
 
         if (savedState != null) {
-            mReviewsCount = savedState.getInt(STATE_REVIEWS_COUNT);
-            mVideosCount = savedState.getInt(STATE_VIDEOS_COUNT);
-            mMovieRowId = savedState.getLong(STATE_MOVIE_ROW_ID);
+            reviewsCount = savedState.getInt(STATE_REVIEWS_COUNT);
+            videosCount = savedState.getInt(STATE_VIDEOS_COUNT);
+            movieRowId = savedState.getLong(STATE_MOVIE_ROW_ID);
         }
     }
 
     @Override
     @CallSuper
     public void saveState(@NonNull Bundle outState) {
-        outState.putInt(STATE_REVIEWS_COUNT, mReviewsCount);
-        outState.putInt(STATE_VIDEOS_COUNT, mVideosCount);
-        outState.putLong(STATE_MOVIE_ROW_ID, mMovieRowId);
+        outState.putInt(STATE_REVIEWS_COUNT, reviewsCount);
+        outState.putInt(STATE_VIDEOS_COUNT, videosCount);
+        outState.putLong(STATE_MOVIE_ROW_ID, movieRowId);
     }
 
     @Override
     public Movie getMovie() {
-        return mMovie;
+        return movie;
     }
 
     @Override
     public void setMovie(@NonNull Movie movie) {
-        mMovie = movie;
+        this.movie = movie;
         setReviewsAndVideosCount();
     }
 
     protected final void setReviewsAndVideosCount() {
-        mReviewsCount = mMovie.getReviews().size();
-        mVideosCount = mMovie.getVideos().size();
+        reviewsCount = movie.getReviews().size();
+        videosCount = movie.getVideos().size();
     }
 
     @Override
     @Bindable
     public String getMovieTitle() {
-        return mMovie != null ? mMovie.getTitle() : "";
+        return movie != null ? movie.getTitle() : "";
     }
 
     @Override
     @Bindable
     public String getMovieBackdropPath() {
-        return mMovie != null ? mMovie.getBackdropPath() : "";
+        return movie != null ? movie.getBackdropPath() : "";
     }
 
     @Override
     public void setMovieFavoured(boolean isFavoured) {
-        mMovie.setIsFavoured(isFavoured);
+        movie.setIsFavoured(isFavoured);
         notifyPropertyChanged(BR.movieFavoured);
     }
 
     @Override
     public long getMovieRowId() {
-        return mMovieRowId;
+        return movieRowId;
     }
 
     @Override
     public void setMovieRowId(long rowId) {
-        mMovieRowId = rowId;
+        movieRowId = rowId;
     }
 
     protected abstract void onMovieDeletedOnePane();
 
     @Override
     public boolean hasMovieVideos() {
-        return mMovie != null && !mMovie.getVideos().isEmpty();
+        return movie != null && !movie.getVideos().isEmpty();
     }
 
     @Override
     public Video getMovieVideoAtPosition(int position) {
         // position - video header and review header if there are reviews - reviews if there are any - info and two pane header if present
-        return mMovie.getVideos().get(position - getNumberOfHeaderRows() - mReviewsCount - adjustPosForTwoPane(1));
+        return movie.getVideos().get(position - getNumberOfHeaderRows() - reviewsCount - adjustPosForTwoPane(1));
     }
 
     @Override
     public Review getMovieReviewAtPosition(int position) {
         // position - review header - info and two pane header if present
-        return mMovie.getReviews().get(position - 1 - adjustPosForTwoPane(1));
+        return movie.getReviews().get(position - 1 - adjustPosForTwoPane(1));
     }
 
     protected final int getNumberOfHeaderRows() {
         int headerRows = 2;
-        if (mReviewsCount == 0) {
+        if (reviewsCount == 0) {
             headerRows--;
         }
-        if (mVideosCount == 0) {
+        if (videosCount == 0) {
             headerRows--;
         }
         return headerRows;
     }
 
     protected final int adjustPosForTwoPane(int position) {
-        return mUseTwoPane ? position + 1 : position;
+        return useTwoPane ? position + 1 : position;
     }
 
     @Override
     public boolean isMovieReviewLastPosition(@NonNull Review review) {
-        return mMovie.getReviews().indexOf(review) == mReviewsCount - 1;
+        return movie.getReviews().indexOf(review) == reviewsCount - 1;
     }
 
     @Override
     public int getHeaderTitle(int position) {
         if (position != adjustPosForTwoPane(1)) {
             return R.string.header_trailers;
-        } else if (mReviewsCount == 0) {
+        } else if (reviewsCount == 0) {
             return R.string.header_trailers;
         } else {
             return R.string.header_reviews;
@@ -181,18 +181,18 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
     @Override
     public int getItemCount() {
-        if (mMovie == null) {
+        if (movie == null) {
             return 0;
         }
 
-        final int count = 1 + mReviewsCount + mVideosCount + getNumberOfHeaderRows();
+        final int count = 1 + reviewsCount + videosCount + getNumberOfHeaderRows();
         return adjustPosForTwoPane(count);
     }
 
     @Override
     public int getItemViewType(int position) {
         if (position == 0) {
-            if (mUseTwoPane) {
+            if (useTwoPane) {
                 return TYPE_TWO_PANE_HEADER;
             } else {
                 return TYPE_INFO;
@@ -200,24 +200,24 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
         }
 
         if (position == 1) {
-            if (mUseTwoPane) {
+            if (useTwoPane) {
                 return TYPE_INFO;
             } else {
                 return TYPE_HEADER;
             }
         }
 
-        if (position == 2 && mUseTwoPane) {
+        if (position == 2 && useTwoPane) {
             return TYPE_HEADER;
         }
 
-        if (mReviewsCount > 0) {
+        if (reviewsCount > 0) {
             final int firstReviewPos = adjustPosForTwoPane(2);
-            if (position >= firstReviewPos && position < firstReviewPos + mReviewsCount) {
+            if (position >= firstReviewPos && position < firstReviewPos + reviewsCount) {
                 return TYPE_REVIEW;
             }
 
-            if (position == firstReviewPos + mReviewsCount) {
+            if (position == firstReviewPos + reviewsCount) {
                 return TYPE_HEADER;
             }
         }
@@ -227,10 +227,10 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
     @Override
     public void onFabClick(View view) {
-        if (mMovie.isFavoured()) {
+        if (movie.isFavoured()) {
             setMovieFavoured(false);
-            final Observable<Integer> observable = mMovieRepo.deleteMovieLocal(mMovieRowId);
-            mSubscriptions.add(observable.subscribe(new Subscriber<Integer>() {
+            final Observable<Integer> observable = movieRepo.deleteMovieLocal(movieRowId);
+            subscriptions.add(observable.subscribe(new Subscriber<Integer>() {
                 @Override
                 public void onCompleted() {
 
@@ -238,7 +238,7 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
                 @Override
                 public void onError(Throwable e) {
-                    mView.showMessage(R.string.snackbar_movie_delete_failed, null);
+                    MovieDetailsViewModelBaseImpl.this.view.showMessage(R.string.snackbar_movie_delete_failed, null);
                 }
 
                 @Override
@@ -248,8 +248,8 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
             }));
         } else {
             setMovieFavoured(true);
-            final Observable<ContentProviderResult[]> observable = mMovieRepo.insertMovieLocal(mMovie);
-            mSubscriptions.add(observable.subscribe(new Subscriber<ContentProviderResult[]>() {
+            final Observable<ContentProviderResult[]> observable = movieRepo.insertMovieLocal(movie);
+            subscriptions.add(observable.subscribe(new Subscriber<ContentProviderResult[]>() {
                         @Override
                         public void onCompleted() {
 
@@ -257,12 +257,12 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
                         @Override
                         public void onError(Throwable e) {
-                            mView.showMessage(R.string.snackbar_movie_insert_failed, null);
+                            MovieDetailsViewModelBaseImpl.this.view.showMessage(R.string.snackbar_movie_insert_failed, null);
                         }
 
                         @Override
                         public void onNext(ContentProviderResult[] contentProviderResults) {
-                            mView.showMessage(R.string.snackbar_movie_added_to_favorites, null);
+                            MovieDetailsViewModelBaseImpl.this.view.showMessage(R.string.snackbar_movie_added_to_favorites, null);
                         }
                     })
             );
@@ -271,8 +271,8 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
     @CallSuper
     protected void onMovieDeleted() {
-        if (mUseTwoPane) {
-            mView.showMessage(R.string.snackbar_movie_removed_from_favorites, null);
+        if (useTwoPane) {
+            view.showMessage(R.string.snackbar_movie_removed_from_favorites, null);
         } else {
             onMovieDeletedOnePane();
         }
@@ -280,22 +280,22 @@ public abstract class MovieDetailsViewModelBaseImpl<T extends MovieDetailsViewMo
 
     @Override
     public void onPosterLoaded() {
-        mView.startPostponedEnterTransition();
+        view.startPostponedEnterTransition();
     }
 
     @Override
     public void onVideoRowItemClick(int position) {
         Video video = getMovieVideoAtPosition(position);
         if (video.siteIsYouTube()) {
-            mView.startVideoActivity(Uri.parse(video.getYoutubeUrl()));
+            view.startVideoActivity(Uri.parse(video.getYoutubeUrl()));
         }
     }
 
     protected final void setYoutubeShareUrl() {
         if (hasMovieVideos()) {
-            final Video firstVideo = mMovie.getVideos().get(0);
+            final Video firstVideo = movie.getVideos().get(0);
             final String url = firstVideo.getYoutubeUrl();
-            mView.setYoutubeShareUrl(url);
+            view.setYoutubeShareUrl(url);
         }
     }
 }

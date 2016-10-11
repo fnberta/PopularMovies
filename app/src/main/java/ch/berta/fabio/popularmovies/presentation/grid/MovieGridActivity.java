@@ -42,12 +42,12 @@ import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
 import ch.berta.fabio.popularmovies.presentation.common.BaseActivity;
 import ch.berta.fabio.popularmovies.presentation.details.MovieDetailsBaseFragment;
-import ch.berta.fabio.popularmovies.presentation.details.fav.MovieDetailsFavFragment;
-import ch.berta.fabio.popularmovies.presentation.grid.fav.MovieGridFavFragment;
-import ch.berta.fabio.popularmovies.presentation.grid.onl.MovieGridOnlFragment;
 import ch.berta.fabio.popularmovies.presentation.details.MovieDetailsViewModel;
+import ch.berta.fabio.popularmovies.presentation.details.fav.MovieDetailsFavFragment;
 import ch.berta.fabio.popularmovies.presentation.details.fav.MovieDetailsViewModelFav;
 import ch.berta.fabio.popularmovies.presentation.details.onl.MovieDetailsViewModelOnl;
+import ch.berta.fabio.popularmovies.presentation.grid.fav.MovieGridFavFragment;
+import ch.berta.fabio.popularmovies.presentation.grid.onl.MovieGridOnlFragment;
 import ch.berta.fabio.popularmovies.presentation.grid.onl.MovieGridViewModelOnl;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorkerListener;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMoviesWorkerListener;
@@ -69,18 +69,18 @@ public class MovieGridActivity extends BaseActivity<MovieGridViewModel>
     public static final String PERSIST_SORT = "PERSIST_SORT";
     private static final String LOG_TAG = MovieGridActivity.class.getSimpleName();
     @Inject
-    SharedPreferences mSharedPrefs;
-    private MovieDetailsViewModel mDetailsViewModel;
-    private ActivityMovieGridBinding mBinding;
+    SharedPreferences sharedPrefs;
+    private MovieDetailsViewModel detailsViewModel;
+    private ActivityMovieGridBinding binding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_grid);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_movie_grid);
         PopularMovies.getAppComponent(this).inject(this);
 
-        setSupportActionBar(mBinding.toolbar);
+        setSupportActionBar(binding.toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(null);
@@ -94,7 +94,7 @@ public class MovieGridActivity extends BaseActivity<MovieGridViewModel>
     }
 
     private void setupSorting() {
-        final int sortSelected = mSharedPrefs.getInt(PERSIST_SORT, 0);
+        final int sortSelected = sharedPrefs.getInt(PERSIST_SORT, 0);
         Sort[] sortOptions = new Sort[]{
                 new Sort(Sort.SORT_POPULARITY, getString(R.string.sort_popularity)),
                 new Sort(Sort.SORT_RATING, getString(R.string.sort_rating)),
@@ -105,15 +105,15 @@ public class MovieGridActivity extends BaseActivity<MovieGridViewModel>
         ArrayAdapter<Sort> spinnerAdapter = new ArrayAdapter<>(this,
                 R.layout.spinner_item_toolbar, sortOptions);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mBinding.spGridSort.setAdapter(spinnerAdapter);
-        mBinding.spGridSort.setSelection(sortSelected, false);
+        binding.spGridSort.setAdapter(spinnerAdapter);
+        binding.spGridSort.setSelection(sortSelected, false);
     }
 
     private void addFragment() {
-        final Sort sortSelected = (Sort) mBinding.spGridSort.getSelectedItem();
+        final Sort sortSelected = (Sort) binding.spGridSort.getSelectedItem();
         final MovieGridBaseFragment fragment = sortSelected.getOption().equals(Sort.SORT_FAVORITE)
-                ? new MovieGridFavFragment()
-                : MovieGridOnlFragment.newInstance(sortSelected);
+                                               ? new MovieGridFavFragment()
+                                               : MovieGridOnlFragment.newInstance(sortSelected);
 
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.container_main, fragment, FRAGMENT_MOVIES)
@@ -126,21 +126,21 @@ public class MovieGridActivity extends BaseActivity<MovieGridViewModel>
 
         if (requestCode == MovieGridBaseFragment.REQUEST_MOVIE_DETAILS
                 && resultCode == MovieDetailsFavFragment.RESULT_UNFAVOURED) {
-            Snackbar.make(mBinding.clMain, R.string.snackbar_movie_removed_from_favorites,
+            Snackbar.make(binding.clMain, R.string.snackbar_movie_removed_from_favorites,
                     Snackbar.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void setViewModel(@NonNull MovieGridViewModel viewModel) {
-        mViewModel = viewModel;
-        mBinding.setViewModel(viewModel);
+        this.viewModel = viewModel;
+        binding.setViewModel(viewModel);
     }
 
     @Override
     public void setViewModel(@NonNull MovieDetailsViewModel viewModel) {
-        mDetailsViewModel = viewModel;
-        mBinding.setViewModelDetails(viewModel);
+        detailsViewModel = viewModel;
+        binding.setViewModelDetails(viewModel);
     }
 
     @Override
@@ -154,21 +154,21 @@ public class MovieGridActivity extends BaseActivity<MovieGridViewModel>
                     .commit();
         }
 
-        mViewModel.setUserSelectedMovie(false);
+        viewModel.setUserSelectedMovie(false);
     }
 
     @Override
     public void setQueryMovieDetailsStream(@NonNull Observable<MovieDetails> observable, @NonNull String workerTag) {
-        ((MovieDetailsViewModelOnl) mViewModel).setQueryMovieDetailsStream(observable, workerTag);
+        ((MovieDetailsViewModelOnl) viewModel).setQueryMovieDetailsStream(observable, workerTag);
     }
 
     @Override
     public void setQueryMoviesStream(@NonNull Observable<List<Movie>> observable, @NonNull String workerTag) {
-        ((MovieGridViewModelOnl) mViewModel).setQueryMoviesStream(observable, workerTag);
+        ((MovieGridViewModelOnl) viewModel).setQueryMoviesStream(observable, workerTag);
     }
 
     @Override
     public void setUpdateMovieDetailsStream(@NonNull Observable<ContentProviderResult[]> observable, @NonNull String workerTag) {
-        ((MovieDetailsViewModelFav) mDetailsViewModel).setUpdateMovieDetailsStream(observable, workerTag);
+        ((MovieDetailsViewModelFav) detailsViewModel).setUpdateMovieDetailsStream(observable, workerTag);
     }
 }

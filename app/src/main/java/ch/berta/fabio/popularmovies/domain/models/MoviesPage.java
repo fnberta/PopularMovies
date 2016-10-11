@@ -26,45 +26,44 @@ import java.util.List;
  */
 public class MoviesPage {
 
-    @SerializedName("page")
-    private int mPage;
+    private int page;
     @SerializedName("results")
-    private List<Movie> mMovies = new ArrayList<>();
+    private List<Movie> movies = new ArrayList<>();
     @SerializedName("total_pages")
-    private int mTotalPages;
-    @SerializedName("total_Movies")
-    private int mTotalMovies;
+    private int totalPages;
+    @SerializedName("total_movies")
+    private int totalMovies;
 
     public int getPage() {
-        return mPage;
+        return page;
     }
 
     public void setPage(int page) {
-        mPage = page;
+        this.page = page;
     }
 
     public List<Movie> getMovies() {
-        return mMovies;
+        return movies;
     }
 
     public void setMovies(List<Movie> Movies) {
-        mMovies = Movies;
+        movies = Movies;
     }
 
     public int getTotalPages() {
-        return mTotalPages;
+        return totalPages;
     }
 
     public void setTotalPages(int totalPages) {
-        mTotalPages = totalPages;
+        this.totalPages = totalPages;
     }
 
     public int getTotalMovies() {
-        return mTotalMovies;
+        return totalMovies;
     }
 
     public void setTotalMovies(int totalMovies) {
-        mTotalMovies = totalMovies;
+        this.totalMovies = totalMovies;
     }
 
 }

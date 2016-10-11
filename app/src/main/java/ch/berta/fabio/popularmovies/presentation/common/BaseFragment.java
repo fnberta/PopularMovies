@@ -40,7 +40,7 @@ public abstract class BaseFragment<T extends ViewModel>
         implements ViewModel.ViewInteractionListener {
 
     @Inject
-    protected T mViewModel;
+    protected T viewModel;
 
     public BaseFragment() {
         // Required empty public constructor
@@ -50,7 +50,7 @@ public abstract class BaseFragment<T extends ViewModel>
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        mViewModel.saveState(outState);
+        viewModel.saveState(outState);
     }
 
     @Override

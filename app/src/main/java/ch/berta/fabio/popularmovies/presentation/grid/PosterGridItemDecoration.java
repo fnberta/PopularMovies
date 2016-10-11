@@ -29,12 +29,12 @@ import android.view.View;
  */
 public class PosterGridItemDecoration extends RecyclerView.ItemDecoration {
 
-    private final int mItemPadding;
+    private final int itemPadding;
 
     public PosterGridItemDecoration(int itemPadding) {
         super();
 
-        mItemPadding = itemPadding;
+        this.itemPadding = itemPadding;
     }
 
     @Override
@@ -45,12 +45,12 @@ public class PosterGridItemDecoration extends RecyclerView.ItemDecoration {
         int spanCount = getSpanCount(parent);
         int column = position % spanCount;
 
-        outRect.left = column == 0 ? mItemPadding : mItemPadding / 2;
-        outRect.right = column + 1 == spanCount ? mItemPadding : mItemPadding / 2;
+        outRect.left = column == 0 ? itemPadding : itemPadding / 2;
+        outRect.right = column + 1 == spanCount ? itemPadding : itemPadding / 2;
         if (position < spanCount) {
-            outRect.top = mItemPadding;
+            outRect.top = itemPadding;
         }
-        outRect.bottom = mItemPadding;
+        outRect.bottom = itemPadding;
     }
 
 

@@ -49,13 +49,13 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
         MovieDetailsViewModel.ViewInteractionListener {
 
     private static final String LOG_TAG = MovieDetailsBaseFragment.class.getSimpleName();
-    protected ActivityListener mActivity;
-    protected boolean mUseTwoPane;
-    protected RecyclerView mRecyclerView;
+    protected ActivityListener activity;
+    protected boolean useTwoPane;
+    protected RecyclerView recyclerView;
     @Inject
-    protected MovieRepository mMovieRepo;
-    private MovieDetailsRecyclerAdapter mRecyclerAdapter;
-    private Intent mShareYoutubeIntent;
+    protected MovieRepository movieRepo;
+    private MovieDetailsRecyclerAdapter recyclerAdapter;
+    private Intent shareYoutubeIntent;
 
     public MovieDetailsBaseFragment() {
         // Required empty public constructor
@@ -66,7 +66,7 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
         super.onAttach(context);
 
         try {
-            mActivity = (ActivityListener) context;
+            activity = (ActivityListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement ActivityListener");
@@ -79,21 +79,21 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
 
         setHasOptionsMenu(true);
 
-        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
+        useTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
 
-        mShareYoutubeIntent = new Intent(Intent.ACTION_SEND);
-        mShareYoutubeIntent.setType("text/plain");
+        shareYoutubeIntent = new Intent(Intent.ACTION_SEND);
+        shareYoutubeIntent.setType("text/plain");
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mRecyclerView = getRecyclerView();
-        mRecyclerAdapter = new MovieDetailsRecyclerAdapter(getActivity(), mViewModel);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecyclerView.setAdapter(mRecyclerAdapter);
+        recyclerView = getRecyclerView();
+        recyclerAdapter = new MovieDetailsRecyclerAdapter(getActivity(), viewModel);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(recyclerAdapter);
     }
 
     protected abstract RecyclerView getRecyclerView();
@@ -102,7 +102,7 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mActivity.setViewModel(mViewModel);
+        activity.setViewModel(viewModel);
     }
 
     @Override
@@ -116,7 +116,7 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
 
         inflater.inflate(R.menu.menu_movie_details, menu);
         MenuItem shareItem = menu.findItem(R.id.menu_details_action_share);
-        shareItem.setVisible(mViewModel.hasMovieVideos());
+        shareItem.setVisible(viewModel.hasMovieVideos());
     }
 
     @Override
@@ -132,29 +132,29 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
     }
 
     private void shareYoutubeUrl() {
-        startActivity(Intent.createChooser(mShareYoutubeIntent, getString(R.string.action_share)));
+        startActivity(Intent.createChooser(shareYoutubeIntent, getString(R.string.action_share)));
     }
 
     @Override
     protected View getSnackbarView() {
-        return mRecyclerView;
+        return recyclerView;
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
 
-        mActivity = null;
+        activity = null;
     }
 
     @Override
     public void notifyItemRangeInserted(int positionStart, int itemCount) {
-        mRecyclerAdapter.notifyItemRangeInserted(positionStart, itemCount);
+        recyclerAdapter.notifyItemRangeInserted(positionStart, itemCount);
     }
 
     @Override
     public void notifyDataChanged() {
-        mRecyclerAdapter.notifyDataSetChanged();
+        recyclerAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -169,7 +169,7 @@ public abstract class MovieDetailsBaseFragment<T extends MovieDetailsViewModel>
 
     @Override
     public void setYoutubeShareUrl(@NonNull String url) {
-        mShareYoutubeIntent.putExtra(Intent.EXTRA_TEXT, url);
+        shareYoutubeIntent.putExtra(Intent.EXTRA_TEXT, url);
     }
 
     @Override

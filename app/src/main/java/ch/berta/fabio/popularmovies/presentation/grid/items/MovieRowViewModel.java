@@ -37,10 +37,10 @@ import ch.berta.fabio.popularmovies.presentation.common.rows.MovieRow;
  */
 public class MovieRowViewModel extends BaseObservable {
 
-    private String mMovieTitle;
-    private Date mMovieReleaseDate;
-    private String mMoviePosterPath;
-    private int mMoviePosterHeight;
+    private String movieTitle;
+    private Date movieReleaseDate;
+    private String moviePosterPath;
+    private int moviePosterHeight;
 
     /**
      * Constructs a new {@link MovieRow} form a {@link Movie} object.
@@ -98,41 +98,41 @@ public class MovieRowViewModel extends BaseObservable {
 
     @Bindable
     public String getMovieTitle() {
-        return mMovieTitle;
+        return movieTitle;
     }
 
     public void setMovieTitle(String movieTitle) {
-        mMovieTitle = movieTitle;
+        this.movieTitle = movieTitle;
         notifyPropertyChanged(BR.movieTitle);
     }
 
     @Bindable
     public Date getMovieReleaseDate() {
-        return mMovieReleaseDate;
+        return movieReleaseDate;
     }
 
     public void setMovieReleaseDate(Date movieReleaseDate) {
-        mMovieReleaseDate = movieReleaseDate;
+        this.movieReleaseDate = movieReleaseDate;
         notifyPropertyChanged(BR.movieReleaseDate);
     }
 
     @Bindable
     public String getMoviePosterPath() {
-        return mMoviePosterPath;
+        return moviePosterPath;
     }
 
     public void setMoviePosterPath(String moviePosterPath) {
-        mMoviePosterPath = moviePosterPath;
+        this.moviePosterPath = moviePosterPath;
         notifyPropertyChanged(BR.moviePosterPath);
     }
 
     @Bindable
     public int getMoviePosterHeight() {
-        return mMoviePosterHeight;
+        return moviePosterHeight;
     }
 
     public void setMoviePosterHeight(int moviePosterHeight) {
-        mMoviePosterHeight = moviePosterHeight;
+        this.moviePosterHeight = moviePosterHeight;
         notifyPropertyChanged(BR.moviePosterHeight);
     }
 }

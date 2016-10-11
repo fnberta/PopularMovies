@@ -32,16 +32,16 @@ import dagger.Provides;
 @Module
 public class ApplicationModule {
 
-    Application mApplication;
+    private Application application;
 
     public ApplicationModule(@NonNull Application application) {
-        mApplication = application;
+        this.application = application;
     }
 
     @Provides
     @Singleton
     Application providesApplication() {
-        return mApplication;
+        return application;
     }
 
     @Provides

@@ -35,13 +35,13 @@ import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.R;
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridFavBinding;
-import ch.berta.fabio.popularmovies.presentation.grid.di.DaggerMovieGridComponent;
-import ch.berta.fabio.popularmovies.presentation.grid.di.MovieGridViewModelModule;
 import ch.berta.fabio.popularmovies.domain.models.Sort;
 import ch.berta.fabio.popularmovies.presentation.details.MovieDetailsActivity;
 import ch.berta.fabio.popularmovies.presentation.details.fav.MovieDetailsFavFragment;
 import ch.berta.fabio.popularmovies.presentation.grid.MovieGridBaseFragment;
 import ch.berta.fabio.popularmovies.presentation.grid.PosterGridItemDecoration;
+import ch.berta.fabio.popularmovies.presentation.grid.di.DaggerMovieGridComponent;
+import ch.berta.fabio.popularmovies.presentation.grid.di.MovieGridViewModelModule;
 import ch.berta.fabio.popularmovies.presentation.grid.onl.MovieGridOnlFragment;
 
 /**
@@ -54,9 +54,9 @@ public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewMod
     public static final String INTENT_MOVIE_SELECTED_ROW_ID = BuildConfig.APPLICATION_ID + ".intents.MOVIE_SELECTED_ROW_ID";
     private static final int FAV_MOVIES_LOADER = 0;
     @Inject
-    MovieRepository mMovieRepo;
-    private MoviesFavRecyclerAdapter mRecyclerAdapter;
-    private FragmentMovieGridFavBinding mBinding;
+    MovieRepository movieRepo;
+    private MoviesFavRecyclerAdapter recyclerAdapter;
+    private FragmentMovieGridFavBinding binding;
 
     public MovieGridFavFragment() {
         // required empty constructor
@@ -77,21 +77,21 @@ public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewMod
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mBinding = FragmentMovieGridFavBinding.inflate(inflater, container, false);
-        mBinding.setViewModel(mViewModel);
-        return mBinding.getRoot();
+        binding = FragmentMovieGridFavBinding.inflate(inflater, container, false);
+        binding.setViewModel(viewModel);
+        return binding.getRoot();
     }
 
     protected void setupRecyclerView() {
         final int spanCount = getResources().getInteger(R.integer.span_count);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), spanCount);
-        mBinding.rvGrid.setLayoutManager(layoutManager);
-        mBinding.rvGrid.setHasFixedSize(true);
-        mBinding.rvGrid.addItemDecoration(new PosterGridItemDecoration(
+        binding.rvGrid.setLayoutManager(layoutManager);
+        binding.rvGrid.setHasFixedSize(true);
+        binding.rvGrid.addItemDecoration(new PosterGridItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.grid_padding)));
-        mRecyclerAdapter = new MoviesFavRecyclerAdapter(null, mViewModel, mMovieRepo,
+        recyclerAdapter = new MoviesFavRecyclerAdapter(null, viewModel, movieRepo,
                 getLayoutWidth(), spanCount);
-        mBinding.rvGrid.setAdapter(mRecyclerAdapter);
+        binding.rvGrid.setAdapter(recyclerAdapter);
     }
 
     @Override
@@ -105,50 +105,50 @@ public class MovieGridFavFragment extends MovieGridBaseFragment<MovieGridViewMod
     public void onStart() {
         super.onStart();
 
-        mViewModel.attachView(this);
+        viewModel.attachView(this);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return mMovieRepo.getFavMoviesLoader(getActivity());
+        return movieRepo.getFavMoviesLoader(getActivity());
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mRecyclerAdapter.swapCursor(data);
-        mViewModel.setMoviesAvailable(mRecyclerAdapter.getItemCount() > 0);
-        mViewModel.setMoviesLoaded(true);
+        recyclerAdapter.swapCursor(data);
+        viewModel.setMoviesAvailable(recyclerAdapter.getItemCount() > 0);
+        viewModel.setMoviesLoaded(true);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mRecyclerAdapter.swapCursor(null);
-        mViewModel.setMoviesAvailable(false);
+        recyclerAdapter.swapCursor(null);
+        viewModel.setMoviesAvailable(false);
     }
 
     @Override
     public void onStop() {
         super.onStop();
 
-        mViewModel.detachView();
+        viewModel.detachView();
     }
 
     @Override
     protected View getSnackbarView() {
-        return mBinding.rvGrid;
+        return binding.rvGrid;
     }
 
     @Override
     public void launchDetailsScreen(int moviePosition, @NonNull View posterSharedElement) {
-        if (!mUseTwoPane) {
+        if (!useTwoPane) {
             final Intent intent = new Intent(getActivity(), MovieDetailsActivity.class);
-            final long rowId = mRecyclerAdapter.getItemId(moviePosition);
+            final long rowId = recyclerAdapter.getItemId(moviePosition);
             intent.putExtra(INTENT_MOVIE_SELECTED_ROW_ID, rowId);
             startDetailsActivity(intent, posterSharedElement);
         } else {
-            final int dbId = mRecyclerAdapter.getMovieDbIdForPosition(moviePosition);
-            if (!mViewModel.isMovieSelected(dbId)) {
-                final long rowId = mRecyclerAdapter.getItemId(moviePosition);
+            final int dbId = recyclerAdapter.getMovieDbIdForPosition(moviePosition);
+            if (!viewModel.isMovieSelected(dbId)) {
+                final long rowId = recyclerAdapter.getItemId(moviePosition);
                 showDetailsFavFragment(rowId);
             }
         }

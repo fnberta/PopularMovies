@@ -28,7 +28,7 @@ import android.support.v7.widget.RecyclerView;
  */
 public abstract class BaseBindingRow<T extends ViewDataBinding> extends RecyclerView.ViewHolder {
 
-    private final T mBinding;
+    private final T binding;
 
     /**
      * Constructs a new {@link BaseBindingRow}.
@@ -38,10 +38,10 @@ public abstract class BaseBindingRow<T extends ViewDataBinding> extends Recycler
     public BaseBindingRow(@NonNull T binding) {
         super(binding.getRoot());
 
-        mBinding = binding;
+        this.binding = binding;
     }
 
     public T getBinding() {
-        return mBinding;
+        return binding;
     }
 }

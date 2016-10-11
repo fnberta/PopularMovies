@@ -31,11 +31,11 @@ import android.view.ViewGroup;
 import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsFavBinding;
 import ch.berta.fabio.popularmovies.databinding.RowDetailsInfoBinding;
-import ch.berta.fabio.popularmovies.presentation.details.di.DaggerMovieDetailsComponent;
-import ch.berta.fabio.popularmovies.presentation.details.di.MovieDetailsViewModelModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.presentation.details.MovieDetailsBaseFragment;
 import ch.berta.fabio.popularmovies.presentation.details.MovieDetailsRecyclerAdapter.InfoRow;
+import ch.berta.fabio.popularmovies.presentation.details.di.DaggerMovieDetailsComponent;
+import ch.berta.fabio.popularmovies.presentation.details.di.MovieDetailsViewModelModule;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.UpdateMovieDetailsWorker;
 import ch.berta.fabio.popularmovies.utils.Utils;
 import ch.berta.fabio.popularmovies.utils.WorkerUtils;
@@ -52,7 +52,7 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     private static final String KEY_MOVIE_ROW_ID = "MOVIE_ROW_ID";
     private static final int LOADER_FAV = 0;
     private static final String LOG_TAG = MovieDetailsFavFragment.class.getSimpleName();
-    private FragmentMovieDetailsFavBinding mBinding;
+    private FragmentMovieDetailsFavBinding binding;
 
     public MovieDetailsFavFragment() {
         // Required empty public constructor
@@ -74,7 +74,7 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
         DaggerMovieDetailsComponent.builder()
                 .applicationComponent(PopularMovies.getAppComponent(getActivity()))
                 .movieDetailsViewModelModule(new MovieDetailsViewModelModule(savedInstanceState,
-                        movieRowId, mUseTwoPane))
+                        movieRowId, useTwoPane))
                 .build()
                 .inject(this);
     }
@@ -82,14 +82,14 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mBinding = FragmentMovieDetailsFavBinding.inflate(inflater, container, false);
-        mBinding.setViewModel(mViewModel);
-        return mBinding.getRoot();
+        binding = FragmentMovieDetailsFavBinding.inflate(inflater, container, false);
+        binding.setViewModel(viewModel);
+        return binding.getRoot();
     }
 
     @Override
     protected RecyclerView getRecyclerView() {
-        return mBinding.rvDetails;
+        return binding.rvDetails;
     }
 
     @Override
@@ -103,27 +103,27 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     public void onStart() {
         super.onStart();
 
-        mViewModel.attachView(this);
+        viewModel.attachView(this);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return mMovieRepo.getFavMovieDetailsLoader(getActivity(), mViewModel.getMovieRowId());
+        return movieRepo.getFavMovieDetailsLoader(getActivity(), viewModel.getMovieRowId());
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (loader.getId() != LOADER_FAV || mViewModel.isDataSetAndNotReloading()) {
+        if (loader.getId() != LOADER_FAV || viewModel.isDataSetAndNotReloading()) {
             // data is already set or loader id does not match, return
             return;
         }
 
         if (data.moveToFirst()) {
-            final Movie movie = mMovieRepo.getMovieFromFavMovieDetailsCursor(data);
-            mViewModel.setMovie(movie);
+            final Movie movie = movieRepo.getMovieFromFavMovieDetailsCursor(data);
+            viewModel.setMovie(movie);
             getActivity().invalidateOptionsMenu();
         } else {
-            mViewModel.onMovieDataEmpty();
+            viewModel.onMovieDataEmpty();
         }
     }
 
@@ -131,7 +131,7 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
     public void onStop() {
         super.onStop();
 
-        mViewModel.detachView();
+        viewModel.detachView();
     }
 
     @Override
@@ -154,7 +154,7 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
 
     @Override
     public void hideDetailsView() {
-        mActivity.hideDetailsFragment();
+        activity.hideDetailsFragment();
     }
 
     @Override
@@ -169,9 +169,9 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
      * Disables shared element transition, it would break the recycler view item change animation.
      */
     private void removeSharedElement() {
-        if (!mUseTwoPane && Utils.isRunningLollipopAndHigher()) {
+        if (!useTwoPane && Utils.isRunningLollipopAndHigher()) {
             // info row will always be the first position in one pane mode, hence 0
-            InfoRow infoRow = (InfoRow) mRecyclerView.findViewHolderForAdapterPosition(0);
+            InfoRow infoRow = (InfoRow) recyclerView.findViewHolderForAdapterPosition(0);
             final RowDetailsInfoBinding binding = infoRow.getBinding();
             binding.getViewModel().setTransitionEnabled(false);
             binding.executePendingBindings();

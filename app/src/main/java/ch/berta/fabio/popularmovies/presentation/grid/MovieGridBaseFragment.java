@@ -45,10 +45,10 @@ public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S exte
 
     public static final int REQUEST_MOVIE_DETAILS = 1;
     private static final String LOG_TAG = MovieGridBaseFragment.class.getSimpleName();
-    protected S mActivity;
+    protected S activity;
     @Inject
-    protected SharedPreferences mSharedPrefs;
-    protected boolean mUseTwoPane;
+    protected SharedPreferences sharedPrefs;
+    protected boolean useTwoPane;
 
     public MovieGridBaseFragment() {
         // required empty constructor
@@ -60,7 +60,7 @@ public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S exte
         super.onAttach(context);
 
         try {
-            mActivity = (S) context;
+            activity = (S) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement ActivityListener");
@@ -71,7 +71,7 @@ public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S exte
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mUseTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
+        useTwoPane = getResources().getBoolean(R.bool.use_two_pane_layout);
     }
 
     @Override
@@ -87,12 +87,12 @@ public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S exte
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mActivity.setViewModel(mViewModel);
+        activity.setViewModel(viewModel);
     }
 
     protected final int getLayoutWidth() {
         int screenWidth = Utils.getScreenWidth(getResources());
-        return mUseTwoPane ? screenWidth / 100 *
+        return useTwoPane ? screenWidth / 100 *
                 getResources().getInteger(R.integer.two_pane_list_width_percentage) : screenWidth;
     }
 
@@ -109,17 +109,17 @@ public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S exte
     public void onDetach() {
         super.onDetach();
 
-        mActivity = null;
+        activity = null;
     }
 
     @Override
     public void persistSort(@NonNull Sort sort, int position) {
-        mSharedPrefs.edit().putInt(MovieGridActivity.PERSIST_SORT, position).apply();
+        sharedPrefs.edit().putInt(MovieGridActivity.PERSIST_SORT, position).apply();
     }
 
     @Override
     public void hideDetailsView() {
-        mActivity.hideDetailsFragment();
+        activity.hideDetailsFragment();
     }
 
     protected final void replaceFragment(@NonNull MovieGridBaseFragment fragment) {
@@ -135,7 +135,7 @@ public abstract class MovieGridBaseFragment<T extends MovieGridViewModel, S exte
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
 
-        mViewModel.setUserSelectedMovie(true);
+        viewModel.setUserSelectedMovie(true);
     }
 
     /**

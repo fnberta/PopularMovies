@@ -33,21 +33,21 @@ import ch.berta.fabio.popularmovies.di.MovieServiceModule;
  */
 public class PopularMovies extends Application {
 
-    private ApplicationComponent mAppComponent;
+    private ApplicationComponent appComponent;
 
     public static ApplicationComponent getAppComponent(@NonNull Activity activity) {
         return ((PopularMovies) activity.getApplication()).getAppComponent();
     }
 
     public ApplicationComponent getAppComponent() {
-        return mAppComponent;
+        return appComponent;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        mAppComponent = DaggerApplicationComponent.builder()
+        appComponent = DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(this))
                 .movieServiceModule(new MovieServiceModule())
                 .build();

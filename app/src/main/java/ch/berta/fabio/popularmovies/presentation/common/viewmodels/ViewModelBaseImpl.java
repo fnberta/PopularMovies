@@ -29,30 +29,30 @@ public abstract class ViewModelBaseImpl<T extends ViewModel.ViewInteractionListe
         extends BaseObservable
         implements ViewModel<T> {
 
-    protected T mView;
-    protected CompositeSubscription mSubscriptions;
+    protected T view;
+    protected CompositeSubscription subscriptions;
 
     @Override
     @CallSuper
     public void attachView(T view) {
-        mView = view;
-        if (mSubscriptions == null || mSubscriptions.isUnsubscribed()) {
-            mSubscriptions = new CompositeSubscription();
+        this.view = view;
+        if (subscriptions == null || subscriptions.isUnsubscribed()) {
+            subscriptions = new CompositeSubscription();
         }
     }
 
     @Override
     @CallSuper
     public void detachView() {
-        mView = null;
-        if (mSubscriptions.hasSubscriptions()) {
-            mSubscriptions.unsubscribe();
+        view = null;
+        if (subscriptions.hasSubscriptions()) {
+            subscriptions.unsubscribe();
         }
     }
 
     @Override
     @CallSuper
     public void onWorkerError(@NonNull String workerTag) {
-        mView.removeWorker(workerTag);
+        view.removeWorker(workerTag);
     }
 }

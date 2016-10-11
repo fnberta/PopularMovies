@@ -42,70 +42,70 @@ public abstract class MovieGridViewModelBaseImpl<T extends MovieGridViewModel.Vi
     private static final String STATE_MOVIES_LOADED = "STATE_MOVIES_LOADED";
     private static final String STATE_USER_SELECTED_MOVIE = "STATE_USER_SELECTED_MOVIE";
     private static final String STATE_DB_ID_SELECTED = "STATE_DB_ID_SELECTED";
-    protected int mMovieDbIdSelected;
-    private boolean mMoviesAvailable;
-    private boolean mMoviesLoaded;
-    private boolean mUserSelectedMovie;
+    protected int movieDbIdSelected;
+    private boolean moviesAvailable;
+    private boolean moviesLoaded;
+    private boolean userSelectedMovie;
 
     public MovieGridViewModelBaseImpl(@Nullable Bundle savedState) {
         if (savedState != null) {
-            mMoviesAvailable = savedState.getBoolean(STATE_MOVIES_AVAILABLE);
-            mMoviesLoaded = savedState.getBoolean(STATE_MOVIES_LOADED);
-            mUserSelectedMovie = savedState.getBoolean(STATE_USER_SELECTED_MOVIE);
-            mMovieDbIdSelected = savedState.getInt(STATE_DB_ID_SELECTED);
+            moviesAvailable = savedState.getBoolean(STATE_MOVIES_AVAILABLE);
+            moviesLoaded = savedState.getBoolean(STATE_MOVIES_LOADED);
+            userSelectedMovie = savedState.getBoolean(STATE_USER_SELECTED_MOVIE);
+            movieDbIdSelected = savedState.getInt(STATE_DB_ID_SELECTED);
         }
     }
 
     @Override
     @CallSuper
     public void saveState(@NonNull Bundle outState) {
-        outState.putBoolean(STATE_MOVIES_AVAILABLE, mMoviesAvailable);
-        outState.putBoolean(STATE_MOVIES_LOADED, mMoviesLoaded);
-        outState.putBoolean(STATE_USER_SELECTED_MOVIE, mUserSelectedMovie);
-        outState.putInt(STATE_DB_ID_SELECTED, mMovieDbIdSelected);
+        outState.putBoolean(STATE_MOVIES_AVAILABLE, moviesAvailable);
+        outState.putBoolean(STATE_MOVIES_LOADED, moviesLoaded);
+        outState.putBoolean(STATE_USER_SELECTED_MOVIE, userSelectedMovie);
+        outState.putInt(STATE_DB_ID_SELECTED, movieDbIdSelected);
     }
 
     @Override
     @Bindable
     public boolean isMoviesAvailable() {
-        return mMoviesAvailable;
+        return moviesAvailable;
     }
 
     @Override
     public void setMoviesAvailable(boolean moviesAvailable) {
-        mMoviesAvailable = moviesAvailable;
+        this.moviesAvailable = moviesAvailable;
         notifyPropertyChanged(BR.moviesAvailable);
     }
 
     @Override
     @Bindable
     public boolean isMoviesLoaded() {
-        return mMoviesLoaded;
+        return moviesLoaded;
     }
 
     @Override
     public void setMoviesLoaded(boolean moviesLoaded) {
-        mMoviesLoaded = moviesLoaded;
+        this.moviesLoaded = moviesLoaded;
         notifyPropertyChanged(BR.moviesLoaded);
     }
 
     @Override
     @Bindable
     public boolean isUserSelectedMovie() {
-        return mUserSelectedMovie;
+        return userSelectedMovie;
     }
 
     @Override
     public void setUserSelectedMovie(boolean userSelectedMovie) {
-        mUserSelectedMovie = userSelectedMovie;
+        this.userSelectedMovie = userSelectedMovie;
         notifyPropertyChanged(BR.userSelectedMovie);
     }
 
     @Override
     public void onSortSelected(AdapterView<?> parent, View view, int position, long id) {
         final Sort sort = ((Sort) parent.getSelectedItem());
-        mView.persistSort(sort, position);
-        mView.hideDetailsView();
+        this.view.persistSort(sort, position);
+        this.view.hideDetailsView();
         switchSort(sort);
     }
 

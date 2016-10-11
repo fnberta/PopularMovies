@@ -39,7 +39,6 @@ import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import ch.berta.fabio.popularmovies.domain.models.MoviesPage;
 import ch.berta.fabio.popularmovies.domain.models.Review;
 import ch.berta.fabio.popularmovies.domain.models.Video;
-import dagger.Provides;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.exceptions.Exceptions;
@@ -104,16 +103,16 @@ public class MovieRepository {
             MovieContract.Video.COLUMN_SIZE,
             MovieContract.Video.COLUMN_TYPE
     };
-    private final Context mAppContext;
-    private final MovieService mMovieService;
+    private final Context appContext;
+    private final MovieService movieService;
 
     /**
      * Constructs a new {@link MovieRepository}.
      */
     @Inject
     public MovieRepository(@NonNull Application app, @NonNull MovieService movieService) {
-        mAppContext = app;
-        mMovieService = movieService;
+        appContext = app;
+        this.movieService = movieService;
     }
 
     /**
@@ -123,8 +122,8 @@ public class MovieRepository {
      * @param sort the sorting scheme to decide which movies to load
      */
     public Observable<List<Movie>> getMoviesOnline(int page, @NonNull String sort) {
-        return mMovieService.loadMoviePosters(page, sort,
-                mAppContext.getString(R.string.movie_db_key))
+        return movieService.loadMoviePosters(page, sort,
+                appContext.getString(R.string.movie_db_key))
                 .map(new Func1<MoviesPage, List<Movie>>() {
                     @Override
                     public List<Movie> call(MoviesPage moviesPage) {
@@ -141,8 +140,8 @@ public class MovieRepository {
      * @param movieDbId the db id of the movie
      */
     public Observable<MovieDetails> getMovieDetailsOnline(int movieDbId) {
-        return mMovieService.loadMovieDetails(movieDbId,
-                mAppContext.getString(R.string.movie_db_key), "reviews,videos")
+        return movieService.loadMovieDetails(movieDbId,
+                appContext.getString(R.string.movie_db_key), "reviews,videos")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
@@ -326,7 +325,7 @@ public class MovieRepository {
                     @Override
                     public ContentProviderResult[] call(ArrayList<ContentProviderOperation> ops) {
                         try {
-                            final ContentResolver contentResolver = mAppContext.getApplicationContext().getContentResolver();
+                            final ContentResolver contentResolver = appContext.getApplicationContext().getContentResolver();
                             return contentResolver.applyBatch(MovieContract.CONTENT_AUTHORITY, ops);
                         } catch (Throwable t) {
                             throw Exceptions.propagate(t);
@@ -385,7 +384,7 @@ public class MovieRepository {
                 .map(new Func1<Long, Integer>() {
                     @Override
                     public Integer call(Long aLong) {
-                        final ContentResolver contentResolver = mAppContext.getApplicationContext().getContentResolver();
+                        final ContentResolver contentResolver = appContext.getApplicationContext().getContentResolver();
                         return contentResolver.delete(MovieContract.Movie.buildMovieUri(aLong), null, null);
                     }
                 });
@@ -412,7 +411,7 @@ public class MovieRepository {
                     @Override
                     public ContentProviderResult[] call(ArrayList<ContentProviderOperation> contentProviderOperations) {
                         try {
-                            final ContentResolver contentResolver = mAppContext.getApplicationContext().getContentResolver();
+                            final ContentResolver contentResolver = appContext.getApplicationContext().getContentResolver();
                             return contentResolver.applyBatch(MovieContract.CONTENT_AUTHORITY,
                                     contentProviderOperations);
                         } catch (Throwable t) {

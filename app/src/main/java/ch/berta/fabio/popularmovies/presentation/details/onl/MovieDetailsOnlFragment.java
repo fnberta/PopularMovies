@@ -31,10 +31,10 @@ import android.view.ViewGroup;
 
 import ch.berta.fabio.popularmovies.PopularMovies;
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsOnlBinding;
-import ch.berta.fabio.popularmovies.presentation.details.di.DaggerMovieDetailsComponent;
-import ch.berta.fabio.popularmovies.presentation.details.di.MovieDetailsViewModelModule;
 import ch.berta.fabio.popularmovies.domain.models.Movie;
 import ch.berta.fabio.popularmovies.presentation.details.MovieDetailsBaseFragment;
+import ch.berta.fabio.popularmovies.presentation.details.di.DaggerMovieDetailsComponent;
+import ch.berta.fabio.popularmovies.presentation.details.di.MovieDetailsViewModelModule;
 import ch.berta.fabio.popularmovies.presentation.workerfragments.QueryMovieDetailsWorker;
 import ch.berta.fabio.popularmovies.utils.WorkerUtils;
 
@@ -52,7 +52,7 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
     private static final String LOG_TAG = MovieDetailsOnlFragment.class.getSimpleName();
     private static final String KEY_MOVIE = "MOVIE";
     private static final int LOADER_IS_FAV = 0;
-    private FragmentMovieDetailsOnlBinding mBinding;
+    private FragmentMovieDetailsOnlBinding binding;
 
     public MovieDetailsOnlFragment() {
         // Required empty public constructor
@@ -75,7 +75,7 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
         DaggerMovieDetailsComponent.builder()
                 .applicationComponent(PopularMovies.getAppComponent(getActivity()))
                 .movieDetailsViewModelModule(new MovieDetailsViewModelModule(savedInstanceState,
-                        movie, mUseTwoPane))
+                        movie, useTwoPane))
                 .build()
                 .inject(this);
     }
@@ -83,14 +83,14 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mBinding = FragmentMovieDetailsOnlBinding.inflate(inflater, container, false);
-        mBinding.setViewModel(mViewModel);
-        return mBinding.getRoot();
+        binding = FragmentMovieDetailsOnlBinding.inflate(inflater, container, false);
+        binding.setViewModel(viewModel);
+        return binding.getRoot();
     }
 
     @Override
     protected RecyclerView getRecyclerView() {
-        return mBinding.rvDetails;
+        return binding.rvDetails;
     }
 
     @Override
@@ -104,20 +104,20 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
     public void onStart() {
         super.onStart();
 
-        mViewModel.attachView(this);
-        mViewModel.loadMovieDetails();
+        viewModel.attachView(this);
+        viewModel.loadMovieDetails();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        mViewModel.onMenuInflation();
+        viewModel.onMenuInflation();
 
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return mMovieRepo.getIsFavLoader(getActivity(), mViewModel.getMovieDbId());
+        return movieRepo.getIsFavLoader(getActivity(), viewModel.getMovieDbId());
     }
 
     @Override
@@ -128,10 +128,10 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
         }
 
         if (data.moveToFirst()) {
-            mViewModel.setMovieFavoured(true);
-            mViewModel.setMovieRowId(mMovieRepo.getRowIdFromIsFavCursor(data));
+            viewModel.setMovieFavoured(true);
+            viewModel.setMovieRowId(movieRepo.getRowIdFromIsFavCursor(data));
         } else {
-            mViewModel.setMovieFavoured(false);
+            viewModel.setMovieFavoured(false);
         }
     }
 
@@ -139,7 +139,7 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
     public void onStop() {
         super.onStop();
 
-        mViewModel.detachView();
+        viewModel.detachView();
     }
 
     @Override

@@ -48,12 +48,12 @@ public class MovieGridViewModelOnlImpl extends
     private static final String STATE_REFRESHING = "STATE_REFRESHING";
     private static final String STATE_LOADING_MORE = "STATE_LOADING_MORE";
     private static final String STATE_LOADING_NEW_SORT = "STATE_LOADING_NEW_SORT";
-    private final List<Movie> mMovies;
-    private int mMoviePage;
-    private boolean mRefreshing;
-    private boolean mLoadingMore;
-    private boolean mLoadingNewSort;
-    private Sort mSortSelected;
+    private final List<Movie> movies;
+    private int moviePage;
+    private boolean refreshing;
+    private boolean loadingMore;
+    private boolean loadingNewSort;
+    private Sort sortSelected;
 
     /**
      * Constructs a new {@link MovieGridViewModelOnlImpl}.
@@ -63,14 +63,14 @@ public class MovieGridViewModelOnlImpl extends
     public MovieGridViewModelOnlImpl(@Nullable Bundle savedState, @NonNull Sort sortSelected) {
         super(savedState);
 
-        mSortSelected = sortSelected;
-        mMovies = new ArrayList<>();
+        this.sortSelected = sortSelected;
+        movies = new ArrayList<>();
 
         if (savedState != null) {
-            mMoviePage = savedState.getInt(STATE_MOVIE_PAGE);
-            mRefreshing = savedState.getBoolean(STATE_REFRESHING);
-            mLoadingMore = savedState.getBoolean(STATE_LOADING_MORE);
-            mLoadingNewSort = savedState.getBoolean(STATE_LOADING_NEW_SORT);
+            moviePage = savedState.getInt(STATE_MOVIE_PAGE);
+            refreshing = savedState.getBoolean(STATE_REFRESHING);
+            loadingMore = savedState.getBoolean(STATE_LOADING_MORE);
+            loadingNewSort = savedState.getBoolean(STATE_LOADING_NEW_SORT);
         }
     }
 
@@ -78,21 +78,21 @@ public class MovieGridViewModelOnlImpl extends
     public void saveState(@NonNull Bundle outState) {
         super.saveState(outState);
 
-        outState.putInt(STATE_MOVIE_PAGE, mMoviePage);
-        outState.putBoolean(STATE_REFRESHING, mRefreshing);
-        outState.putBoolean(STATE_LOADING_MORE, mLoadingMore);
-        outState.putBoolean(STATE_LOADING_NEW_SORT, mLoadingNewSort);
+        outState.putInt(STATE_MOVIE_PAGE, moviePage);
+        outState.putBoolean(STATE_REFRESHING, refreshing);
+        outState.putBoolean(STATE_LOADING_MORE, loadingMore);
+        outState.putBoolean(STATE_LOADING_NEW_SORT, loadingNewSort);
     }
 
     @Override
     @Bindable
     public boolean isRefreshing() {
-        return mRefreshing;
+        return refreshing;
     }
 
     @Override
     public void setRefreshing(boolean refreshing) {
-        mRefreshing = refreshing;
+        this.refreshing = refreshing;
         notifyPropertyChanged(BR.refreshing);
     }
 
@@ -102,8 +102,8 @@ public class MovieGridViewModelOnlImpl extends
             @Override
             public void onRefresh() {
                 setRefreshing(true);
-                mMoviePage = 1;
-                mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
+                moviePage = 1;
+                view.loadQueryMoviesWorker(moviePage, sortSelected.getOption(), false);
             }
         };
     }
@@ -112,15 +112,15 @@ public class MovieGridViewModelOnlImpl extends
     public void loadMovies() {
         final int moviesSize = getItemCount();
         if (moviesSize == 0) {
-            mMoviePage = 1;
-            mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
+            moviePage = 1;
+            view.loadQueryMoviesWorker(moviePage, sortSelected.getOption(), false);
         } else {
-            if (mLoadingMore) {
+            if (loadingMore) {
                 // scroll to last position to show load more indicator
-                mView.scrollToPosition(moviesSize - 1);
+                view.scrollToPosition(moviesSize - 1);
             }
 
-            if (!mLoadingNewSort) {
+            if (!loadingNewSort) {
                 setMoviesLoaded(true);
             }
         }
@@ -128,27 +128,27 @@ public class MovieGridViewModelOnlImpl extends
 
     @Override
     public void setQueryMoviesStream(@NonNull Observable<List<Movie>> observable, @NonNull final String workerTag) {
-        mSubscriptions.add(observable.subscribe(new Subscriber<List<Movie>>() {
+        subscriptions.add(observable.subscribe(new Subscriber<List<Movie>>() {
             @Override
             public void onCompleted() {
-                mView.removeWorker(workerTag);
+                view.removeWorker(workerTag);
             }
 
             @Override
             public void onError(Throwable e) {
-                mView.removeWorker(workerTag);
+                view.removeWorker(workerTag);
                 onMoviesLoadFailed();
             }
 
             @Override
             public void onNext(List<Movie> movies) {
-                if (mMoviePage == 1) {
+                if (moviePage == 1) {
                     setMovies(movies);
                 } else {
                     addMovies(movies);
                 }
 
-                mMoviePage++;
+                moviePage++;
             }
         }));
     }
@@ -161,40 +161,40 @@ public class MovieGridViewModelOnlImpl extends
     }
 
     private void onMoviesLoadFailed() {
-        if (mMoviePage == 1) {
-            mLoadingNewSort = false;
+        if (moviePage == 1) {
+            loadingNewSort = false;
             setRefreshing(false);
             setMoviesLoaded(true);
 
-            mView.showMessage(R.string.snackbar_movies_load_failed, new SnackbarAction(R.string.snackbar_retry) {
+            view.showMessage(R.string.snackbar_movies_load_failed, new SnackbarAction(R.string.snackbar_retry) {
                 @Override
                 public void onClick(View v) {
                     setRefreshing(true);
-                    mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
+                    view.loadQueryMoviesWorker(moviePage, sortSelected.getOption(), false);
                 }
             });
         } else {
             hideLoadMoreIndicator();
-            mLoadingMore = false;
+            loadingMore = false;
 
-            mView.showMessage(R.string.snackbar_movies_load_failed, null);
+            view.showMessage(R.string.snackbar_movies_load_failed, null);
         }
     }
 
     private void setMovies(@NonNull List<Movie> movies) {
         // finished loading
-        mLoadingNewSort = false;
+        loadingNewSort = false;
         setRefreshing(false);
 
         // set movies
-        mMovies.clear();
+        this.movies.clear();
         if (!movies.isEmpty()) {
-            mMovies.addAll(movies);
+            this.movies.addAll(movies);
         }
-        mView.notifyMoviesChanged();
+        view.notifyMoviesChanged();
 
         // update view
-        mView.scrollToPosition(0);
+        view.scrollToPosition(0);
         setMoviesLoaded(true);
         setMoviesAvailable(!movies.isEmpty());
     }
@@ -204,49 +204,49 @@ public class MovieGridViewModelOnlImpl extends
         hideLoadMoreIndicator();
 
         // insert movies
-        mMovies.addAll(movies);
-        mView.notifyMoviesInserted(getItemCount(), movies.size());
+        this.movies.addAll(movies);
+        view.notifyMoviesInserted(getItemCount(), movies.size());
 
         // indicate load more process finished
-        mLoadingMore = false;
+        loadingMore = false;
     }
 
     private void hideLoadMoreIndicator() {
         final int position = getItemCount() - 1;
-        mMovies.remove(position);
-        mView.notifyLoadMoreRemoved(position);
+        movies.remove(position);
+        view.notifyLoadMoreRemoved(position);
     }
 
     @Override
     public void onLoadMore() {
-        mLoadingMore = true;
+        loadingMore = true;
         showLoadMoreIndicator();
-        mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), false);
+        view.loadQueryMoviesWorker(moviePage, sortSelected.getOption(), false);
     }
 
     private void showLoadMoreIndicator() {
-        mMovies.add(null);
-        mView.notifyLoadMoreInserted(getItemCount() - 1);
+        movies.add(null);
+        view.notifyLoadMoreInserted(getItemCount() - 1);
     }
 
     @Override
     public boolean isLoading() {
-        return mRefreshing || mLoadingMore || mLoadingNewSort;
+        return refreshing || loadingMore || loadingNewSort;
     }
 
     @Override
     public boolean hasLoadedAllItems() {
-        return mMoviePage >= MOVIE_DB_MAX_PAGE;
+        return moviePage >= MOVIE_DB_MAX_PAGE;
     }
 
     @Override
     public int getItemCount() {
-        return mMovies.size();
+        return movies.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mMovies.get(position) == null) {
+        if (movies.get(position) == null) {
             return TYPE_PROGRESS;
         }
 
@@ -255,41 +255,41 @@ public class MovieGridViewModelOnlImpl extends
 
     @Override
     public Movie getMovieAtPosition(int position) {
-        return mMovies.get(position);
+        return movies.get(position);
     }
 
     @Override
     public boolean isMovieSelected(@NonNull Movie movie) {
         final int dbId = movie.getDbId();
-        if (dbId == mMovieDbIdSelected) {
+        if (dbId == movieDbIdSelected) {
             return true;
         }
 
-        mMovieDbIdSelected = dbId;
+        movieDbIdSelected = dbId;
         return false;
     }
 
     @Override
     public void onMovieRowItemClick(int position, @NonNull View sharedView) {
         final Movie movie = getMovieAtPosition(position);
-        mView.launchDetailsScreen(movie, sharedView);
+        view.launchDetailsScreen(movie, sharedView);
     }
 
     @Override
     protected void switchSort(@NonNull Sort sort) {
         if (sort.getOption().equals(Sort.SORT_FAVORITE)) {
-            mView.showFavoriteMovies();
+            view.showFavoriteMovies();
             return;
         }
 
-        mSortSelected = sort;
+        sortSelected = sort;
 
         setMoviesLoaded(false);
         setRefreshing(false);
-        mLoadingMore = false;
-        mLoadingNewSort = true;
-        mMoviePage = 1;
+        loadingMore = false;
+        loadingNewSort = true;
+        moviePage = 1;
 
-        mView.loadQueryMoviesWorker(mMoviePage, mSortSelected.getOption(), true);
+        view.loadQueryMoviesWorker(moviePage, sortSelected.getOption(), true);
     }
 }

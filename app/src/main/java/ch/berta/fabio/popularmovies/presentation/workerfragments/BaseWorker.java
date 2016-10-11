@@ -39,11 +39,11 @@ import rx.subjects.PublishSubject;
 public abstract class BaseWorker<T, S extends BaseWorkerListener> extends Fragment {
 
     private static final String LOG_TAG = BaseWorker.class.getSimpleName();
-    S mActivity;
+    private final PublishSubject<T> subject = PublishSubject.create();
+    S activity;
     @Inject
-    MovieRepository mMovieRepo;
-    private Subscription mSubscription;
-    private final PublishSubject<T> mSubject = PublishSubject.create();
+    MovieRepository movieRepo;
+    private Subscription subscription;
 
     public BaseWorker() {
         // required empty constructor
@@ -55,7 +55,7 @@ public abstract class BaseWorker<T, S extends BaseWorkerListener> extends Fragme
         super.onAttach(context);
 
         try {
-            mActivity = (S) context;
+            activity = (S) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
                     + " must implement WorkerInteractionListener");
@@ -81,7 +81,7 @@ public abstract class BaseWorker<T, S extends BaseWorkerListener> extends Fragme
 
         final Observable<T> observable = getObservable(args);
         if (observable != null) {
-            mSubscription = observable.subscribe(mSubject);
+            subscription = observable.subscribe(subject);
         } else {
             onWorkerError();
         }
@@ -91,22 +91,22 @@ public abstract class BaseWorker<T, S extends BaseWorkerListener> extends Fragme
     public void onStart() {
         super.onStart();
 
-        setStream(mSubject.asObservable());
+        setStream(subject.asObservable());
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
 
-        mActivity = null;
+        activity = null;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
-            mSubscription.unsubscribe();
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
         }
     }
 

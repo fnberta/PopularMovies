@@ -61,7 +61,7 @@ public class QueryMovieDetailsWorker extends BaseWorker<MovieDetails, QueryMovie
     protected Observable<MovieDetails> getObservable(@NonNull Bundle args) {
         final int movieDbId = args.getInt(KEY_MOVIE_DB_ID, -1);
         if (movieDbId != -1) {
-            return mMovieRepo.getMovieDetailsOnline(movieDbId);
+            return movieRepo.getMovieDetailsOnline(movieDbId);
         }
 
         return null;
@@ -69,11 +69,11 @@ public class QueryMovieDetailsWorker extends BaseWorker<MovieDetails, QueryMovie
 
     @Override
     protected void onWorkerError() {
-        mActivity.onWorkerError(WORKER_TAG);
+        activity.onWorkerError(WORKER_TAG);
     }
 
     @Override
     protected void setStream(@NonNull Observable<MovieDetails> observable) {
-        mActivity.setQueryMovieDetailsStream(observable, WORKER_TAG);
+        activity.setQueryMovieDetailsStream(observable, WORKER_TAG);
     }
 }

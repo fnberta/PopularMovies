@@ -48,7 +48,7 @@ public class MovieDetailsActivity extends BaseActivity<MovieDetailsViewModel>
 
     private static final String LOG_TAG = MovieDetailsActivity.class.getSimpleName();
     private static final String DETAILS_FRAGMENT = "details_fragment";
-    private ActivityMovieDetailsBinding mBinding;
+    private ActivityMovieDetailsBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +57,9 @@ public class MovieDetailsActivity extends BaseActivity<MovieDetailsViewModel>
         // enter transition will start when movie poster is loaded
         supportPostponeEnterTransition();
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_movie_details);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_movie_details);
 
-        setSupportActionBar(mBinding.toolbar);
+        setSupportActionBar(binding.toolbar);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -85,18 +85,18 @@ public class MovieDetailsActivity extends BaseActivity<MovieDetailsViewModel>
 
     @Override
     public void setViewModel(@NonNull MovieDetailsViewModel viewModel) {
-        mViewModel = viewModel;
-        mBinding.setViewModel(viewModel);
+        this.viewModel = viewModel;
+        binding.setViewModel(viewModel);
     }
 
     @Override
     public void setQueryMovieDetailsStream(@NonNull Observable<MovieDetails> observable, @NonNull String workerTag) {
-        ((MovieDetailsViewModelOnl) mViewModel).setQueryMovieDetailsStream(observable, workerTag);
+        ((MovieDetailsViewModelOnl) viewModel).setQueryMovieDetailsStream(observable, workerTag);
     }
 
     @Override
     public void setUpdateMovieDetailsStream(@NonNull Observable<ContentProviderResult[]> observable, @NonNull String workerTag) {
-        ((MovieDetailsViewModelFav) mViewModel).setUpdateMovieDetailsStream(observable, workerTag);
+        ((MovieDetailsViewModelFav) viewModel).setUpdateMovieDetailsStream(observable, workerTag);
     }
 
     @Override
