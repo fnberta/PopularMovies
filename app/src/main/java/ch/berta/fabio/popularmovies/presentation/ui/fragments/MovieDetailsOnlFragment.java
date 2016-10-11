@@ -75,7 +75,6 @@ public class MovieDetailsOnlFragment extends MovieDetailsBaseFragment<MovieDetai
         final Movie movie = getArguments().getParcelable(KEY_MOVIE);
         DaggerMovieDetailsComponent.builder()
                 .applicationComponent(PopularMovies.getAppComponent(getActivity()))
-                .movieRepositoryModule(new MovieRepositoryModule())
                 .movieDetailsViewModelModule(new MovieDetailsViewModelModule(savedInstanceState,
                         movie, mUseTwoPane))
                 .build()

@@ -77,7 +77,6 @@ public abstract class BaseWorker<T, S extends BaseWorkerListener> extends Fragme
 
         final WorkerComponent repoComp = DaggerWorkerComponent.builder()
                 .applicationComponent(PopularMovies.getAppComponent(getActivity()))
-                .movieRepositoryModule(new MovieRepositoryModule())
                 .build();
         injectDependencies(repoComp);
 

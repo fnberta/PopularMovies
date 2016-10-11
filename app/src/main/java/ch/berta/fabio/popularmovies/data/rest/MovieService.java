@@ -18,10 +18,9 @@ package ch.berta.fabio.popularmovies.data.rest;
 
 import ch.berta.fabio.popularmovies.domain.models.MovieDetails;
 import ch.berta.fabio.popularmovies.domain.models.MoviesPage;
-import retrofit.Call;
-import retrofit.http.GET;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
@@ -34,7 +33,7 @@ public interface MovieService {
      * @param page   the page to query
      * @param sortBy the option to sort movies by
      * @param apiKey the api key for querying TheMovieDB.
-     * @return a {@link Call} object with the query
+     * @return an {@link Observable} with the query
      */
     @GET("discover/movie")
     Observable<MoviesPage> loadMoviePosters(@Query("page") int page,
@@ -47,7 +46,7 @@ public interface MovieService {
      * @param movieId  the db id of the movie
      * @param apiKey   the api key for querying TheMovieDB.
      * @param appendTo the extra query information to append
-     * @return a {@link Call} object with the query
+     * @return a {@link Observable} with the query
      */
     @GET("movie/{id}")
     Observable<MovieDetails> loadMovieDetails(@Path("id") int movieId,

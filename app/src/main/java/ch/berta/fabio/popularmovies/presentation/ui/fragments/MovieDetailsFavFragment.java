@@ -74,7 +74,6 @@ public class MovieDetailsFavFragment extends MovieDetailsBaseFragment<MovieDetai
         final long movieRowId = getArguments().getLong(KEY_MOVIE_ROW_ID);
         DaggerMovieDetailsComponent.builder()
                 .applicationComponent(PopularMovies.getAppComponent(getActivity()))
-                .movieRepositoryModule(new MovieRepositoryModule())
                 .movieDetailsViewModelModule(new MovieDetailsViewModelModule(savedInstanceState,
                         movieRowId, mUseTwoPane))
                 .build()

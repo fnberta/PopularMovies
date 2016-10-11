@@ -114,14 +114,14 @@ public class MovieRepositoryImpl implements MovieRepository {
     public Observable<List<Movie>> getMoviesOnline(int page, @NonNull String sort) {
         return mMovieService.loadMoviePosters(page, sort,
                 mAppContext.getString(R.string.movie_db_key))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<MoviesPage, List<Movie>>() {
                     @Override
                     public List<Movie> call(MoviesPage moviesPage) {
                         return moviesPage.getMovies();
                     }
-                });
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     @Override
