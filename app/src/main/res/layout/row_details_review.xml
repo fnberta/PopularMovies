@@ -25,7 +25,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.details.items.DetailsReviewRowViewModel"
+            type="ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsReviewRowViewModel"
             />
     </data>
 
@@ -51,7 +51,7 @@
                 android:layout_marginStart="@dimen/key_line_1"
                 android:ellipsize="marquee"
                 android:maxLines="1"
-                android:text="@{viewModel.reviewAuthor}"
+                android:text="@{viewModel.author}"
                 />
 
             <TextView
@@ -63,8 +63,7 @@
                 android:layout_marginStart="@dimen/key_line_1"
                 android:ellipsize="end"
                 android:maxLines="@integer/review_content_max_lines"
-                android:onClick="@{viewModel.onContentClick}"
-                android:text="@{viewModel.reviewContent}"
+                android:text="@{viewModel.content}"
                 />
 
         </LinearLayout>
@@ -75,7 +74,7 @@
             android:layout_height="1dp"
             android:layout_gravity="bottom"
             android:background="?android:listDivider"
-            android:visibility="@{viewModel.reviewLastPosition ? View.GONE : View.VISIBLE}"
+            android:visibility="@{viewModel.lastPosition ? View.GONE : View.VISIBLE}"
             />
 
     </FrameLayout>

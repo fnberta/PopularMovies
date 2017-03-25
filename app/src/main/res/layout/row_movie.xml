@@ -22,11 +22,9 @@
 
     <data>
 
-        <import type="ch.berta.fabio.popularmovies.utils.Utils"/>
-
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.grid.items.MovieRowViewModel"
+            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.GridRowViewModel"
             />
     </data>
 
@@ -34,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:foreground="?selectableItemBackground"
-        app:moviePosterHeight="@{viewModel.moviePosterHeight}"
+        app:posterHeight="@{viewModel.posterHeight}"
         >
 
         <ImageView
@@ -44,7 +42,7 @@
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
-            app:imageUrl="@{@string/movie_poster_url(viewModel.moviePosterPath)}"
+            app:imageUrl="@{@string/movie_poster_url(viewModel.posterPath)}"
             />
 
         <View
@@ -70,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{viewModel.movieTitle}"
+                android:text="@{viewModel.title}"
                 />
 
             <TextView
@@ -80,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{Utils.formatDateShort(viewModel.movieReleaseDate)}"
+                android:text="@{viewModel.releaseDate}"
                 />
 
         </LinearLayout>

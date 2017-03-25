@@ -16,14 +16,13 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     >
 
     <data>
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.details.fav.MovieDetailsViewModelFav"
+            type="ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsFavViewModel"
             />
     </data>
 
@@ -33,7 +32,6 @@
         android:layout_height="match_parent"
         app:colorScheme="@{@intArray/srl_color_scheme}"
         app:refreshing="@{viewModel.refreshing}"
-        app:onRefreshListener="@{viewModel.onRefreshListener}"
         >
 
         <android.support.v7.widget.RecyclerView
@@ -41,7 +39,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="@dimen/small_space"
-            tools:context=".presentation.details.MovieDetailsBaseFragment"
             />
 
     </android.support.v4.widget.SwipeRefreshLayout>

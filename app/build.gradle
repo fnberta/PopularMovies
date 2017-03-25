@@ -15,15 +15,17 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "ch.berta.fabio.popularmovies"
-        minSdkVersion 18
-        targetSdkVersion 24
+        minSdkVersion 19
+        targetSdkVersion 25
         versionCode 3
         versionName "3.0"
     }
@@ -40,29 +42,48 @@ android {
     }
 }
 
+kapt {
+    generateStubs = true
+}
+
 ext {
-    supportLibVersion = '24.2.1'
-    retrofitVersion = '2.1.0'
+    supportLibVersion = '25.3.0'
     daggerVersion = '2.7'
+    ankoVersion = '0.9.1'
+    rxBindingVersion = '1.0.0'
+    paperParcelVersion = '2.0.0'
+    retrofitVersion = '2.1.0'
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    kapt 'com.android.databinding:compiler:2.3.0'
     compile "com.android.support:support-v4:${supportLibVersion}"
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
     compile "com.android.support:support-annotations:${supportLibVersion}"
     compile "com.google.dagger:dagger:${daggerVersion}"
-    annotationProcessor "com.google.dagger:dagger-compiler:${daggerVersion}"
+    kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
     provided 'javax.annotation:jsr250-api:1.0'
+    compile 'io.reactivex:rxjava:1.2.4'
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'com.jakewharton.rxrelay:rxrelay:1.2.0'
+    compile "com.jakewharton.rxbinding:rxbinding-kotlin:${rxBindingVersion}"
+    compile "com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:${rxBindingVersion}"
+    compile "com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:${rxBindingVersion}"
+    compile "com.jakewharton.rxbinding:rxbinding-design-kotlin:${rxBindingVersion}"
+    compile "org.jetbrains.anko:anko-common:${ankoVersion}"
+    compile "org.jetbrains.anko:anko-sqlite:${ankoVersion}"
+    compile 'com.jakewharton.timber:timber:4.5.1'
+    compile "nz.bradcampbell:paperparcel:${paperParcelVersion}"
+    compile "nz.bradcampbell:paperparcel-kotlin:${paperParcelVersion}"
+    kapt "nz.bradcampbell:paperparcel-compiler:${paperParcelVersion}"
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile "com.squareup.retrofit2:retrofit:${retrofitVersion}"
     compile "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
     compile "com.squareup.retrofit2:adapter-rxjava:${retrofitVersion}"
     compile 'com.vinaysshenoy:mugen:1.0.2'
-    compile 'io.reactivex:rxjava:1.2.0'
-    compile 'io.reactivex:rxandroid:1.2.1'
 }

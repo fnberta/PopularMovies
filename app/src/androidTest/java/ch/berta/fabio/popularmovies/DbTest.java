@@ -29,9 +29,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import ch.berta.fabio.popularmovies.data.storage.MovieContract;
 import ch.berta.fabio.popularmovies.data.storage.MovieContract.Movie;
 import ch.berta.fabio.popularmovies.data.storage.MovieDbHelper;
+import ch.berta.fabio.popularmovies.data.storage.MovieDbHelperKt;
 
 /**
  * Created by fabio on 12.10.15.
@@ -42,7 +42,7 @@ public class DbTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        mContext.deleteDatabase(MovieDbHelper.DATABASE_NAME);
+        mContext.deleteDatabase(MovieDbHelperKt.DATABASE_NAME);
     }
 
     public void testCreateDb() throws Throwable {
@@ -50,7 +50,7 @@ public class DbTest extends AndroidTestCase {
         final HashSet<String> tablesNames = new HashSet<>();
         tablesNames.add(Movie.TABLE_NAME);
 
-        mContext.deleteDatabase(MovieDbHelper.DATABASE_NAME);
+        mContext.deleteDatabase(MovieDbHelperKt.DATABASE_NAME);
         SQLiteDatabase db = new MovieDbHelper(mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());
 
@@ -100,9 +100,9 @@ public class DbTest extends AndroidTestCase {
         ContentResolver contentResolver = mContext.getContentResolver();
 
         ContentValues contentValues = getMovieEntry();
-        Uri uri = contentResolver.insert(Movie.CONTENT_URI, contentValues);
+        Uri uri = contentResolver.insert(Movie.INSTANCE.getContentUri(), contentValues);
 
-        Cursor c = contentResolver.query(Movie.buildMovieUri(ContentUris.parseId(uri)), null, null, null, null);
+        Cursor c = contentResolver.query(Movie.INSTANCE.buildMovieUri(ContentUris.parseId(uri)), null, null, null, null);
         assertTrue("Insert failed", c.moveToFirst());
 
         Set<Map.Entry<String, Object>> values = contentValues.valueSet();

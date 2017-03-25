@@ -19,19 +19,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     >
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.grid.MovieGridViewModel"
-            />
-
-        <variable
-            name="viewModelDetails"
-            type="ch.berta.fabio.popularmovies.presentation.details.MovieDetailsViewModel"
-            />
-    </data>
-
     <FrameLayout
         android:id="@+id/container_main"
         android:layout_width="match_parent"

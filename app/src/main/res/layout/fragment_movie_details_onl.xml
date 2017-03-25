@@ -15,16 +15,7 @@
   -->
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     >
-
-    <data>
-
-        <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.details.onl.MovieDetailsViewModelOnl"
-            />
-    </data>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -36,7 +27,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingBottom="@dimen/small_space"
-            tools:context=".presentation.details.MovieDetailsBaseFragment"
             />
 
     </FrameLayout>

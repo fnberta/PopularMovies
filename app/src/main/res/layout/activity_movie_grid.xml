@@ -18,18 +18,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".features.grid.GridActivity"
     >
 
     <data>
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.grid.MovieGridViewModel"
-            />
-
-        <variable
-            name="viewModelDetails"
-            type="ch.berta.fabio.popularmovies.presentation.details.MovieDetailsViewModel"
+            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.GridViewModel"
             />
     </data>
 
@@ -39,7 +35,6 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay"
-        tools:context=".MainActivity"
         >
 
         <android.support.design.widget.AppBarLayout
@@ -56,10 +51,9 @@
                 >
 
                 <Spinner
-                    android:id="@+id/sp_grid_sort"
+                    android:id="@+id/spGridSort"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:onItemSelected="@{viewModel.onSortSelected}"
                     />
 
             </android.support.v7.widget.Toolbar>
@@ -68,7 +62,6 @@
         <include
             layout="@layout/activity_movie_grid_content"
             app:viewModel="@{viewModel}"
-            app:viewModelDetails="@{viewModelDetails}"
             />
 
     </android.support.design.widget.CoordinatorLayout>

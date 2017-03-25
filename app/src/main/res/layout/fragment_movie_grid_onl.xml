@@ -26,7 +26,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.grid.onl.MovieGridViewModelOnl"
+            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.GridOnlViewModel"
             />
     </data>
 
@@ -37,21 +37,20 @@
         >
 
         <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/srl_grid"
+            android:id="@+id/srlGrid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:onRefreshListener="@{viewModel.onRefreshListener}"
             app:colorScheme="@{@intArray/srl_color_scheme}"
             app:refreshing="@{viewModel.refreshing}"
             >
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_grid"
+                android:id="@+id/rvGrid"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:scrollbars="vertical"
-                android:visibility="@{viewModel.moviesLoaded ? View.VISIBLE : View.GONE}"
+                android:visibility="@{viewModel.loading ? View.GONE : View.VISIBLE}"
                 />
 
         </android.support.v4.widget.SwipeRefreshLayout>

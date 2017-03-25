@@ -17,24 +17,17 @@
 
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     >
 
     <data>
 
         <import type="android.view.View"/>
 
-        <import type="ch.berta.fabio.popularmovies.utils.Utils"/>
-
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.details.items.DetailsInfoRowViewModel"
-            />
-
-        <variable
-            name="detailsListener"
-            type="ch.berta.fabio.popularmovies.presentation.details.MovieDetailsInteractionListener"
+            type="ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsInfoRowViewModel"
             />
     </data>
 
@@ -54,9 +47,8 @@
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
             android:transitionName="@{viewModel.transitionEnabled ? @string/shared_transition_details_poster : null}"
-            app:imageUrl="@{@string/movie_poster_url(viewModel.moviePosterPath)}"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
-            app:loadedListener="@{detailsListener}"
+            app:imageUrl="@{@string/movie_poster_url(viewModel.posterPath)}"
             tools:layout_height="222dp"
             />
 
@@ -84,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
-                android:text="@{Utils.formatDateLong(viewModel.movieDate)}"
+                android:text="@{viewModel.date}"
                 />
 
             <TextView
@@ -95,7 +87,7 @@
                 android:layout_marginBottom="@dimen/normal_space"
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
-                android:text="@{@string/details_rating(viewModel.movieRating)}"
+                android:text="@{@string/details_rating(viewModel.rating)}"
                 />
 
             <TextView
@@ -107,8 +99,7 @@
                 android:layout_marginStart="@dimen/key_line_1"
                 android:ellipsize="end"
                 android:maxLines="@integer/plot_max_lines"
-                android:onClick="@{viewModel.onPlotClick}"
-                android:text="@{viewModel.moviePlot}"
+                android:text="@{viewModel.plot}"
                 />
 
         </LinearLayout>

@@ -24,7 +24,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.grid.MovieGridViewModel"
+            type="ch.berta.fabio.popularmovies.features.common.LoadingEmptyViewModel"
             />
     </data>
 
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true"
-            android:visibility="@{viewModel.moviesLoaded ? View.GONE : View.VISIBLE}"
+            android:visibility="@{viewModel.loading ? View.VISIBLE : View.GONE}"
             />
 
         <TextView
@@ -53,7 +53,7 @@
             android:drawableTop="@drawable/ic_movie_white_144dp"
             android:gravity="center_horizontal"
             android:text="@string/no_movies"
-            android:visibility="@{viewModel.moviesAvailable ? View.GONE : viewModel.moviesLoaded ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewModel.empty ? View.VISIBLE : View.GONE}"
             />
 
     </FrameLayout>
