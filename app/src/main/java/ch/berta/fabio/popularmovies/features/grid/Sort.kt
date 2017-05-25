@@ -16,8 +16,6 @@
 
 package ch.berta.fabio.popularmovies.features.grid
 
-import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.features.grid.SortOption.*
 import paperparcel.PaperParcel
 import paperparcel.PaperParcelable
 
@@ -45,17 +43,7 @@ data class Sort(
     }
 }
 
-fun makeSortOptionDisplay(getString: (Int) -> String): (SortOption) -> Sort {
-    return { sortOption ->
-        when (sortOption) {
-            SORT_POPULARITY ->
-                Sort(SORT_POPULARITY, "popularity.desc", getString(R.string.sort_popularity))
-            SORT_RATING -> Sort(SORT_RATING, "vote_average.desc",
-                    getString(R.string.sort_rating))
-            SORT_RELEASE_DATE ->
-                Sort(SORT_RELEASE_DATE, "release_date.desc",
-                        getString(R.string.sort_release_date))
-            SORT_FAVORITE -> Sort(SORT_FAVORITE, "favorite", getString(R.string.sort_favorite))
-        }
-    }
-}
+data class SortSelectionState(
+        val sort: Sort,
+        val sortPrev: Sort
+)

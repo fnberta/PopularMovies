@@ -11,7 +11,7 @@ class DetailsViewModel : BaseObservable() {
             notifyPropertyChanged(BR.title)
         }
 
-    @get:Bindable var backdropPath: String = ""
+    @get:Bindable var backdropPath: String? = ""
         set(value) {
             field = value
             notifyPropertyChanged(BR.backdropPath)
@@ -19,7 +19,7 @@ class DetailsViewModel : BaseObservable() {
 
     @get:Bindable var favoured: Boolean = false
         set(value) {
-            field = favoured
+            field = value
             notifyPropertyChanged(BR.favoured)
         }
 }

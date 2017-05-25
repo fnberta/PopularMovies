@@ -128,8 +128,7 @@ class MovieProvider : ContentProvider() {
                         "LEFT JOIN ${Video.TABLE_NAME} " +
                         "ON ${Movie.TABLE_NAME}.${BaseColumns._ID} = ${Video.TABLE_NAME}.${Video.COLUMN_MOVIE_ID}"
                 queryBuilder.appendWhere(
-                        Movie.TABLE_NAME + "." + BaseColumns._ID + " = " + Movie.getMovieIdFromUri(
-                                uri))
+                        "${Movie.TABLE_NAME}.${BaseColumns._ID} = ${Movie.getMovieIdFromUri(uri)}")
             }
             URI_TYPE_REVIEWS -> queryBuilder.tables = Review.TABLE_NAME
             URI_TYPE_REVIEW_ID -> {
@@ -151,7 +150,7 @@ class MovieProvider : ContentProvider() {
                 queryBuilder.appendWhere(
                         "${Video.COLUMN_MOVIE_ID} = ${Video.getMovieIdFromUri(uri)}")
             }
-            else -> throw UnsupportedOperationException("Unknown uri: " + uri)
+            else -> throw UnsupportedOperationException("Unknown uri: $uri")
         }
 
         val cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null,

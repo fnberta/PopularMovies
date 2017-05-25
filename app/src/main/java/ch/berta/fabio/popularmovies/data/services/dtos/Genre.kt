@@ -16,17 +16,7 @@
 
 package ch.berta.fabio.popularmovies.data.services.dtos
 
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
-
 /**
  * Represents a genre, obtained from TheMovieDb.
  */
-@PaperParcel
-data class Genre(val id: Int, val name: String) : PaperParcelable {
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelGenre.CREATOR
-    }
-}
+data class Genre(val id: Int, val name: String)

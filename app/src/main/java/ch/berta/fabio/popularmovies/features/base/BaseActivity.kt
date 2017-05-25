@@ -3,17 +3,18 @@ package ch.berta.fabio.popularmovies.features.base
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import ch.berta.fabio.popularmovies.features.base.LifecycleHandler
 import com.jakewharton.rxrelay.BehaviorRelay
+import rx.Observable
+
+data class FrameworkEvents(val activityResult: Observable<ActivityResult>)
 
 data class ActivityResult(val requestCode: Int, val resultCode: Int, val intent: Intent?)
 
 abstract class BaseActivity : AppCompatActivity() {
 
     val lifecycleHandler: LifecycleHandler = LifecycleHandler()
-    val activityResult: BehaviorRelay<ActivityResult> = BehaviorRelay.create()
-    val activityStarted: BehaviorRelay<String> = BehaviorRelay.create()
-    val fragmentCommitted: BehaviorRelay<String> = BehaviorRelay.create()
+    private val activityResult: BehaviorRelay<ActivityResult> = BehaviorRelay.create()
+    val frameworkEvents = FrameworkEvents(activityResult)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

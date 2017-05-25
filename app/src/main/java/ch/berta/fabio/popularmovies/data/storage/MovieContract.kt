@@ -33,7 +33,7 @@ object MovieContract {
     const val PATH_REVIEW = "review"
     const val PATH_VIDEO = "video"
 
-    val baseContentUri: Uri = Uri.parse("content://" + CONTENT_AUTHORITY)
+    val baseContentUri: Uri = Uri.parse("content://$CONTENT_AUTHORITY")
 
     object Movie : BaseColumns {
         const val CONTENT_TYPE = "$CURSOR_DIR_BASE_TYPE/$CONTENT_AUTHORITY/$PATH_MOVIE"
@@ -53,28 +53,20 @@ object MovieContract {
 
         val contentUri: Uri = baseContentUri.buildUpon().appendPath(PATH_MOVIE).build()
 
-        fun buildMovieUri(id: Long): Uri {
-            return ContentUris.withAppendedId(contentUri, id)
-        }
+        fun buildMovieUri(id: Long): Uri = ContentUris.withAppendedId(contentUri, id)
 
-        fun buildMovieByDbIdUri(dbId: Int): Uri {
-            return contentUri.buildUpon()
-                    .appendPath(COLUMN_DB_ID)
-                    .appendPath(dbId.toString())
-                    .build()
-        }
+        fun buildMovieByDbIdUri(dbId: Int): Uri = contentUri.buildUpon()
+                .appendPath(COLUMN_DB_ID)
+                .appendPath(dbId.toString())
+                .build()
 
-        fun buildMovieWithReviewsAndTrailersUri(id: Long): Uri {
-            return contentUri.buildUpon()
-                    .appendPath(PATH_REVIEW)
-                    .appendPath(PATH_VIDEO)
-                    .appendPath(id.toString())
-                    .build()
-        }
+        fun buildMovieWithReviewsAndTrailersUri(id: Long): Uri = contentUri.buildUpon()
+                .appendPath(PATH_REVIEW)
+                .appendPath(PATH_VIDEO)
+                .appendPath(id.toString())
+                .build()
 
-        fun getMovieIdFromUri(uri: Uri): String {
-            return uri.pathSegments[3]
-        }
+        fun getMovieIdFromUri(uri: Uri): String = uri.pathSegments[3]
     }
 
     object Review : BaseColumns {
@@ -86,22 +78,17 @@ object MovieContract {
         const val COLUMN_AUTHOR = "author"
         const val COLUMN_CONTENT = "content"
         const val COLUMN_URL = "url"
-        const val INDEX_MOVIE_ID = TABLE_NAME + "_" + COLUMN_MOVIE_ID + "_idx"
+        const val INDEX_MOVIE_ID = "${TABLE_NAME}_${COLUMN_MOVIE_ID}_idx"
 
         val contentUri: Uri = baseContentUri.buildUpon().appendPath(PATH_REVIEW).build()
 
-        fun buildReviewUri(id: Long): Uri {
-            return ContentUris.withAppendedId(contentUri, id)
-        }
+        fun buildReviewUri(id: Long): Uri = ContentUris.withAppendedId(contentUri, id)
 
-        fun buildReviewsFromMovieUri(movieId: Long): Uri {
-            return contentUri.buildUpon().appendPath(PATH_MOVIE).appendPath(
-                    movieId.toString()).build()
-        }
+        fun buildReviewsFromMovieUri(movieId: Long): Uri = contentUri.buildUpon()
+                .appendPath(PATH_MOVIE).appendPath(movieId.toString())
+                .build()
 
-        fun getMovieIdFromUri(uri: Uri): String {
-            return uri.pathSegments[2]
-        }
+        fun getMovieIdFromUri(uri: Uri): String = uri.pathSegments[2]
     }
 
     object Video : BaseColumns {
@@ -115,21 +102,16 @@ object MovieContract {
         const val COLUMN_SITE = "site"
         const val COLUMN_SIZE = "size"
         const val COLUMN_TYPE = "type"
-        const val INDEX_MOVIE_ID = TABLE_NAME + "_" + COLUMN_MOVIE_ID + "_idx"
+        const val INDEX_MOVIE_ID = "${TABLE_NAME}_${COLUMN_MOVIE_ID}_idx"
 
         val contentUri: Uri = baseContentUri.buildUpon().appendPath(PATH_VIDEO).build()
 
-        fun buildVideoUri(id: Long): Uri {
-            return ContentUris.withAppendedId(contentUri, id)
-        }
+        fun buildVideoUri(id: Long): Uri = ContentUris.withAppendedId(contentUri, id)
 
-        fun buildVideosFromMovieUri(movieId: Long): Uri {
-            return contentUri.buildUpon().appendPath(PATH_MOVIE).appendPath(
-                    movieId.toString()).build()
-        }
+        fun buildVideosFromMovieUri(movieId: Long): Uri = contentUri.buildUpon()
+                .appendPath(PATH_MOVIE).appendPath(movieId.toString())
+                .build()
 
-        fun getMovieIdFromUri(uri: Uri): String {
-            return uri.pathSegments[2]
-        }
+        fun getMovieIdFromUri(uri: Uri): String = uri.pathSegments[2]
     }
 }

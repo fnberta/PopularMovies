@@ -22,6 +22,7 @@ import ch.berta.fabio.popularmovies.di.ApplicationComponent
 import ch.berta.fabio.popularmovies.di.ApplicationModule
 import ch.berta.fabio.popularmovies.di.DaggerApplicationComponent
 import ch.berta.fabio.popularmovies.di.MovieServiceModule
+import com.facebook.stetho.Stetho
 import timber.log.Timber
 
 /**
@@ -33,25 +34,25 @@ import timber.log.Timber
  */
 class PopularMovies : Application() {
 
-    private lateinit var appComponent: ApplicationComponent
+    companion object {
+        fun getAppComponent(activity: Activity): ApplicationComponent {
+            return (activity.application as PopularMovies).appComponent
+        }
+    }
+
+    private val appComponent by lazy {
+        DaggerApplicationComponent.builder()
+                .applicationModule(ApplicationModule(this))
+                .movieServiceModule(MovieServiceModule())
+                .build()
+    }
 
     override fun onCreate() {
         super.onCreate()
 
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
-        }
-
-        appComponent = DaggerApplicationComponent.builder()
-                .applicationModule(ApplicationModule(this))
-                .movieServiceModule(MovieServiceModule())
-                .build()
-    }
-
-    companion object {
-
-        fun getAppComponent(activity: Activity): ApplicationComponent {
-            return (activity.application as PopularMovies).appComponent
+            Stetho.initializeWithDefaults(this)
         }
     }
 }

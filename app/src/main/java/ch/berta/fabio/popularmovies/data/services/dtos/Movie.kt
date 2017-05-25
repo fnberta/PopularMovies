@@ -16,17 +16,12 @@
 
 package ch.berta.fabio.popularmovies.data.services.dtos
 
-import android.content.ContentValues
-import ch.berta.fabio.popularmovies.data.storage.MovieContract.Movie
 import com.google.gson.annotations.SerializedName
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
 import java.util.*
 
 /**
  * Represents a movie, queried from TheMovieDB.
  */
-@PaperParcel
 data class Movie(
         @SerializedName("backdrop_path") val backdropPath: String,
         @SerializedName("id") val dbId: Int,
@@ -34,32 +29,5 @@ data class Movie(
         @SerializedName("release_date") val releaseDate: Date,
         @SerializedName("poster_path") val posterPath: String,
         val title: String,
-        @SerializedName("vote_average") val voteAverage: Double,
-        val favoured: Boolean,
-        val reviews: List<Review>,
-        val videos: List<Video>,
-        val reviewsAndVideosSet: Boolean = true
-) : PaperParcelable {
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelMovie.CREATOR
-    }
-
-    /**
-     * Returns a {@link ContentValues} object with the movie's data.
-     *
-     * @return a {@link ContentValues} object with the movie's data
-     */
-    fun getContentValuesEntry(): ContentValues {
-        val contentValues = ContentValues()
-        contentValues.put(Movie.COLUMN_DB_ID, dbId)
-        contentValues.put(Movie.COLUMN_TITLE, title)
-        contentValues.put(Movie.COLUMN_RELEASE_DATE, releaseDate.time)
-        contentValues.put(Movie.COLUMN_VOTE_AVERAGE, voteAverage)
-        contentValues.put(Movie.COLUMN_PLOT, overview)
-        contentValues.put(Movie.COLUMN_POSTER, posterPath)
-        contentValues.put(Movie.COLUMN_BACKDROP, backdropPath)
-        return contentValues
-    }
-}
+        @SerializedName("vote_average") val voteAverage: Double
+)

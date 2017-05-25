@@ -25,57 +25,41 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsReviewRowViewModel"
+            type="ch.berta.fabio.popularmovies.features.details.viewmodels.rows.DetailsReviewRowViewModel"
             />
     </data>
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/small_space"
+        android:paddingTop="@dimen/small_space"
         >
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tv_details_review_author"
+            style="@style/TextAppearance.AppCompat.Subhead"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/small_space"
-            android:paddingTop="@dimen/small_space"
-            >
-
-            <TextView
-                android:id="@+id/tv_details_review_author"
-                style="@style/TextAppearance.AppCompat.Subhead"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/key_line_1"
-                android:layout_marginStart="@dimen/key_line_1"
-                android:ellipsize="marquee"
-                android:maxLines="1"
-                android:text="@{viewModel.author}"
-                />
-
-            <TextView
-                android:id="@+id/tv_details_review_content"
-                style="@style/TextAppearance.AppCompat.Body1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/key_line_1"
-                android:layout_marginStart="@dimen/key_line_1"
-                android:ellipsize="end"
-                android:maxLines="@integer/review_content_max_lines"
-                android:text="@{viewModel.content}"
-                />
-
-        </LinearLayout>
-
-        <View
-            android:id="@+id/v_details_review_divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_gravity="bottom"
-            android:background="?android:listDivider"
-            android:visibility="@{viewModel.lastPosition ? View.GONE : View.VISIBLE}"
+            android:layout_marginEnd="@dimen/key_line_1"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:ellipsize="marquee"
+            android:maxLines="1"
+            android:text="@{viewModel.author}"
             />
 
-    </FrameLayout>
+        <TextView
+            android:id="@+id/tv_details_review_content"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/key_line_1"
+            android:layout_marginStart="@dimen/key_line_1"
+            android:ellipsize="end"
+            android:maxLines="@integer/review_content_max_lines"
+            android:text="@{viewModel.content}"
+            />
+
+    </LinearLayout>
 </layout>

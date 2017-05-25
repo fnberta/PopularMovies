@@ -20,8 +20,9 @@ import android.content.Context
 import android.provider.BaseColumns
 import android.support.v4.content.CursorLoader
 import ch.berta.fabio.popularmovies.data.repositories.MovieRepository
+import ch.berta.fabio.popularmovies.data.services.MovieService
 import ch.berta.fabio.popularmovies.data.storage.MovieContract
-import ch.berta.fabio.popularmovies.features.grid.GridOnlMoviesLoader
+import ch.berta.fabio.popularmovies.features.grid.loaders.GridOnlMoviesLoader
 import dagger.Module
 import dagger.Provides
 
@@ -32,9 +33,8 @@ import dagger.Provides
 class GridLoaderModule(private val context: Context) {
 
     @Provides
-    fun providesGridOnlMoviesLoader(movieRepo: MovieRepository): GridOnlMoviesLoader {
-        return GridOnlMoviesLoader(context, movieRepo)
-    }
+    fun providesGridOnlMoviesLoader(movieService: MovieService): GridOnlMoviesLoader =
+            GridOnlMoviesLoader(context, movieService)
 
     @Provides
     fun providesGridFavMoviesLoader(): CursorLoader {

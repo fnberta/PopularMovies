@@ -43,6 +43,5 @@ fun removeWorker(fragmentManager: FragmentManager, tag: String) {
  * *
  * @return the worker fragment associated with the name
  */
-fun findWorker(fragmentManager: FragmentManager, tag: String): Fragment? {
-    return fragmentManager.findFragmentByTag(tag)
-}
+fun findWorker(fragmentManager: FragmentManager, tag: String): Fragment? =
+        fragmentManager.findFragmentByTag(tag)

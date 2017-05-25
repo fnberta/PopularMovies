@@ -23,8 +23,8 @@
     <data>
 
         <variable
-            name="movie"
-            type="ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsViewModel"
+            name="viewModel"
+            type="ch.berta.fabio.popularmovies.features.details.viewmodels.rows.DetailsTwoPaneHeaderViewModel"
             />
     </data>
 
@@ -40,7 +40,7 @@
             android:layout_height="match_parent"
             android:contentDescription="@string/movie_backdrop"
             android:scaleType="centerCrop"
-            app:backdropUrl="@{@string/movie_backdrop_url(movie.backdropPath)}"
+            app:backdropUrl="@{@string/movie_backdrop_url(viewModel.backdropPath)}"
             />
 
         <View
@@ -60,7 +60,7 @@
             android:layout_marginStart="@dimen/key_line_1"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="@{movie.title}"
+            android:text="@{viewModel.title}"
             />
     </FrameLayout>
 </layout>

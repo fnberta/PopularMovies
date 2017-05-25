@@ -27,7 +27,12 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsInfoRowViewModel"
+            type="ch.berta.fabio.popularmovies.features.details.viewmodels.rows.DetailsInfoRowViewModel"
+            />
+
+        <variable
+            name="posterListener"
+            type="ch.berta.fabio.popularmovies.features.details.view.PosterLoadListener"
             />
     </data>
 
@@ -47,8 +52,9 @@
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
             android:transitionName="@{viewModel.transitionEnabled ? @string/shared_transition_details_poster : null}"
+            app:poster="@{@string/movie_poster_url(viewModel.posterPath)}"
+            app:listener="@{posterListener}"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
-            app:imageUrl="@{@string/movie_poster_url(viewModel.posterPath)}"
             tools:layout_height="222dp"
             />
 

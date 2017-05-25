@@ -12,6 +12,7 @@ import rx.subjects.ReplaySubject
  */
 abstract class RxLoader<T>(context: Context) : Loader<Observable<T>>(context) {
 
+    abstract val observable: Observable<T>
     private val subject: ReplaySubject<T> = ReplaySubject.create<T>()
     private var subscription: Subscription? = null
 
@@ -28,11 +29,9 @@ abstract class RxLoader<T>(context: Context) : Loader<Observable<T>>(context) {
     override fun onForceLoad() {
         super.onForceLoad()
 
-        subscription = getObservable().subscribe(subject)
+        subscription = observable.subscribe(subject)
         deliverResult(subject.asObservable())
     }
-
-    abstract fun getObservable(): Observable<T>
 
     override fun deliverResult(observable: Observable<T>) {
         if (isStarted) {

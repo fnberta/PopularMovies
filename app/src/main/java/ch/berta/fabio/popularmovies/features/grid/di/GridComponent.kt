@@ -18,17 +18,17 @@ package ch.berta.fabio.popularmovies.features.grid.di
 
 import android.support.v4.content.CursorLoader
 import ch.berta.fabio.popularmovies.di.ApplicationComponent
-import ch.berta.fabio.popularmovies.di.scopes.PerFragment
-import ch.berta.fabio.popularmovies.features.grid.GridActivity
-import ch.berta.fabio.popularmovies.features.grid.GridFavFragment
-import ch.berta.fabio.popularmovies.features.grid.GridOnlFragment
-import ch.berta.fabio.popularmovies.features.grid.GridOnlMoviesLoader
+import ch.berta.fabio.popularmovies.di.scopes.PerScreen
+import ch.berta.fabio.popularmovies.features.grid.view.GridActivity
+import ch.berta.fabio.popularmovies.features.grid.view.GridFavFragment
+import ch.berta.fabio.popularmovies.features.grid.view.GridOnlFragment
+import ch.berta.fabio.popularmovies.features.grid.loaders.GridOnlMoviesLoader
 import dagger.Component
 
 /**
  * Defines the dependency injection component for the Movie Grid screen.
  */
-@PerFragment
+@PerScreen
 @Component(modules = arrayOf(GridLoaderModule::class),
         dependencies = arrayOf(ApplicationComponent::class))
 interface GridComponent {

@@ -17,22 +17,13 @@
 package ch.berta.fabio.popularmovies.data.services.dtos
 
 import com.google.gson.annotations.SerializedName
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
 
 /**
  * Represents a result page of reviews obtained from TheMovieDb.
  */
-@PaperParcel
 data class ReviewsPage(
         val page: Int,
         @SerializedName("results") val reviews: List<Review>,
         @SerializedName("total_pages") val totalPages: Int,
         @SerializedName("total_results") val totalResults: Int
-) : PaperParcelable {
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelReviewsPage.CREATOR
-    }
-}
+)

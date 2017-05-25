@@ -19,7 +19,6 @@ package ch.berta.fabio.popularmovies.di
 import android.app.Application
 import android.content.SharedPreferences
 import ch.berta.fabio.popularmovies.data.services.MovieService
-import ch.berta.fabio.popularmovies.features.grid.GridActivity
 import dagger.Component
 import javax.inject.Singleton
 

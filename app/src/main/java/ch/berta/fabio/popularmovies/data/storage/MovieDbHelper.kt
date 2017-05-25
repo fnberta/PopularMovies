@@ -53,6 +53,7 @@ class MovieDbHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME,
                 "${Video.COLUMN_MOVIE_ID} INTEGER NOT NULL REFERENCES ${Movie.TABLE_NAME} (${BaseColumns._ID}) ON DELETE CASCADE ON UPDATE CASCADE, " +
                 "${Video.COLUMN_NAME} TEXT NOT NULL, " +
                 "${Video.COLUMN_KEY} TEXT NOT NULL, " +
+                "${Video.COLUMN_SITE} TEXT NOT NULL, " +
                 "${Video.COLUMN_SIZE} INTEGER NOT NULL, " +
                 "${Video.COLUMN_TYPE} TEXT NOT NULL);"
 

@@ -20,28 +20,20 @@ import android.content.ContentValues
 import android.databinding.BaseObservable
 import android.databinding.Bindable
 import ch.berta.fabio.popularmovies.data.storage.MovieContract
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
+
+const val YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v="
+const val YOU_TUBE = "YouTube"
 
 /**
  * Represents a video (e.g. trailer) of a movie, obtained from TheMovieDb.
  */
-@PaperParcel
 data class Video(
         @get:Bindable val name: String,
         @get:Bindable val key: String,
         @get:Bindable val site: String,
         @get:Bindable val size: Int,
         val type: String
-) : BaseObservable(), PaperParcelable {
-    companion object {
-        const val YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v="
-        const val YOU_TUBE = "YouTube"
-
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelVideo.CREATOR
-    }
+) : BaseObservable() {
 
     fun siteIsYouTube(): Boolean {
         return site == YOU_TUBE

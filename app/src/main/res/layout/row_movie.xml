@@ -24,7 +24,7 @@
 
         <variable
             name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.GridRowViewModel"
+            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.rows.GridRowViewModel"
             />
     </data>
 

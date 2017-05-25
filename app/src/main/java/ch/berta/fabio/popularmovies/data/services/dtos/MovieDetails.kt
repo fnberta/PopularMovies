@@ -19,14 +19,11 @@ package ch.berta.fabio.popularmovies.data.services.dtos
 import android.content.ContentValues
 import ch.berta.fabio.popularmovies.data.storage.MovieContract.Movie
 import com.google.gson.annotations.SerializedName
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
 import java.util.*
 
 /**
  * Represents a movie, queried from TheMovieDB.
  */
-@PaperParcel
 data class MovieDetails(
         @SerializedName("backdrop_path") val backdropPath: String,
         val overview: String,
@@ -39,13 +36,7 @@ data class MovieDetails(
         val dbId: Int,
         @SerializedName("reviews") val reviewsPage: ReviewsPage,
         @SerializedName("videos") val videosPage: VideosPage
-) : PaperParcelable {
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelMovieDetails.CREATOR
-    }
-
+) {
     fun getContentValuesEntry(): ContentValues {
         val contentValues = ContentValues()
         contentValues.put(Movie.COLUMN_DB_ID, dbId)

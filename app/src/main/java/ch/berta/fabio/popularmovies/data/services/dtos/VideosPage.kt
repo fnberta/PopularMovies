@@ -17,17 +17,8 @@
 package ch.berta.fabio.popularmovies.data.services.dtos
 
 import com.google.gson.annotations.SerializedName
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
 
 /**
  * Represents a list of videos (e.g.) trailers obtained from TheMovieDb.
  */
-@PaperParcel
-data class VideosPage(@SerializedName("results") val videos: List<Video>) : PaperParcelable {
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelVideosPage.CREATOR
-    }
-}
+data class VideosPage(@SerializedName("results") val videos: List<Video>)

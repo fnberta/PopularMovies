@@ -31,7 +31,7 @@
         >
 
         <activity
-            android:name=".features.grid.GridActivity"
+            android:name=".features.grid.view.GridActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme"
             >
@@ -42,9 +42,9 @@
         </activity>
 
         <activity
-            android:name=".features.details.DetailsActivity"
+            android:name=".features.details.view.DetailsActivity"
             android:label="@string/title_activity_movie_details"
-            android:parentActivityName=".features.grid.GridActivity"
+            android:parentActivityName=".features.grid.view.GridActivity"
             android:theme="@style/AppTheme.DrawStatusBar.Explode"
             />
 

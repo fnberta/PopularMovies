@@ -18,23 +18,15 @@ package ch.berta.fabio.popularmovies.data.services.dtos
 
 import android.content.ContentValues
 import ch.berta.fabio.popularmovies.data.storage.MovieContract.Review
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
 
 /**
  * Represents a review of a movie, obtained from TheMovieDb.
  */
-@PaperParcel
 data class Review(
         val author: String,
         val content: String,
         val url: String
-) : PaperParcelable {
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelReview.CREATOR
-    }
+) {
 
     override fun toString(): String {
         return author + ": " + content

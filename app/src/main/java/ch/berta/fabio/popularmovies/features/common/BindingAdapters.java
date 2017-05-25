@@ -24,6 +24,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+
+import ch.berta.fabio.popularmovies.features.details.view.PosterLoadListener;
 
 /**
  * Contains generic binding adapters.
@@ -52,6 +57,31 @@ public class BindingAdapters {
                 .load(imageUrl)
                 .error(fallback)
                 .crossFade()
+                .into(view);
+    }
+
+    @BindingAdapter({"poster", "listener", "fallback"})
+    public static void loadPosterWithListener(ImageView view,
+                                              String imageUrl,
+                                              final PosterLoadListener listener,
+                                              Drawable fallback) {
+        Glide.with(view.getContext())
+                .load(imageUrl)
+                .error(fallback)
+                .crossFade()
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        listener.onPosterLoaded();
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        listener.onPosterLoaded();
+                        return false;
+                    }
+                })
                 .into(view);
     }
 

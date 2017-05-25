@@ -42,16 +42,12 @@ android {
     }
 }
 
-kapt {
-    generateStubs = true
-}
-
 ext {
-    supportLibVersion = '25.3.0'
+    supportLibVersion = '25.3.1'
     daggerVersion = '2.7'
     ankoVersion = '0.9.1'
     rxBindingVersion = '1.0.0'
-    paperParcelVersion = '2.0.0'
+    paperParcelVersion = '2.0.1'
     retrofitVersion = '2.1.0'
 }
 
@@ -65,6 +61,7 @@ dependencies {
     compile "com.android.support:design:${supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
     compile "com.android.support:support-annotations:${supportLibVersion}"
+    compile 'com.facebook.stetho:stetho:1.5.0'
     compile "com.google.dagger:dagger:${daggerVersion}"
     kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
     provided 'javax.annotation:jsr250-api:1.0'

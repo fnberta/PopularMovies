@@ -1,122 +1,110 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
+import android.database.Cursor
+import ch.berta.fabio.popularmovies.Maybe
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.data.services.dtos.Movie
-import ch.berta.fabio.popularmovies.extensions.debug
-import ch.berta.fabio.popularmovies.features.base.ActivityResult
-import ch.berta.fabio.popularmovies.features.details.DetailsActivity
-import ch.berta.fabio.popularmovies.features.grid.GridFavFragment
-import ch.berta.fabio.popularmovies.features.grid.GridOnlFragment
-import ch.berta.fabio.popularmovies.features.grid.SortOption
-import ch.berta.fabio.popularmovies.features.grid.viewmodels.GridOnlRowViewModel
-import ch.berta.fabio.popularmovies.features.grid.viewmodels.GridRowViewModel
+import ch.berta.fabio.popularmovies.features.common.SnackbarMessage
+import ch.berta.fabio.popularmovies.features.grid.Sort
+import ch.berta.fabio.popularmovies.features.grid.viewmodels.rows.GridOnlRowLoadMoreViewModel
+import ch.berta.fabio.popularmovies.features.grid.viewmodels.rows.GridOnlRowViewModel
+import ch.berta.fabio.popularmovies.features.grid.viewmodels.rows.GridRowViewModel
 import ch.berta.fabio.popularmovies.utils.formatDateLong
 import rx.Observable
 
-typealias MovieGridReducer = (GridViewState) -> GridViewState
-
-data class MovieGridIntentions(
-        val activityResult: Observable<ActivityResult>,
-        val activityStarted: Observable<String>,
-        val fragmentCommitted: Observable<String>,
-        val moviesOnl: Observable<List<Movie>>,
-        val moviesFav: Observable<Sequence<Map<String, Any?>>>,
-        val sortSelections: Observable<Int>,
-        val movieClicks: Observable<Int>,
-        val loadMore: Observable<Unit>,
-        val refreshSwipes: Observable<Unit>
+data class GridState(
+        val sort: Sort,
+        val page: Int,
+        val moviesOnl: List<GridOnlRowViewModel> = emptyList(),
+        val moviesFav: Maybe<Cursor> = Maybe.None,
+        val loading: Boolean,
+        val loadingMore: Boolean,
+        val refreshing: Boolean,
+        val snackbar: SnackbarMessage
 )
 
+typealias GridStateReducer = (GridState) -> GridState
+
 fun model(
-        initialState: GridViewState,
-        intentions: MovieGridIntentions,
+        actions: Observable<GridAction>,
+        initialState: GridState,
         moviePosterHeight: Int
-): Observable<GridViewState> {
-    val fragmentCommitted = intentions.fragmentCommitted
-            .map(::fragmentCommittedReducer)
-    val moviesOnl = intentions.moviesOnl
-            .flatMap {
-                Observable.from(it)
+): Observable<GridState> {
+    val moviesOnl = actions
+            .ofType(GridAction.MoviesOnlLoad::class.java)
+            .switchMap {
+                Observable.from(it.movies)
                         .map {
-                            GridRowViewModel(R.layout.row_movie, it.title,
-                                    formatDateLong(it.releaseDate), it.posterPath,
-                                    moviePosterHeight)
+                            GridRowViewModel(it.dbId, it.title, formatDateLong(it.releaseDate),
+                                    it.posterPath, moviePosterHeight)
                         }
                         .toList()
             }
-            .debug("moviesOnl")
             .map(::moviesOnlReducer)
-    val refreshSwipes = intentions.refreshSwipes
-            .map { true }
-            .map(::refreshSwipesReducer)
-    val moviesFav = intentions.moviesFav
-            .debug("moviesFav")
+    val moviesFav = actions
+            .ofType(GridAction.MoviesFavLoad::class.java)
+            .map { it.favResult }
             .map(::moviesFavReducer)
-    val sortSelections = intentions.sortSelections
-            .filter { it != -1 }
-            .distinctUntilChanged()
-            .debug("sortSelection")
-            .map(::sortSelectionsReducer)
-    val movieClicks = Observable.merge(
-            intentions.movieClicks,
-            intentions.activityStarted
-                    .filter { it == DetailsActivity::class.java.canonicalName }
-                    .map { -1 }
-    )
-            .debug("movieClick")
-            .map(::movieClicksReducer)
 
-    val reducer = listOf(fragmentCommitted, moviesOnl, refreshSwipes, moviesFav, sortSelections,
-            movieClicks)
+    val sortSelections = actions
+            .ofType(GridAction.SortSelection::class.java)
+            .map(::sortSelectionsReducer)
+    val refreshSwipes = actions
+            .ofType(GridAction.RefreshSwipe::class.java)
+            .map { refreshingReducer() }
+    val loadMore = actions
+            .ofType(GridAction.LoadMore::class.java)
+            .map { GridOnlRowLoadMoreViewModel() }
+            .map(::loadMoreReducer)
+
+    val favDelete = actions
+            .ofType(GridAction.FavDelete::class.java)
+            .map { favDeleteReducer() }
+
+    val reducer = listOf(moviesOnl, moviesFav, sortSelections, refreshSwipes, loadMore, favDelete)
     return Observable.merge(reducer)
             .scan(initialState, { state, reducer -> reducer(state) })
-            .debug("state")
-            .publish()
-            .autoConnect(2)
+            .skip(1) // skip initial scan emission
 }
 
-fun moviesOnlReducer(movies: List<GridOnlRowViewModel>): MovieGridReducer = { state ->
-    state.copy(
+fun createInitialState(initialSort: Sort): GridState =
+        GridState(initialSort, 1, emptyList(), Maybe.None, true, false, false,
+                SnackbarMessage(false))
+
+fun sortSelectionsReducer(sortSelection: GridAction.SortSelection): GridStateReducer = {
+    it.copy(sort = sortSelection.sort, snackbar = it.snackbar.copy(show = false))
+}
+
+fun refreshingReducer(): GridStateReducer = {
+    it.copy(refreshing = true, snackbar = it.snackbar.copy(show = false))
+}
+
+fun loadMoreReducer(loadMoreViewModel: GridOnlRowLoadMoreViewModel): GridStateReducer = {
+    it.copy(
+            loadingMore = true,
+            page = it.page + 1,
+            moviesOnl = it.moviesOnl.plus(loadMoreViewModel),
+            snackbar = it.snackbar.copy(show = false)
+    )
+}
+
+fun moviesOnlReducer(movies: List<GridOnlRowViewModel>): GridStateReducer = {
+    it.copy(
             moviesOnl = movies,
             loading = false,
+            loadingMore = false,
             refreshing = false,
-            refreshMoviesOnl = false,
-            loadNewSort = false
+            snackbar = it.snackbar.copy(show = false)
     )
 }
 
-fun refreshSwipesReducer(refreshMoviesOnl: Boolean): MovieGridReducer = { state ->
-    state.copy(refreshMoviesOnl = refreshMoviesOnl)
+fun moviesFavReducer(favResult: Maybe<Cursor>): GridStateReducer = {
+    it.copy(moviesFav = favResult, loading = false, snackbar = it.snackbar.copy(show = false))
 }
 
-fun moviesFavReducer(movies: Sequence<Map<String, Any?>>): MovieGridReducer = { state ->
-    state.copy(moviesFav = movies, loading = false)
-}
-
-fun fragmentCommittedReducer(tag: String): MovieGridReducer = { state ->
-    when (tag) {
-        GridOnlFragment::class.java.canonicalName -> state.copy(showOnlGrid = false)
-        GridFavFragment::class.java.canonicalName -> state.copy(showFavGrid = false)
-        else -> state
-    }
-}
-
-fun sortSelectionsReducer(sortSelectedPos: Int): MovieGridReducer = { state ->
-    val sortSelectedOption = state.sortOptions[sortSelectedPos].option
-    val currentSortSelectedOption = state.sortOptions[state.sortSelectedPos].option
-    val showFavGrid = sortSelectedOption == SortOption.SORT_FAVORITE
-    val showOnlGrid = sortSelectedOption != SortOption.SORT_FAVORITE &&
-            currentSortSelectedOption == SortOption.SORT_FAVORITE
-    val loadNewSort = sortSelectedOption != SortOption.SORT_FAVORITE &&
-            sortSelectedOption != currentSortSelectedOption
-    state.copy(
-            sortSelectedPos = sortSelectedPos,
-            showFavGrid = showFavGrid,
-            showOnlGrid = showOnlGrid,
-            loadNewSort = loadNewSort
+fun favDeleteReducer(): GridStateReducer = {
+    val snackbar = it.snackbar.copy(
+            show = true,
+            message = R.string.snackbar_movie_removed_from_favorites
     )
-}
-
-fun movieClicksReducer(pos: Int): MovieGridReducer = { state ->
-    state.copy(selectedMoviePosition = pos, showMovieDetails = pos != -1)
+    it.copy(snackbar = snackbar)
 }
