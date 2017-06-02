@@ -51,7 +51,7 @@ class GridRecyclerAdapter(
                 MovieViewHolder(it).apply {
                     binding.root.setOnClickListener {
                         val rowData = movies[adapterPosition] as GridRowMovieViewData
-                        viewModel.viewEvents.movieClicks.accept(SelectedMovie(rowData.id, binding.ivPoster))
+                        viewModel.uiEvents.movieClicks.accept(SelectedMovie(rowData.id, binding.ivPoster))
                     }
                 }
             }

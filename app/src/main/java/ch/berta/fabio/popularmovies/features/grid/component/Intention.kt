@@ -1,5 +1,6 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
+import ch.berta.fabio.popularmovies.features.details.component.RS_DATA_MOVIE_ID
 import ch.berta.fabio.popularmovies.features.details.component.RS_REMOVE_FROM_FAV
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.SortSelectionState
@@ -35,8 +36,8 @@ fun intention(
             .map { GridAction.RefreshSwipe }
 
     val favDelete = sources.activityResults
-            .filter { it.requestCode == RQ_DETAILS && it.resultCode == RS_REMOVE_FROM_FAV }
-            .map { GridAction.FavDelete }
+            .filter { it.requestCode == RQ_DETAILS && it.resultCode == RS_REMOVE_FROM_FAV && it.data != null }
+            .map { GridAction.FavDelete(it.data!!.getIntExtra(RS_DATA_MOVIE_ID, -1)) }
 
     val actions = listOf(snackbarShown, sortSelections, movieClicks, loadMore, refreshSwipes, favDelete)
     return Observable.merge(actions)

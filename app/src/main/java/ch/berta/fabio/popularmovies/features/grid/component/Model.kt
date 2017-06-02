@@ -3,6 +3,7 @@ package ch.berta.fabio.popularmovies.features.grid.component
 import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.data.GetFavMoviesResult
 import ch.berta.fabio.popularmovies.data.GetOnlMoviesResult
+import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.features.common.SnackbarMessage
 import ch.berta.fabio.popularmovies.features.grid.Sort
@@ -31,7 +32,8 @@ data class PageWithSort(val page: Int, val sort: Sort)
 fun model(
         sortOptions: List<Sort>,
         actions: Observable<GridAction>,
-        movieStorage: MovieStorage
+        movieStorage: MovieStorage,
+        localDbWriteResults: Observable<LocalDbWriteResult>
 ): Observable<GridState> {
     val snackbars = actions
             .ofType(GridAction.SnackbarShown::class.java)
@@ -46,7 +48,7 @@ fun model(
                     movieStorage.getFavMovies()
                             .map(::moviesFavReducer)
                 } else {
-                    movieStorage.getOnlMovies(1, it.sort.value)
+                    movieStorage.getOnlMovies(1, it.sort.value, false)
                             .map(::moviesOnlReducer)
                 }.startWith(sortSelectionsReducer(it))
             }
@@ -60,7 +62,7 @@ fun model(
     val loadMore = pageWithSort
             .skip(1) // skip initial page 1 emission
             .switchMap {
-                movieStorage.getOnlMovies(it.page, it.sort.value)
+                movieStorage.getOnlMovies(it.page, it.sort.value, false)
                         .map(::moviesOnlMoreReducer)
                         .startWith(loadMoreReducer(GridRowLoadMoreViewData()))
             }
@@ -70,15 +72,16 @@ fun model(
             .withLatestFrom(pageWithSort, BiFunction<GridAction, PageWithSort, PageWithSort>
             { _, pageWithSort -> pageWithSort })
             .switchMap {
-                movieStorage.getOnlMovies(it.page, it.sort.value)
+                movieStorage.getOnlMovies(it.page, it.sort.value, true)
                         .map(::moviesOnlReducer)
                         .startWith(refreshingReducer())
             }
 
 
-    val favDelete = actions
-            .ofType(GridAction.FavDelete::class.java)
-            .map { favDeleteReducer() }
+    val favDelete = localDbWriteResults
+            .ofType(LocalDbWriteResult.DeleteFromFav::class.java)
+            .map { it.successful }
+            .map(::favDeleteReducer)
 
     val initialState = GridState(sortOptions[0])
     val reducer = listOf(snackbars, sortSelections, loadMore, refreshSwipes, favDelete)
@@ -151,6 +154,8 @@ fun moviesOnlMoreReducer(result: GetOnlMoviesResult): GridStateReducer = { state
     }
 }
 
-fun favDeleteReducer(): GridStateReducer = {
-    it.copy(snackbar = SnackbarMessage(true, R.string.snackbar_movie_removed_from_favorites))
+fun favDeleteReducer(successful: Boolean): GridStateReducer = {
+    it.copy(snackbar = SnackbarMessage(true,
+            if (successful) R.string.snackbar_movie_removed_from_favorites
+            else R.string.snackbar_movie_delete_failed))
 }

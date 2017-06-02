@@ -4,7 +4,7 @@ import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.data.GetMovieDetailsResult
 import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.features.common.SnackbarMessage
-import ch.berta.fabio.popularmovies.features.details.vdo.rows.*
+import ch.berta.fabio.popularmovies.features.details.vdos.rows.*
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
 import ch.berta.fabio.popularmovies.formatLong
 import io.reactivex.Observable

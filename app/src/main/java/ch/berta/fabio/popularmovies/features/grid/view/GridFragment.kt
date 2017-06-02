@@ -59,7 +59,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
         binding.rvGrid.adapter = recyclerAdapter
         Mugen.with(binding.rvGrid, object : MugenCallbacks {
             override fun onLoadMore() {
-                if (viewData.refreshEnabled) viewModel.viewEvents.loadMore.accept(Unit)
+                if (viewData.refreshEnabled) viewModel.uiEvents.loadMore.accept(Unit)
             }
 
             override fun isLoading(): Boolean = viewData.loading || viewData.refreshing || viewData.loadingMore
@@ -71,7 +71,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        binding.srlGrid.setOnRefreshListener { viewModel.viewEvents.refreshSwipes.accept(Unit) }
+        binding.srlGrid.setOnRefreshListener { viewModel.uiEvents.refreshSwipes.accept(Unit) }
         viewModel.state.observe(this, Observer<GridState> {
             it?.let { render(it) }
         })
@@ -87,7 +87,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
 
         if (state.snackbar.show) {
             Snackbar.make(binding.rvGrid, state.snackbar.message, Snackbar.LENGTH_LONG).show()
-            viewModel.viewEvents.snackbarShown.accept(Unit)
+            viewModel.uiEvents.snackbarShown.accept(Unit)
         }
     }
 }

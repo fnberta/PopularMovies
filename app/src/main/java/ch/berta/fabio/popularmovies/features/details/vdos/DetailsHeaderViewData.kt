@@ -1,4 +1,4 @@
-package ch.berta.fabio.popularmovies.features.details.vdo
+package ch.berta.fabio.popularmovies.features.details.vdos
 
 import android.databinding.BaseObservable
 import android.databinding.Bindable

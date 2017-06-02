@@ -12,6 +12,7 @@ import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsBinding
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.details.component.DetailsState
+import ch.berta.fabio.popularmovies.features.details.vdos.DetailsViewData
 import ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsViewModel
 
 
@@ -21,6 +22,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
                         PosterLoadListener {
 
     private val viewModel by lazy { ViewModelProviders.of(activity).get(DetailsViewModel::class.java) }
+    private val viewData = DetailsViewData()
     private val recyclerAdapter by lazy { DetailsRecyclerAdapter(viewModel, this) }
     private lateinit var binding: FragmentMovieDetailsBinding
 
@@ -35,6 +37,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
+        binding.viewData = viewData
         return binding.root
     }
 
@@ -57,6 +60,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
         super.onActivityCreated(savedInstanceState)
 
         binding.srlDetailsFav.setOnRefreshListener { viewModel.uiEvents.updateSwipes.accept(Unit) }
+        viewData.refreshEnabled = arguments.getParcelable<DetailsArgs>(KEY_ARGS).fromFavList
         viewModel.state.observe(this, Observer<DetailsState> {
             it?.let { render(it) }
         })
@@ -64,7 +68,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
 
     private fun render(state: DetailsState) {
         recyclerAdapter.swapData(state.details)
-        binding.srlDetailsFav.isRefreshing = state.updating
+        viewData.refreshing = state.updating
     }
 
     override fun onPosterLoaded() {

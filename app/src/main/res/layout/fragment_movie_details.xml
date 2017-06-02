@@ -22,7 +22,7 @@
 
         <variable
             name="viewData"
-            type="ch.berta.fabio.popularmovies.features.details.vdo.DetailsViewData"
+            type="ch.berta.fabio.popularmovies.features.details.vdos.DetailsViewData"
             />
     </data>
 
@@ -30,6 +30,7 @@
         android:id="@+id/srl_details_fav"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:enabled="@{viewData.refreshEnabled}"
         app:colorScheme="@{@intArray/srl_color_scheme}"
         app:refreshing="@{viewData.refreshing}"
         >

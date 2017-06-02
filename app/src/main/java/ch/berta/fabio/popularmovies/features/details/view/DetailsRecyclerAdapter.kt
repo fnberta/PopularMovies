@@ -8,7 +8,7 @@ import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.databinding.*
 import ch.berta.fabio.popularmovies.features.common.vdos.HeaderRowViewData
 import ch.berta.fabio.popularmovies.features.common.viewholders.HeaderViewHolder
-import ch.berta.fabio.popularmovies.features.details.vdo.rows.*
+import ch.berta.fabio.popularmovies.features.details.vdos.rows.*
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.InfoViewHolder
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.ReviewViewHolder
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.TwoPaneHeaderViewHolder

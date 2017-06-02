@@ -59,12 +59,27 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             .onErrorReturn { GetFavMoviesResult.Failure }
             .toObservable()
 
-    fun getOnlMovies(page: Int, sort: String): Observable<GetOnlMoviesResult> = theMovieDbService.loadMovies(page, sort)
-            .map<GetOnlMoviesResult> { GetOnlMoviesResult.Success(it.movies) }
-            .onErrorReturn { GetOnlMoviesResult.Failure }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .toObservable()
+    fun getOnlMovies(page: Int, sort: String, fetchAllPages: Boolean): Observable<GetOnlMoviesResult> {
+        val movies =
+                if (fetchAllPages) {
+                    Observable.range(1, page)
+                            .concatMap {
+                                theMovieDbService.loadMovies(it, sort)
+                                        .flatMapObservable { Observable.fromIterable(it.movies) }
+                            }
+                            .toList()
+
+                } else {
+                    theMovieDbService.loadMovies(page, sort)
+                            .map { it.movies }
+                }
+        return movies
+                .map<GetOnlMoviesResult> { GetOnlMoviesResult.Success(it) }
+                .onErrorReturn { GetOnlMoviesResult.Failure }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .toObservable()
+    }
 
     fun getMovieDetails(movieId: Int, fromFavList: Boolean): Observable<GetMovieDetailsResult> {
         val movieDetails =
@@ -132,8 +147,8 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
-    fun deleteMovieFromFav(movieDetails: MovieDetails): Observable<LocalDbWriteResult> = Observable.fromCallable {
-        movieDb.movieDao().deleteById(movieDetails.id)
+    fun deleteMovieFromFav(movieId: Int): Observable<LocalDbWriteResult> = Observable.fromCallable {
+        movieDb.movieDao().deleteById(movieId)
     }
             .map<LocalDbWriteResult> { LocalDbWriteResult.DeleteFromFav(it > 0) }
             .onErrorReturn { LocalDbWriteResult.DeleteFromFav(false) }

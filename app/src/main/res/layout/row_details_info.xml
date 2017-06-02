@@ -27,7 +27,7 @@
 
         <variable
             name="viewData"
-            type="ch.berta.fabio.popularmovies.features.details.vdo.rows.DetailsInfoRowViewData"
+            type="ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsInfoRowViewData"
             />
 
         <variable

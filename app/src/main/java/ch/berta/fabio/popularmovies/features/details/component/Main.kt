@@ -3,7 +3,7 @@ package ch.berta.fabio.popularmovies.features.details.component
 import ch.berta.fabio.popularmovies.NavigationTarget
 import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.data.MovieStorage
-import ch.berta.fabio.popularmovies.features.details.vdo.rows.DetailsVideoRowViewData
+import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
 import ch.berta.fabio.popularmovies.log
 import com.jakewharton.rxrelay2.PublishRelay
@@ -41,9 +41,9 @@ fun main(sources: DetailsSources, detailsArgs: DetailsArgs): Observable<DetailsS
 
             val state = model(it, getMovieDetails, sources.localDbWriteResults, detailsArgs)
                     .map { DetailsSink.State(it) }
-            val navigationTargets = navigationTargets(it, sources.localDbWriteResults, detailsArgs.fromFavList)
+            val navigationTargets = navigationTargets(it, detailsArgs)
                     .map { DetailsSink.Navigation(it) }
-            val localDbWrites = localMovieDbWrites(it, sources.movieStorage, getMovieDetails, detailsArgs.movieId)
+            val localDbWrites = localMovieDbWrites(it, sources.movieStorage, getMovieDetails, detailsArgs)
                     .map { DetailsSink.LocalDbWrite(it) }
 
             Observable.merge(state, navigationTargets, localDbWrites)

@@ -24,7 +24,7 @@
 
         <variable
             name="viewData"
-            type="ch.berta.fabio.popularmovies.features.details.vdo.rows.DetailsVideoRowViewData"
+            type="ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData"
             />
     </data>
 

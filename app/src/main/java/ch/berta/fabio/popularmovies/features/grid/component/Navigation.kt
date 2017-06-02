@@ -1,6 +1,7 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
 import ch.berta.fabio.popularmovies.NavigationTarget
+import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.features.details.view.DetailsActivity
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
 import ch.berta.fabio.popularmovies.features.grid.Sort
@@ -27,7 +28,8 @@ fun navigationTargets(actions: Observable<GridAction>): Observable<NavigationTar
                     { (selectedMovie), (sort) -> SelectedMovieWithSort(selectedMovie, sort) })
             .map {
                 val args = DetailsArgs(it.selectedMovie.movieId, it.sort.option == SortOption.SORT_FAVORITE)
-                NavigationTarget.Activity(DetailsActivity::class.java, args, RQ_DETAILS, it.selectedMovie.posterView)
+                NavigationTarget.Activity(DetailsActivity::class.java, args, RQ_DETAILS, it.selectedMovie.posterView,
+                        R.string.shared_transition_details_poster)
             }
 
     val navigationTargets = listOf(movieClicks)

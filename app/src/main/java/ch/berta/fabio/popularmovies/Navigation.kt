@@ -14,13 +14,18 @@ enum class FragmentAction {
 }
 
 sealed class NavigationTarget {
-    data class Finish(val result: Int? = null) : NavigationTarget()
+    data class Finish(
+            val result: Int? = null,
+            val data: Map<String, Int>? = null // TODO: implement for other data types
+    ) : NavigationTarget()
+
     data class Action(val action: String, val uri: Uri) : NavigationTarget()
     data class Activity(
             val name: Class<*>,
             val args: Parcelable? = null,
             val requestCode: Int = -1,
-            val sharedElementView: View? = null
+            val sharedElementView: View? = null,
+            val sharedElementName: Int? = null
     ) : NavigationTarget()
 
     data class Fragment(
@@ -36,7 +41,14 @@ fun navigateTo(activity: FragmentActivity, target: NavigationTarget) {
     when (target) {
         is NavigationTarget.Finish -> {
             if (target.result != null) {
-                activity.setResult(target.result)
+                if (target.data != null) {
+                    val resultData = Intent().apply {
+                        target.data.forEach { key, value -> putExtra(key, value) }
+                    }
+                    activity.setResult(target.result, resultData)
+                } else {
+                    activity.setResult(target.result)
+                }
             }
             ActivityCompat.finishAfterTransition(activity)
         }
@@ -55,15 +67,19 @@ fun navigateActivity(activity: FragmentActivity, target: NavigationTarget.Activi
     val intent = Intent(activity, target.name).apply {
         putExtra(KEY_ACTIVITY_ARGS, target.args)
     }
-    val options = activity.getString(R.string.shared_transition_details_poster).let {
-        ViewCompat.setTransitionName(target.sharedElementView, it)
-        ActivityOptionsCompat.makeSceneTransitionAnimation(activity, target.sharedElementView, it)
-    }
+
+    val options =
+            if (target.sharedElementName != null && target.sharedElementView != null) {
+                activity.getString(target.sharedElementName).let {
+                    ViewCompat.setTransitionName(target.sharedElementView, it)
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(activity, target.sharedElementView, it)
+                }
+            } else null
 
     if (target.requestCode > -1) {
-        activity.startActivityForResult(intent, target.requestCode, options.toBundle())
+        activity.startActivityForResult(intent, target.requestCode, options?.toBundle())
     } else {
-        activity.startActivity(intent, options.toBundle())
+        activity.startActivity(intent, options?.toBundle())
     }
 }
 

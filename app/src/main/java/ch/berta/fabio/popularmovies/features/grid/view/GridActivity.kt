@@ -94,7 +94,7 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) =
-                    viewModel.viewEvents.sortSelections.accept(position)
+                    viewModel.uiEvents.sortSelections.accept(position)
         }
     }
 
