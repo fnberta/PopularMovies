@@ -21,8 +21,8 @@
     <data>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.common.viewmodels.HeaderRowViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.common.vdos.HeaderRowViewData"
             />
     </data>
 
@@ -34,6 +34,6 @@
         android:gravity="center_vertical"
         android:paddingEnd="@dimen/key_line_1"
         android:paddingStart="@dimen/key_line_1"
-        android:text="@{viewModel.header}"
+        android:text="@{viewData.header}"
         />
 </layout>

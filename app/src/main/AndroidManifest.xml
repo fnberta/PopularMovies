@@ -48,12 +48,6 @@
             android:theme="@style/AppTheme.DrawStatusBar.Explode"
             />
 
-        <provider
-            android:name=".data.storage.MovieProvider"
-            android:authorities="ch.berta.fabio.popularmovies"
-            android:enabled="true"
-            android:exported="false"
-            />
     </application>
 
 </manifest>

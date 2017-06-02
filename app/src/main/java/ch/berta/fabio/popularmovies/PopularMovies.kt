@@ -19,9 +19,9 @@ package ch.berta.fabio.popularmovies
 import android.app.Activity
 import android.app.Application
 import ch.berta.fabio.popularmovies.di.ApplicationComponent
-import ch.berta.fabio.popularmovies.di.ApplicationModule
 import ch.berta.fabio.popularmovies.di.DaggerApplicationComponent
-import ch.berta.fabio.popularmovies.di.MovieServiceModule
+import ch.berta.fabio.popularmovies.di.modules.ApplicationModule
+import ch.berta.fabio.popularmovies.di.modules.MovieServiceModule
 import com.facebook.stetho.Stetho
 import timber.log.Timber
 
@@ -29,15 +29,13 @@ import timber.log.Timber
  * Provides state across the lifecycle of the whole application. Used to build the AppComponent
  * Dagger component.
  *
- *
  * Subclass of [Application].
  */
 class PopularMovies : Application() {
 
     companion object {
-        fun getAppComponent(activity: Activity): ApplicationComponent {
-            return (activity.application as PopularMovies).appComponent
-        }
+        fun getAppComponent(activity: Activity): ApplicationComponent =
+                (activity.application as PopularMovies).appComponent
     }
 
     private val appComponent by lazy {

@@ -23,8 +23,7 @@ import android.support.v7.widget.RecyclerView
  * Provides an abstract base class for a [RecyclerView] row that uses the Android data
  * binding framework to bind its views.
  *
- *
- * Subclass [RecyclerView.ViewHolder].
+ * Subclass of [RecyclerView.ViewHolder].
  */
 abstract class BaseBindingViewHolder<out T : ViewDataBinding>(
         val binding: T

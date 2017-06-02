@@ -26,8 +26,8 @@
         <import type="android.view.View"/>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.details.viewmodels.rows.DetailsInfoRowViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.details.vdo.rows.DetailsInfoRowViewData"
             />
 
         <variable
@@ -51,8 +51,8 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
-            android:transitionName="@{viewModel.transitionEnabled ? @string/shared_transition_details_poster : null}"
-            app:poster="@{@string/movie_poster_url(viewModel.posterPath)}"
+            android:transitionName="@{viewData.transitionEnabled ? @string/shared_transition_details_poster : null}"
+            app:poster="@{@string/movie_poster_url(viewData.posterPath)}"
             app:listener="@{posterListener}"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
             tools:layout_height="222dp"
@@ -82,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
-                android:text="@{viewModel.date}"
+                android:text="@{viewData.date}"
                 />
 
             <TextView
@@ -93,7 +93,7 @@
                 android:layout_marginBottom="@dimen/normal_space"
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
-                android:text="@{@string/details_rating(viewModel.rating)}"
+                android:text="@{@string/details_rating(viewData.rating)}"
                 />
 
             <TextView
@@ -104,8 +104,8 @@
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
                 android:ellipsize="end"
-                android:maxLines="@integer/plot_max_lines"
-                android:text="@{viewModel.plot}"
+                android:maxLines="@integer/plot_max_lines_collapsed"
+                android:text="@{viewData.plot}"
                 />
 
         </LinearLayout>

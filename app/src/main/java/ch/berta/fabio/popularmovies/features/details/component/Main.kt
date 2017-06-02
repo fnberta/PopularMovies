@@ -1,62 +1,51 @@
 package ch.berta.fabio.popularmovies.features.details.component
 
-import android.database.Cursor
-import ch.berta.fabio.popularmovies.Maybe
-import ch.berta.fabio.popularmovies.data.services.dtos.MovieDetails
-import ch.berta.fabio.popularmovies.effects.ContentProviderResult
-import ch.berta.fabio.popularmovies.effects.ContentProviderTarget
-import ch.berta.fabio.popularmovies.effects.NavigationTarget
-import ch.berta.fabio.popularmovies.extensions.debug
-import ch.berta.fabio.popularmovies.features.details.viewmodels.rows.DetailsVideoRowViewModel
-import rx.Observable
+import ch.berta.fabio.popularmovies.NavigationTarget
+import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
+import ch.berta.fabio.popularmovies.data.MovieStorage
+import ch.berta.fabio.popularmovies.features.details.vdo.rows.DetailsVideoRowViewData
+import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
+import ch.berta.fabio.popularmovies.log
+import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
 
 data class DetailsSources(
-        val viewEvents: DetailsViewEvents,
-        val dataLoadEvents: DetailsDataLoadEvents,
-        val persistenceEvents: PersistenceEvents
+        val uiEvents: DetailsUiEvents,
+        val movieStorage: MovieStorage,
+        val localDbWriteResults: Observable<LocalDbWriteResult>
 )
 
-data class DetailsViewEvents(
-        val updateSwipes: Observable<Unit>,
-        val favClicks: Observable<Unit>,
-        val videoClicks: Observable<DetailsVideoRowViewModel>
+data class DetailsUiEvents(
+        val snackbarShown: PublishRelay<Unit> = PublishRelay.create(),
+        val updateSwipes: PublishRelay<Unit> = PublishRelay.create(),
+        val favClicks: PublishRelay<Unit> = PublishRelay.create(),
+        val videoClicks: PublishRelay<DetailsVideoRowViewData> = PublishRelay.create()
 )
-
-data class DetailsDataLoadEvents(
-        val detailsFav: Observable<Maybe<Cursor>>,
-        val detailsOnl: Observable<MovieDetails>,
-        val detailsOnlId: Observable<Maybe<Cursor>>
-)
-
-data class PersistenceEvents(val contentProviderRes: Observable<ContentProviderResult>)
 
 sealed class DetailsAction {
-    data class DetailsOnlLoad(val movieDetails: MovieDetails) : DetailsAction()
-    data class DetailsOnlIdLoad(val detailsOnlIdResult: Maybe<Cursor>) : DetailsAction()
-    data class DetailsFavLoad(val detailsFavLoad: Maybe<Cursor>) : DetailsAction()
     object UpdateSwipe : DetailsAction()
     object FavClick : DetailsAction()
-    data class VideoClick(val videoViewModel: DetailsVideoRowViewModel) : DetailsAction()
-    object FavSave : DetailsAction()
-    object FavDelete : DetailsAction()
+    data class VideoClick(val videoViewModel: DetailsVideoRowViewData) : DetailsAction()
 }
 
-data class DetailsSinks(
-        val state: Observable<DetailsState>,
-        val navigation: Observable<NavigationTarget>,
-        val contentProviderOps: Observable<ContentProviderTarget>
-)
-
-fun main(initialState: DetailsState, sources: DetailsSources): DetailsSinks {
-    val actions = intention(sources)
-            .debug("action")
-            .share()
-    val state = model(initialState, actions)
-            .share()
-    val contentProviderOps = persist(actions)
-            .share()
-    val navigation = navigate(actions)
-            .share()
-
-    return DetailsSinks(state, navigation, contentProviderOps)
+sealed class DetailsSink {
+    data class State(val state: DetailsState) : DetailsSink()
+    data class Navigation(val target: NavigationTarget) : DetailsSink()
+    data class LocalDbWrite(val result: LocalDbWriteResult) : DetailsSink()
 }
+
+fun main(sources: DetailsSources, detailsArgs: DetailsArgs): Observable<DetailsSink> = intention(sources)
+        .log("action")
+        .publish {
+            val getMovieDetails = sources.movieStorage.getMovieDetails(detailsArgs.movieDbId, detailsArgs.fromFavList).share()
+
+            val state = model(it, getMovieDetails, sources.localDbWriteResults, detailsArgs)
+                    .map { DetailsSink.State(it) }
+            val navigationTargets = navigationTargets(it, sources.localDbWriteResults, detailsArgs.fromFavList)
+                    .map { DetailsSink.Navigation(it) }
+            val localDbWrites = localMovieDbWrites(it, sources.movieStorage, getMovieDetails, detailsArgs.movieDbId)
+                    .map { DetailsSink.LocalDbWrite(it) }
+
+            Observable.merge(state, navigationTargets, localDbWrites)
+        }
+        .share()

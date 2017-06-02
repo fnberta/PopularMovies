@@ -23,8 +23,13 @@
     <data>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.rows.GridRowViewModel"
+            name="posterHeight"
+            type="Integer"
+            />
+
+        <variable
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowMovieViewData"
             />
     </data>
 
@@ -32,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:foreground="?selectableItemBackground"
-        app:posterHeight="@{viewModel.posterHeight}"
+        app:posterHeight="@{posterHeight}"
         >
 
         <ImageView
@@ -42,7 +47,7 @@
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
-            app:imageUrl="@{@string/movie_poster_url(viewModel.posterPath)}"
+            app:imageUrl="@{@string/movie_poster_url(viewData.posterPath)}"
             />
 
         <View
@@ -68,7 +73,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{viewModel.title}"
+                android:text="@{viewData.title}"
                 />
 
             <TextView
@@ -78,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{viewModel.releaseDate}"
+                android:text="@{viewData.releaseDate}"
                 />
 
         </LinearLayout>

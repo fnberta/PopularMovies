@@ -1,15 +1,16 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
-import ch.berta.fabio.popularmovies.effects.KEY_SORT_POS
-import ch.berta.fabio.popularmovies.effects.SharedPrefsWriteTarget
+import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.features.grid.Sort
-import rx.Observable
+import io.reactivex.Observable
 
+const val KEY_SORT_POS = "KEY_SORT_POS"
 
-fun persist(
+fun sharedPrefWrites(
         actions: Observable<GridAction>,
+        sharedPrefs: SharedPrefs,
         sortOptions: List<Sort>
-): Observable<SharedPrefsWriteTarget> = actions
+): Observable<Unit> = actions
         .ofType(GridAction.SortSelection::class.java)
         .map { sortOptions.indexOf(it.sort) }
-        .map { SharedPrefsWriteTarget(KEY_SORT_POS, it) }
+        .flatMap { sharedPrefs.writeSortPos(it) }

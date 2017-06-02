@@ -4,7 +4,7 @@ import android.support.annotation.IntegerRes
 import android.widget.TextView
 import ch.berta.fabio.popularmovies.databinding.RowDetailsInfoBinding
 import ch.berta.fabio.popularmovies.features.base.BaseBindingViewHolder
-import ch.berta.fabio.popularmovies.utils.expandOrCollapseTextView
+import ch.berta.fabio.popularmovies.expandOrCollapse
 
 /**
  * Provides a [RecyclerView] row that displays basic information about a movie.
@@ -12,12 +12,10 @@ import ch.berta.fabio.popularmovies.utils.expandOrCollapseTextView
  */
 class InfoViewHolder(
         binding: RowDetailsInfoBinding,
-        @IntegerRes maxLines: Int
+        @IntegerRes maxLinesCollapsed: Int
 ) : BaseBindingViewHolder<RowDetailsInfoBinding>(binding) {
 
     init {
-        binding.tvDetailsPlot.setOnClickListener {
-            expandOrCollapseTextView(it as TextView, maxLines)
-        }
+        binding.tvDetailsPlot.setOnClickListener { (it as TextView).expandOrCollapse(maxLinesCollapsed) }
     }
 }

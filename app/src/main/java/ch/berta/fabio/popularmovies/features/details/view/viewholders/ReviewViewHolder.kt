@@ -4,7 +4,7 @@ import android.support.annotation.IntegerRes
 import android.widget.TextView
 import ch.berta.fabio.popularmovies.databinding.RowDetailsReviewBinding
 import ch.berta.fabio.popularmovies.features.base.BaseBindingViewHolder
-import ch.berta.fabio.popularmovies.utils.expandOrCollapseTextView
+import ch.berta.fabio.popularmovies.expandOrCollapse
 
 /**
  * Provides a [RecyclerView] row that displays reviews about a movie.
@@ -12,12 +12,10 @@ import ch.berta.fabio.popularmovies.utils.expandOrCollapseTextView
  */
 class ReviewViewHolder(
         binding: RowDetailsReviewBinding,
-        @IntegerRes maxLines: Int
+        @IntegerRes maxLinesCollapsed: Int
 ) : BaseBindingViewHolder<RowDetailsReviewBinding>(binding) {
 
     init {
-        binding.tvDetailsReviewContent.setOnClickListener {
-            expandOrCollapseTextView(it as TextView, maxLines)
-        }
+        binding.tvDetailsReviewContent.setOnClickListener { (it as TextView).expandOrCollapse(maxLinesCollapsed) }
     }
 }

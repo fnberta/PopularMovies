@@ -23,8 +23,8 @@
         <import type="android.view.View"/>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.common.LoadingEmptyViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.common.vdos.LoadingEmptyViewData"
             />
     </data>
 
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true"
-            android:visibility="@{viewModel.loading ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewData.loading ? View.VISIBLE : View.GONE}"
             />
 
         <TextView
@@ -53,7 +53,7 @@
             android:drawableTop="@drawable/ic_movie_white_144dp"
             android:gravity="center_horizontal"
             android:text="@string/no_movies"
-            android:visibility="@{viewModel.empty ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewData.empty ? View.VISIBLE : View.GONE}"
             />
 
     </FrameLayout>

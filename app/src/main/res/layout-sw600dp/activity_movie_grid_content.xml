@@ -25,8 +25,8 @@
         <import type="android.view.View"/>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.GridViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.grid.vdos.GridHeaderViewData"
             />
     </data>
 
@@ -52,7 +52,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="@integer/two_pane_list_width_percentage"
                 tools:ignore="MergeRootFrame"
-                tools:layout="@layout/fragment_movie_grid_onl"
+                tools:layout="@layout/fragment_movie_grid"
                 />
 
             <FrameLayout
@@ -77,7 +77,7 @@
                     android:drawableTop="@drawable/ic_movie_white_144dp"
                     android:gravity="center_horizontal"
                     android:text="@string/no_movie_selected"
-                    android:visibility="@{viewModel.movieSelected ? View.GONE : View.VISIBLE}"
+                    android:visibility="@{viewData.movieSelected ? View.GONE : View.VISIBLE}"
                     />
 
             </FrameLayout>
@@ -90,8 +90,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/normal_space"
-            android:src="@{viewModel.favoured ? @drawable/ic_favorite_white_24dp : @drawable/ic_favorite_outline_white_24dp}"
-            android:visibility="@{viewModel.movieSelected ? View.VISIBLE : View.GONE}"
+            android:src="@{viewData.favoured ? @drawable/ic_favorite_white_24dp : @drawable/ic_favorite_outline_white_24dp}"
+            android:visibility="@{viewData.movieSelected ? View.VISIBLE : View.GONE}"
             />
 
     </FrameLayout>

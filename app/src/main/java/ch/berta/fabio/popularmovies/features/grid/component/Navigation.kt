@@ -1,45 +1,35 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
-import android.support.v4.app.FragmentTransaction
-import ch.berta.fabio.popularmovies.effects.FragmentAction
-import ch.berta.fabio.popularmovies.effects.NavigationTarget
+import ch.berta.fabio.popularmovies.NavigationTarget
 import ch.berta.fabio.popularmovies.features.details.view.DetailsActivity
-import ch.berta.fabio.popularmovies.features.details.view.DetailsActivityArgs
+import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
+import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.SortOption
-import ch.berta.fabio.popularmovies.features.grid.view.GridFavFragment
-import ch.berta.fabio.popularmovies.features.grid.view.GridOnlFragment
-import rx.Observable
+import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
+import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 
 const val RQ_DETAILS = 1
 
-fun navigate(actions: Observable<GridAction>): Observable<NavigationTarget> {
-    val movieClicks = actions
-            .ofType(GridAction.MovieClick::class.java)
-            .map {
-                when (it.selectedMovie) {
-                    is SelectedMovie.Fav -> NavigationTarget.Activity(DetailsActivity::class.java,
-                            DetailsActivityArgs.Fav(it.selectedMovie.id), RQ_DETAILS,
-                            it.selectedMovie.posterView)
-                    is SelectedMovie.Onl -> NavigationTarget.Activity(DetailsActivity::class.java,
-                            DetailsActivityArgs.Onl(it.selectedMovie.id), RQ_DETAILS,
-                            it.selectedMovie.posterView)
-                }
-            }
+data class SelectedMovieWithSort(
+        val selectedMovie: SelectedMovie,
+        val sort: Sort
+)
+
+fun navigationTargets(actions: Observable<GridAction>): Observable<NavigationTarget> {
     val sortSelections = actions
             .ofType(GridAction.SortSelection::class.java)
-    val openFav = sortSelections
-            .filter { it.sort.option == SortOption.SORT_FAVORITE }
-            .map { NavigationTarget.Fragment(GridFavFragment(), FragmentAction.REPLACE) }
-    val openOnl = sortSelections
-            .filter {
-                it.sort != it.sortPrev && it.sort.option != SortOption.SORT_FAVORITE
-                        && it.sortPrev.option == SortOption.SORT_FAVORITE
-            }
+
+    val movieClicks = actions
+            .ofType(GridAction.MovieClick::class.java)
+            .withLatestFrom(sortSelections,
+                    BiFunction<GridAction.MovieClick, GridAction.SortSelection, SelectedMovieWithSort>
+                    { (selectedMovie), (sort) -> SelectedMovieWithSort(selectedMovie, sort) })
             .map {
-                NavigationTarget.Fragment(GridOnlFragment.newInstance(it.sort.value),
-                        FragmentAction.REPLACE, FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                val args = DetailsArgs(it.selectedMovie.dbId, it.sort.option == SortOption.SORT_FAVORITE)
+                NavigationTarget.Activity(DetailsActivity::class.java, args, RQ_DETAILS, it.selectedMovie.posterView)
             }
 
-    val navigators = listOf(movieClicks, openFav, openOnl)
-    return Observable.merge(navigators)
+    val navigationTargets = listOf(movieClicks)
+    return Observable.merge(navigationTargets)
 }

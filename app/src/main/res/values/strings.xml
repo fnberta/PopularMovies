@@ -40,6 +40,7 @@
     <string name="snackbar_movie_load_reviews_videos_failed">Failed to load reviews and trailers</string>
     <string name="action_share">Share</string>
     <string name="snackbar_movie_insert_failed">Failed to mark movie as favoured</string>
+    <string name="snackbar_movie_updated">Updated movie details</string>
     <string name="snackbar_movie_update_failed">Failed to update movie</string>
     <string name="video_size">%1$sp</string>
     <string name="movie_poster_url">http://image.tmdb.org/t/p/w185%1$s</string>

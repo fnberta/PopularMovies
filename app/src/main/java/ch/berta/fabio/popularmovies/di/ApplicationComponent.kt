@@ -18,7 +18,12 @@ package ch.berta.fabio.popularmovies.di
 
 import android.app.Application
 import android.content.SharedPreferences
-import ch.berta.fabio.popularmovies.data.services.MovieService
+import ch.berta.fabio.popularmovies.data.themoviedb.TheMovieDbService
+import ch.berta.fabio.popularmovies.data.localmoviedb.MovieDb
+import ch.berta.fabio.popularmovies.di.modules.ApplicationModule
+import ch.berta.fabio.popularmovies.di.modules.MovieServiceModule
+import ch.berta.fabio.popularmovies.features.details.view.DetailsActivity
+import ch.berta.fabio.popularmovies.features.grid.view.GridActivity
 import dagger.Component
 import javax.inject.Singleton
 
@@ -31,7 +36,13 @@ interface ApplicationComponent {
 
     val application: Application
 
+    val movieDb: MovieDb
+
     val sharedPreferences: SharedPreferences
 
-    val movieService: MovieService
+    val theMovieDbService: TheMovieDbService
+
+    fun inject(gridActivity: GridActivity)
+
+    fun inject(detailsActivity: DetailsActivity)
 }

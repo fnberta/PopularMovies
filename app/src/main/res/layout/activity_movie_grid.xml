@@ -24,8 +24,8 @@
     <data>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.features.grid.viewmodels.GridViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.grid.vdos.GridHeaderViewData"
             />
     </data>
 
@@ -61,7 +61,7 @@
 
         <include
             layout="@layout/activity_movie_grid_content"
-            app:viewModel="@{viewModel}"
+            app:viewData="@{viewData}"
             />
 
     </android.support.design.widget.CoordinatorLayout>

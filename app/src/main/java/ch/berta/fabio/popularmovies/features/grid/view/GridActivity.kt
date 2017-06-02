@@ -16,52 +16,45 @@
 
 package ch.berta.fabio.popularmovies.features.grid.view
 
-import android.content.SharedPreferences
-import android.database.Cursor
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import ch.berta.fabio.popularmovies.Maybe
+import ch.berta.fabio.popularmovies.NavigationTarget
 import ch.berta.fabio.popularmovies.PopularMovies
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.data.services.dtos.Movie
+import ch.berta.fabio.popularmovies.data.MovieStorage
+import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.databinding.ActivityMovieGridBinding
-import ch.berta.fabio.popularmovies.effects.*
-import ch.berta.fabio.popularmovies.extensions.bindToDestroy
+import ch.berta.fabio.popularmovies.di.ApplicationComponent
+import ch.berta.fabio.popularmovies.features.base.ActivityResult
 import ch.berta.fabio.popularmovies.features.base.BaseActivity
+import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.SortOption.*
-import ch.berta.fabio.popularmovies.features.grid.component.*
-import ch.berta.fabio.popularmovies.features.grid.di.DaggerGridComponent
-import ch.berta.fabio.popularmovies.features.grid.di.GridComponent
-import ch.berta.fabio.popularmovies.features.grid.di.GridLoaderModule
-import ch.berta.fabio.popularmovies.utils.calcPosterHeight
-import com.jakewharton.rxbinding.widget.itemSelections
-import com.jakewharton.rxrelay.BehaviorRelay
+import ch.berta.fabio.popularmovies.features.grid.component.GridState
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModel
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelFactory
+import ch.berta.fabio.popularmovies.navigateTo
 import javax.inject.Inject
 
 /**
  * Provides the main entry point to the app.
  */
-class GridActivity : BaseActivity(),
-                     GridOnlActivityListener,
-                     GridFavActivityListener {
+class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
 
-    override val moviesOnl: BehaviorRelay<List<Movie>> = BehaviorRelay.create()
-    override val moviesFav: BehaviorRelay<Maybe<Cursor>> = BehaviorRelay.create()
-    override val movieClicks: BehaviorRelay<SelectedMovie> = BehaviorRelay.create()
-    override val loadMore: BehaviorRelay<Unit> = BehaviorRelay.create()
-    override val refreshSwipes: BehaviorRelay<Unit> = BehaviorRelay.create()
-    override val component: GridComponent by lazy {
-        DaggerGridComponent.builder()
-                .applicationComponent(PopularMovies.getAppComponent(this))
-                .gridLoaderModule(GridLoaderModule(this))
-                .build()
-    }
-    override lateinit var sinks: GridSinks
     @Inject
-    lateinit var sharedPrefs: SharedPreferences
+    lateinit var sharedPrefs: SharedPrefs
+    @Inject
+    lateinit var movieStorage: MovieStorage
+    private val component: ApplicationComponent by lazy { PopularMovies.getAppComponent(this) }
+    private val binding by lazy {
+        DataBindingUtil.setContentView<ActivityMovieGridBinding>(this, R.layout.activity_movie_grid)
+    }
     private val sortOptions by lazy {
         listOf(
                 Sort(SORT_POPULARITY, "popularity.desc", getString(R.string.sort_popularity)),
@@ -75,10 +68,7 @@ class GridActivity : BaseActivity(),
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
     }
-    private val useTwoPane by lazy { resources.getBoolean(R.bool.use_two_pane_layout) }
-    private val binding by lazy {
-        DataBindingUtil.setContentView<ActivityMovieGridBinding>(this, R.layout.activity_movie_grid)
-    }
+    private lateinit var viewModel: GridViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,65 +78,51 @@ class GridActivity : BaseActivity(),
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = null
 
-        val initialState = savedInstanceState?.get(GridActivity::class.java.canonicalName)
-                as? GridState ?: getNewInitialState()
-
-        binding.spGridSort.adapter = spinnerAdapter
-        binding.spGridSort.setSelection(sortOptions.indexOf(initialState.sort))
-
-        sinks = setupComponent(initialState)
-        subscribeToSinks(sinks)
+        initViewModel()
+        setupSortSpinner()
 
         if (savedInstanceState == null) {
-            addInitialFragment(initialState.sort)
+            addFragment()
         }
     }
 
-    private fun getNewInitialState(): GridState {
-        val sortPos = readFrom(sharedPrefs, SharedPrefsReadTarget(KEY_SORT_POS, 0))
-        return createInitialState(sortOptions[sortPos])
+    private fun setupSortSpinner() {
+        binding.spGridSort.adapter = spinnerAdapter
+        binding.spGridSort.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // do nothing
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) =
+                    viewModel.viewEvents.sortSelections.accept(position)
+        }
     }
 
-    private fun addInitialFragment(initialSort: Sort) {
-        val fragment: Fragment = when (initialSort.option) {
-            SORT_FAVORITE -> GridFavFragment()
-            else -> GridOnlFragment.newInstance(initialSort.value)
-        }
+    private fun initViewModel() {
+        val factory = GridViewModelFactory(sharedPrefs, movieStorage, sortOptions)
+        viewModel = ViewModelProviders.of(this, factory).get(GridViewModel::class.java)
+        viewModel.state.observe(this, Observer<GridState> {
+            it?.let { render(it) }
+        })
+        viewModel.navigation.observe(this, Observer<NavigationTarget> {
+            it?.let { navigateTo(this, it) }
+        })
+    }
+
+    private fun render(state: GridState) {
+        binding.spGridSort.setSelection(sortOptions.indexOf(state.sort))
+    }
+
+    private fun addFragment() {
+        val fragment = GridFragment()
         supportFragmentManager.beginTransaction()
                 .add(R.id.container_main, fragment, fragment.javaClass.canonicalName)
                 .commit()
     }
 
-    private fun setupComponent(initialState: GridState): GridSinks {
-        val viewEvents = GridViewEvents(
-                binding.spGridSort.itemSelections(),
-                movieClicks,
-                loadMore,
-                refreshSwipes
-        )
-        val dataLoadEvents = GridDataLoadEvents(
-                moviesOnl,
-                moviesFav
-        )
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        val sources = GridSources(viewEvents, frameworkEvents, dataLoadEvents)
-        return main(initialState, sources, sortOptions, calcPosterHeight(resources, useTwoPane))
-    }
-
-    private fun subscribeToSinks(sinks: GridSinks) {
-        sinks.state
-                .bindToDestroy(lifecycleHandler)
-                .subscribe { render(it) }
-//        state.saveForConfigChange(lifecycleHandler, name).subscribe()
-        sinks.navigation
-                .bindToDestroy(lifecycleHandler)
-                .subscribe { navigateTo(this, it) }
-        sinks.sharedPrefs
-                .bindToDestroy(lifecycleHandler)
-                .subscribe { persistTo(sharedPrefs, it) }
-    }
-
-    private fun render(state: GridState) {
-        binding.spGridSort.setSelection(sortOptions.indexOf(state.sort))
+        viewModel.activityResults.accept(ActivityResult(requestCode, resultCode, data))
     }
 }

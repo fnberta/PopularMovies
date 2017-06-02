@@ -1,74 +1,58 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
-import android.database.Cursor
-import android.view.View
-import ch.berta.fabio.popularmovies.Maybe
-import ch.berta.fabio.popularmovies.data.services.dtos.Movie
-import ch.berta.fabio.popularmovies.effects.LoaderTarget
-import ch.berta.fabio.popularmovies.effects.NavigationTarget
-import ch.berta.fabio.popularmovies.effects.SharedPrefsWriteTarget
-import ch.berta.fabio.popularmovies.extensions.debug
-import ch.berta.fabio.popularmovies.features.base.FrameworkEvents
+import ch.berta.fabio.popularmovies.NavigationTarget
+import ch.berta.fabio.popularmovies.data.MovieStorage
+import ch.berta.fabio.popularmovies.data.SharedPrefs
+import ch.berta.fabio.popularmovies.features.base.ActivityResult
 import ch.berta.fabio.popularmovies.features.grid.Sort
-import rx.Observable
+import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
+import ch.berta.fabio.popularmovies.log
+import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
 
 data class GridSources(
-        val viewEvents: GridViewEvents,
-        val frameworkEvents: FrameworkEvents,
-        val dataLoadEvents: GridDataLoadEvents
+        val uiEvents: GridUiEvents,
+        val activityResults: Observable<ActivityResult>,
+        val sharedPrefs: SharedPrefs,
+        val movieStorage: MovieStorage
 )
 
-data class GridViewEvents(
-        val sortSelections: Observable<Int>,
-        val movieClicks: Observable<SelectedMovie>,
-        val loadMore: Observable<Unit>,
-        val refreshSwipes: Observable<Unit>
-)
-
-sealed class SelectedMovie {
-    data class Onl(val id: Int, val posterView: View?) : SelectedMovie()
-    data class Fav(val id: Long, val posterView: View?) : SelectedMovie()
-}
-
-data class GridDataLoadEvents(
-        val moviesOnl: Observable<List<Movie>>,
-        val moviesFav: Observable<Maybe<Cursor>>
+data class GridUiEvents(
+        val snackbarShown: PublishRelay<Unit> = PublishRelay.create(),
+        val sortSelections: PublishRelay<Int> = PublishRelay.create(),
+        val movieClicks: PublishRelay<SelectedMovie> = PublishRelay.create(),
+        val loadMore: PublishRelay<Unit> = PublishRelay.create(),
+        val refreshSwipes: PublishRelay<Unit> = PublishRelay.create()
 )
 
 sealed class GridAction {
-    data class MoviesOnlLoad(val movies: List<Movie>) : GridAction()
-    data class MoviesFavLoad(val favResult: Maybe<Cursor>) : GridAction()
+    object SnackbarShown : GridAction()
     data class SortSelection(val sort: Sort, val sortPrev: Sort) : GridAction()
     data class MovieClick(val selectedMovie: SelectedMovie) : GridAction()
-    object LoadMore : GridAction()
+    data class LoadMore(val page: Int) : GridAction()
     object RefreshSwipe : GridAction()
     object FavDelete : GridAction()
 }
 
-data class GridSinks(
-        val state: Observable<GridState>,
-        val navigation: Observable<NavigationTarget>,
-        val loader: Observable<LoaderTarget>,
-        val sharedPrefs: Observable<SharedPrefsWriteTarget>
-)
+sealed class GridSink {
+    data class State(val state: GridState) : GridSink()
+    data class Navigation(val target: NavigationTarget) : GridSink()
+    data class SharedPrefsWrite(val write: Unit) : GridSink()
+}
 
 fun main(
-        initialState: GridState,
         sources: GridSources,
-        sortOptions: List<Sort>,
-        moviePosterHeight: Int
-): GridSinks {
-    val actions = intention(sources, initialState.sort, sortOptions)
-            .debug("action")
-            .share()
-    val navigation = navigate(actions)
-            .share()
-    val state = model(actions, initialState, moviePosterHeight)
-            .share()
-    val loader = loadData(actions, state)
-            .share()
-    val sharedPrefs = persist(actions, sortOptions)
-            .share()
+        sortOptions: List<Sort>
+): Observable<GridSink> = intention(sources, sortOptions)
+        .log("action")
+        .publish {
+            val state = model(sortOptions, it, sources.movieStorage)
+                    .map { GridSink.State(it) }
+            val navigationTargets = navigationTargets(it)
+                    .map { GridSink.Navigation(it) }
+            val sharedPrefWrites = sharedPrefWrites(it, sources.sharedPrefs, sortOptions)
+                    .map { GridSink.SharedPrefsWrite(it) }
 
-    return GridSinks(state, navigation, loader, sharedPrefs)
-}
+            Observable.merge(state, navigationTargets, sharedPrefWrites)
+        }
+        .share()
