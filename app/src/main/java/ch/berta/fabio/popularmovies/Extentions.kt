@@ -1,6 +1,7 @@
 package ch.berta.fabio.popularmovies
 
 import android.animation.ObjectAnimator
+import android.view.View
 import android.widget.TextView
 import io.reactivex.Observable
 import java.text.DateFormat
@@ -22,6 +23,12 @@ fun TextView.expandOrCollapse(maxLinesCollapsed: Int) {
     val anim = ObjectAnimator.ofInt(this, "maxLines", value)
     anim.duration = COLLAPSE_EXPAND_ANIM_TIME
     anim.start()
+}
+
+fun View.setHeight(height: Int) {
+    val params = layoutParams
+    params.height = height
+    layoutParams = params
 }
 
 fun Date.formatLong(): String = DateFormat.getDateInstance(DateFormat.LONG, Locale.getDefault()).format(this)

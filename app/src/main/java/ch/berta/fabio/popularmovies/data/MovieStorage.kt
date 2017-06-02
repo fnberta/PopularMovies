@@ -41,7 +41,7 @@ sealed class LocalDbWriteResult {
 
 data class MovieDetails(
         val isFav: Boolean,
-        val dbId: Int,
+        val id: Int,
         val title: String,
         val overview: String,
         val releaseDate: Date,
@@ -66,16 +66,16 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             .observeOn(AndroidSchedulers.mainThread())
             .toObservable()
 
-    fun getMovieDetails(movieDbId: Int, fromFavList: Boolean): Observable<GetMovieDetailsResult> {
+    fun getMovieDetails(movieId: Int, fromFavList: Boolean): Observable<GetMovieDetailsResult> {
         val movieDetails =
                 if (fromFavList) {
                     Flowable.combineLatest(
-                            movieDb.movieDao().getByDbId(movieDbId),
-                            movieDb.videoDao().getByMovieDbId(movieDbId),
-                            movieDb.reviewDao().getByMovieDbId(movieDbId),
+                            movieDb.movieDao().getById(movieId),
+                            movieDb.videoDao().getByMovieId(movieId),
+                            movieDb.reviewDao().getByMovieId(movieId),
                             Function3<MovieEntity, List<VideoEntity>, List<ReviewEntity>, MovieDetails>
                             { movie, videos, reviews ->
-                                MovieDetails(true, movie.dbId, movie.title, movie.overview, movie.releaseDate,
+                                MovieDetails(true, movie.id, movie.title, movie.overview, movie.releaseDate,
                                         movie.voteAverage, movie.poster, movie.backdrop,
                                         videos.map { Video(it.name, it.key, it.site, it.size, it.type) },
                                         reviews.map { Review(it.author, it.content, it.url) })
@@ -84,12 +84,12 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                             .toObservable()
                 } else {
                     Observable.combineLatest(
-                            theMovieDbService.loadMovieDetails(movieDbId).toObservable(),
-                            movieDb.movieDao().existsByDbId(movieDbId)
+                            theMovieDbService.loadMovieDetails(movieId).toObservable(),
+                            movieDb.movieDao().existsById(movieId)
                                     .map { it == 1 }
                                     .toObservable(),
                             BiFunction<MovieInfo, Boolean, MovieDetails> { details, fav ->
-                                MovieDetails(fav, details.dbId, details.title, details.overview,
+                                MovieDetails(fav, details.id, details.title, details.overview,
                                         details.releaseDate, details.voteAverage, details.poster, details.backdrop,
                                         details.videosPage.videos, details.reviewsPage.reviews)
                             }
@@ -106,19 +106,19 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
     fun saveMovieAsFav(movieDetails: MovieDetails): Observable<LocalDbWriteResult> = Observable.fromCallable {
         movieDb.beginTransaction()
         try {
-            val movieEntity = MovieEntity(movieDetails.dbId, movieDetails.title, movieDetails.releaseDate,
+            val movieEntity = MovieEntity(movieDetails.id, movieDetails.title, movieDetails.releaseDate,
                     movieDetails.voteAverage, movieDetails.overview, movieDetails.poster, movieDetails.backdrop)
-            val movieId = movieDb.movieDao().insert(movieEntity)
+            movieDb.movieDao().insert(movieEntity)
 
             if (movieDetails.videos.isNotEmpty()) {
                 val videoEntities = movieDetails.videos
-                        .map { VideoEntity(movieId, it.name, it.key, it.site, it.size, it.type) }
+                        .map { VideoEntity(movieDetails.id, it.name, it.key, it.site, it.size, it.type) }
                 movieDb.videoDao().insertAll(videoEntities)
             }
 
             if (movieDetails.reviews.isNotEmpty()) {
                 val reviewEntities = movieDetails.reviews
-                        .map { ReviewEntity(movieId, it.author, it.content, it.url) }
+                        .map { ReviewEntity(movieDetails.id, it.author, it.content, it.url) }
                 movieDb.reviewDao().insertAll(reviewEntities)
             }
 
@@ -133,25 +133,24 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             .observeOn(AndroidSchedulers.mainThread())
 
     fun deleteMovieFromFav(movieDetails: MovieDetails): Observable<LocalDbWriteResult> = Observable.fromCallable {
-        movieDb.movieDao().deleteByDbId(movieDetails.dbId)
+        movieDb.movieDao().deleteById(movieDetails.id)
     }
             .map<LocalDbWriteResult> { LocalDbWriteResult.DeleteFromFav(it > 0) }
             .onErrorReturn { LocalDbWriteResult.DeleteFromFav(false) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
-    fun updateFavMovie(movieDbId: Int): Observable<LocalDbWriteResult> = theMovieDbService.loadMovieDetails(movieDbId)
+    fun updateFavMovie(movieId: Int): Observable<LocalDbWriteResult> = theMovieDbService.loadMovieDetails(movieId)
             .toObservable()
             .flatMap {
                 Observable.fromCallable {
                     movieDb.beginTransaction()
                     try {
-                        movieDb.movieDao().deleteByDbId(it.dbId)
-                        movieDb.videoDao().deleteByMovieDbId(it.dbId)
-                        movieDb.reviewDao().deleteByMovieDbId(it.dbId)
-                        val movieEntity = MovieEntity(it.dbId, it.title, it.releaseDate, it.voteAverage, it.overview,
+                        val movieEntity = MovieEntity(it.id, it.title, it.releaseDate, it.voteAverage, it.overview,
                                 it.poster, it.backdrop)
-                        val movieId = movieDb.movieDao().insert(movieEntity)
+                        movieDb.movieDao().update(movieEntity)
+                        movieDb.videoDao().deleteByMovieId(it.id)
+                        movieDb.reviewDao().deleteByMovieId(it.id)
 
                         if (it.videosPage.videos.isNotEmpty()) {
                             val videoEntities = it.videosPage.videos

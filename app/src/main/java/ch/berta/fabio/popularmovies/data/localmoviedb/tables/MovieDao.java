@@ -18,18 +18,18 @@ public interface MovieDao {
     @Query("SELECT * FROM movie")
     Flowable<List<MovieEntity>> getAll();
 
-    @Query("SELECT * FROM movie WHERE db_id = :dbId")
-    Flowable<MovieEntity> getByDbId(int dbId);
+    @Query("SELECT * FROM movie WHERE id = :id")
+    Flowable<MovieEntity> getById(int id);
 
-    @Query("SELECT EXISTS(SELECT id FROM movie WHERE db_id = :dbId)")
-    Flowable<Integer> existsByDbId(int dbId);
+    @Query("SELECT EXISTS(SELECT id FROM movie WHERE id = :id)")
+    Flowable<Integer> existsById(int id);
 
     @Insert(onConflict = REPLACE)
     long insert(MovieEntity movie);
 
-    @Query("DELETE FROM movie WHERE db_id = :dbId")
-    int deleteByDbId(int dbId);
+    @Update
+    void update(MovieEntity movie);
 
-    @Delete
-    void delete(MovieEntity movie);
+    @Query("DELETE FROM movie WHERE id = :id")
+    int deleteById(int id);
 }

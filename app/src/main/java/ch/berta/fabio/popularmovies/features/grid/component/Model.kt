@@ -109,7 +109,7 @@ fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
         is GetOnlMoviesResult.Success -> {
             val movies = result.movies
-                    .map { GridRowMovieViewData(it.dbId, it.title, it.releaseDate.formatLong(), it.poster) }
+                    .map { GridRowMovieViewData(it.id, it.title, it.releaseDate.formatLong(), it.poster) }
             state.copy(
                     movies = movies,
                     empty = movies.isEmpty(),
@@ -127,7 +127,7 @@ fun moviesFavReducer(result: GetFavMoviesResult): GridStateReducer = { state ->
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
         is GetFavMoviesResult.Success -> {
             val movies = result.movies
-                    .map { GridRowMovieViewData(it.dbId, it.title, it.releaseDate.formatLong(), it.poster) }
+                    .map { GridRowMovieViewData(it.id, it.title, it.releaseDate.formatLong(), it.poster) }
             state.copy(
                     movies = movies,
                     empty = movies.isEmpty(),
@@ -145,7 +145,7 @@ fun moviesOnlMoreReducer(result: GetOnlMoviesResult): GridStateReducer = { state
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
         is GetOnlMoviesResult.Success -> {
             val movies = result.movies
-                    .map { GridRowMovieViewData(it.dbId, it.title, it.releaseDate.formatLong(), it.poster) }
+                    .map { GridRowMovieViewData(it.id, it.title, it.releaseDate.formatLong(), it.poster) }
             state.copy(movies = state.movies.minus(state.movies.last()).plus(movies), loadingMore = false)
         }
     }

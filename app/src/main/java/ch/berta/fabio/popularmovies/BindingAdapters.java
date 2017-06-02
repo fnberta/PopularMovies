@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.features.common;
+package ch.berta.fabio.popularmovies;
 
 import android.databinding.BindingAdapter;
 import android.graphics.drawable.Drawable;
@@ -83,12 +83,5 @@ public class BindingAdapters {
                     }
                 })
                 .into(view);
-    }
-
-    @BindingAdapter({"posterHeight"})
-    public static void setPosterHeight(View view, int moviePosterHeight) {
-        final ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-        layoutParams.height = moviePosterHeight;
-        view.setLayoutParams(layoutParams);
     }
 }

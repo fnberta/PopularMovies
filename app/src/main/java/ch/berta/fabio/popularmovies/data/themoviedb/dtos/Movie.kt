@@ -23,8 +23,8 @@ import java.util.*
  * Represents a movie, queried from TheMovieDB.
  */
 data class Movie(
+        val id: Int,
         @SerializedName("backdrop_path") val backdrop: String,
-        @SerializedName("id") val dbId: Int,
         val overview: String,
         @SerializedName("release_date") val releaseDate: Date,
         @SerializedName("poster_path") val poster: String,

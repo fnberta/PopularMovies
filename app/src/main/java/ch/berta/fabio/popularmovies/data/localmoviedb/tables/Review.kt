@@ -15,7 +15,7 @@ import android.arch.persistence.room.ForeignKey.CASCADE
         indices = arrayOf(Index("movie_id"))
 )
 data class ReviewEntity(
-        @ColumnInfo(name = "movie_id") val movieId: Long,
+        @ColumnInfo(name = "movie_id") val movieId: Int,
         val author: String,
         val content: String,
         val url: String,

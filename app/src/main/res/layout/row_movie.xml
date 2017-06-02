@@ -23,21 +23,16 @@
     <data>
 
         <variable
-            name="posterHeight"
-            type="Integer"
-            />
-
-        <variable
             name="viewData"
             type="ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowMovieViewData"
             />
     </data>
 
     <FrameLayout
+        android:id="@+id/fl_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:foreground="?selectableItemBackground"
-        app:posterHeight="@{posterHeight}"
         >
 
         <ImageView

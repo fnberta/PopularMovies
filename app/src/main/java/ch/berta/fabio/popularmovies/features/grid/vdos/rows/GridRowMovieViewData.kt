@@ -24,7 +24,7 @@ import ch.berta.fabio.popularmovies.R
  * Provides a view model for the movie row.
  */
 data class GridRowMovieViewData(
-        val dbId: Int,
+        val id: Int,
         @get:Bindable val title: String,
         @get:Bindable val releaseDate: String,
         @get:Bindable val posterPath: String?,

@@ -10,7 +10,7 @@ fun localMovieDbWrites(
         actions: Observable<DetailsAction>,
         movieStorage: MovieStorage,
         getMovieDetails: Observable<GetMovieDetailsResult>,
-        movieDbId: Int
+        movieId: Int
 ): Observable<LocalDbWriteResult> {
     val favMovie = actions
             .ofType(DetailsAction.FavClick::class.java)
@@ -25,7 +25,7 @@ fun localMovieDbWrites(
 
     val updateFavMovie =actions
             .ofType(DetailsAction.UpdateSwipe::class.java)
-            .flatMap { movieStorage.updateFavMovie(movieDbId) }
+            .flatMap { movieStorage.updateFavMovie(movieId) }
 
     val dbWrites = listOf(favMovie, updateFavMovie)
     return Observable.merge(dbWrites)

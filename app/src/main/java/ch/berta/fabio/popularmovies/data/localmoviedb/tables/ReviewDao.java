@@ -1,6 +1,7 @@
 package ch.berta.fabio.popularmovies.data.localmoviedb.tables;
 
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
@@ -11,15 +12,14 @@ import io.reactivex.Flowable;
 @Dao
 public interface ReviewDao {
 
-    @Query("SELECT r.id, r.movie_id, r.author, r.content, r.url FROM review r " +
-            "LEFT JOIN movie m ON m.id = r.movie_id " +
-            "WHERE db_id = :movieDbId")
-    Flowable<List<ReviewEntity>> getByMovieDbId(int movieDbId);
+    @Query("SELECT id, movie_id, author, content, url FROM review " +
+            "WHERE movie_id = :movieId")
+    Flowable<List<ReviewEntity>> getByMovieId(int movieId);
 
     @Insert
     void insertAll(List<ReviewEntity> reviews);
 
     @Query("DELETE FROM review " +
-            "WHERE movie_id IN (SELECT id FROM movie m WHERE db_id = :movieDbId)")
-    int deleteByMovieDbId(int movieDbId);
+            "WHERE movie_id IN (SELECT id FROM movie m WHERE id = :movieId)")
+    int deleteByMovieId(int movieId);
 }

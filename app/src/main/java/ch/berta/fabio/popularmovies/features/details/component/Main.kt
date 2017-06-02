@@ -37,13 +37,13 @@ sealed class DetailsSink {
 fun main(sources: DetailsSources, detailsArgs: DetailsArgs): Observable<DetailsSink> = intention(sources)
         .log("action")
         .publish {
-            val getMovieDetails = sources.movieStorage.getMovieDetails(detailsArgs.movieDbId, detailsArgs.fromFavList).share()
+            val getMovieDetails = sources.movieStorage.getMovieDetails(detailsArgs.movieId, detailsArgs.fromFavList).share()
 
             val state = model(it, getMovieDetails, sources.localDbWriteResults, detailsArgs)
                     .map { DetailsSink.State(it) }
             val navigationTargets = navigationTargets(it, sources.localDbWriteResults, detailsArgs.fromFavList)
                     .map { DetailsSink.Navigation(it) }
-            val localDbWrites = localMovieDbWrites(it, sources.movieStorage, getMovieDetails, detailsArgs.movieDbId)
+            val localDbWrites = localMovieDbWrites(it, sources.movieStorage, getMovieDetails, detailsArgs.movieId)
                     .map { DetailsSink.LocalDbWrite(it) }
 
             Observable.merge(state, navigationTargets, localDbWrites)

@@ -15,7 +15,7 @@ import android.arch.persistence.room.ForeignKey.CASCADE
         indices = arrayOf(Index("movie_id"))
 )
 data class VideoEntity(
-        @ColumnInfo(name = "movie_id") val movieId: Long,
+        @ColumnInfo(name = "movie_id") val movieId: Int,
         val name: String,
         val key: String,
         val site: String,

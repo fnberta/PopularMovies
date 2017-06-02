@@ -28,10 +28,11 @@ import ch.berta.fabio.popularmovies.features.common.viewholders.DefaultViewHolde
 import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowMovieViewData
 import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowViewData
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModel
+import ch.berta.fabio.popularmovies.setHeight
 
 class MovieViewHolder(binding: RowMovieBinding) : BaseBindingViewHolder<RowMovieBinding>(binding)
 
-data class SelectedMovie(val dbId: Int, val posterView: View?)
+data class SelectedMovie(val movieId: Int, val posterView: View?)
 
 /**
  * Provides the adapter for a movie poster images grid.
@@ -50,7 +51,7 @@ class GridRecyclerAdapter(
                 MovieViewHolder(it).apply {
                     binding.root.setOnClickListener {
                         val rowData = movies[adapterPosition] as GridRowMovieViewData
-                        viewModel.viewEvents.movieClicks.accept(SelectedMovie(rowData.dbId, binding.ivPoster))
+                        viewModel.viewEvents.movieClicks.accept(SelectedMovie(rowData.id, binding.ivPoster))
                     }
                 }
             }
@@ -66,7 +67,7 @@ class GridRecyclerAdapter(
         val viewType = getItemViewType(position)
         if (viewType == R.layout.row_movie) {
             val movieRow = holder as MovieViewHolder
-            movieRow.binding.posterHeight = posterHeight
+            movieRow.binding.flContainer.setHeight(posterHeight)
             movieRow.binding.viewData = movies[position] as GridRowMovieViewData
             movieRow.binding.executePendingBindings()
         }
@@ -90,7 +91,7 @@ class GridRecyclerAdapter(
                     return true
                 }
 
-                return (oldItem as GridRowMovieViewData).dbId == (newItem as GridRowMovieViewData).dbId
+                return (oldItem as GridRowMovieViewData).id == (newItem as GridRowMovieViewData).id
             }
 
             override fun getOldListSize(): Int = movies.size

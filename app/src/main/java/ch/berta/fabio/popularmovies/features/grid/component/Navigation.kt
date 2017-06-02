@@ -26,7 +26,7 @@ fun navigationTargets(actions: Observable<GridAction>): Observable<NavigationTar
                     BiFunction<GridAction.MovieClick, GridAction.SortSelection, SelectedMovieWithSort>
                     { (selectedMovie), (sort) -> SelectedMovieWithSort(selectedMovie, sort) })
             .map {
-                val args = DetailsArgs(it.selectedMovie.dbId, it.sort.option == SortOption.SORT_FAVORITE)
+                val args = DetailsArgs(it.selectedMovie.movieId, it.sort.option == SortOption.SORT_FAVORITE)
                 NavigationTarget.Activity(DetailsActivity::class.java, args, RQ_DETAILS, it.selectedMovie.posterView)
             }
 

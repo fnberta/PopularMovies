@@ -36,7 +36,7 @@ import paperparcel.PaperParcelable
 import javax.inject.Inject
 
 @PaperParcel
-data class DetailsArgs(val movieDbId: Int, val fromFavList: Boolean) : PaperParcelable {
+data class DetailsArgs(val movieId: Int, val fromFavList: Boolean) : PaperParcelable {
     companion object {
         @Suppress("unused")
         @JvmField
