@@ -19,7 +19,7 @@ class DetailsViewModel(
 ) : ViewModel() {
 
     val state: LiveData<DetailsState>
-    val navigation: LiveData<NavigationTarget>
+    val navigation: Observable<NavigationTarget>
 
     val uiEvents = DetailsUiEvents()
     val localDbWriteResults: PublishRelay<LocalDbWriteResult> = PublishRelay.create()
@@ -36,11 +36,9 @@ class DetailsViewModel(
                 .map { it.state }
                 .toFlowable(BackpressureStrategy.LATEST)
         )
-        navigation = LiveDataReactiveStreams.fromPublisher(sinks
+        navigation = sinks
                 .ofType(DetailsSink.Navigation::class.java)
                 .map { it.target }
-                .toFlowable(BackpressureStrategy.LATEST)
-        )
     }
 
     private fun initWriteEffectSubscriptions(

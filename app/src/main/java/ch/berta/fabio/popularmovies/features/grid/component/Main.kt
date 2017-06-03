@@ -39,7 +39,7 @@ sealed class GridAction {
 sealed class GridSink {
     data class State(val state: GridState) : GridSink()
     data class Navigation(val target: NavigationTarget) : GridSink()
-    data class SharedPrefsWrite(val write: Unit) : GridSink()
+    object SharedPrefsWrite : GridSink()
     data class LocalDbWrite(val result: LocalDbWriteResult) : GridSink()
 }
 
@@ -54,7 +54,7 @@ fun main(
             val navigationTargets = navigationTargets(it)
                     .map { GridSink.Navigation(it) }
             val sharedPrefWrites = sharedPrefWrites(it, sources.sharedPrefs, sortOptions)
-                    .map { GridSink.SharedPrefsWrite(it) }
+                    .map { GridSink.SharedPrefsWrite }
             val localDbWrites = localMovieDbWrites(it, sources.movieStorage)
                     .map { GridSink.LocalDbWrite(it) }
 

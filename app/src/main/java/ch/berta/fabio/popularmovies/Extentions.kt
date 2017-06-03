@@ -1,6 +1,8 @@
 package ch.berta.fabio.popularmovies
 
 import android.animation.ObjectAnimator
+import android.arch.lifecycle.Lifecycle
+import android.arch.lifecycle.LifecycleRegistry
 import android.view.View
 import android.widget.TextView
 import io.reactivex.Observable
@@ -9,6 +11,12 @@ import java.util.*
 
 
 fun <T> Observable<T>.log(tag: String): Observable<T> = doOnNext { timber.log.Timber.d("$tag: $it") }
+
+fun <T> Observable<T>.bindTo(lifecycleRegistry: LifecycleRegistry): Observable<T> = compose {
+    it
+            .takeWhile { lifecycleRegistry.currentState != Lifecycle.State.DESTROYED }
+            .filter { lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.STARTED) }
+}
 
 private const val COLLAPSE_EXPAND_ANIM_TIME: Long = 300
 private const val MAX_LINES_EXPANDED = 500

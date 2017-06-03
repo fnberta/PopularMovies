@@ -22,7 +22,7 @@ class GridViewModel(
 ) : ViewModel() {
 
     val state: LiveData<GridState>
-    val navigation: LiveData<NavigationTarget>
+    val navigation: Observable<NavigationTarget>
 
     val uiEvents = GridUiEvents()
     val activityResults: PublishRelay<ActivityResult> = PublishRelay.create()
@@ -40,11 +40,9 @@ class GridViewModel(
                 .map { it.state }
                 .toFlowable(BackpressureStrategy.LATEST)
         )
-        navigation = LiveDataReactiveStreams.fromPublisher(sinks
+        navigation = sinks
                 .ofType(GridSink.Navigation::class.java)
                 .map { it.target }
-                .toFlowable(BackpressureStrategy.LATEST)
-        )
     }
 
     private fun initWriteEffectsSubscriptions(sinks: Observable<GridSink>): CompositeDisposable =

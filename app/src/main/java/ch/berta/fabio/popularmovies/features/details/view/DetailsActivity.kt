@@ -85,9 +85,9 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         viewModel.state.observe(this, Observer<DetailsState> {
             it?.let { render(it) }
         })
-        viewModel.navigation.observe(this, Observer<NavigationTarget> {
-            it?.let { navigateTo(this, it) }
-        })
+        viewModel.navigation
+                .bindTo(lifecycle)
+                .subscribe { navigateTo(this, it) }
 
         return viewModel
     }

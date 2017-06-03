@@ -20,9 +20,9 @@ fun localMovieDbWrites(
                     BiFunction<DetailsAction, GetMovieDetailsResult, GetMovieDetailsResult> { _, result -> result })
             .ofType(GetMovieDetailsResult.Success::class.java)
             .map { it.movieDetails }
-            .flatMap { movieStorage.saveMovieAsFav(it) }
+            .flatMap { if (it.isFav) movieStorage.deleteMovieFromFav(it.id) else movieStorage.saveMovieAsFav(it) }
 
-    val updateFavMovie =actions
+    val updateFavMovie = actions
             .ofType(DetailsAction.UpdateSwipe::class.java)
             .flatMap { movieStorage.updateFavMovie(detailsArgs.movieId) }
 

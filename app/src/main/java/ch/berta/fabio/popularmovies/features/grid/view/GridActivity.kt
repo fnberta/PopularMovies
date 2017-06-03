@@ -24,9 +24,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import ch.berta.fabio.popularmovies.NavigationTarget
 import ch.berta.fabio.popularmovies.PopularMovies
 import ch.berta.fabio.popularmovies.R
+import ch.berta.fabio.popularmovies.bindTo
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.databinding.ActivityMovieGridBinding
@@ -68,22 +68,37 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
     }
-    private lateinit var viewModel: GridViewModel
+    private val viewModel by lazy {
+        val factory = GridViewModelFactory(sharedPrefs, movieStorage, sortOptions)
+        ViewModelProviders.of(this, factory).get(GridViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         component.inject(this)
+        initViewModel()
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = null
-
-        initViewModel()
         setupSortSpinner()
 
         if (savedInstanceState == null) {
             addFragment()
         }
+    }
+
+    private fun initViewModel() {
+        viewModel.state.observe(this, Observer<GridState> {
+            it?.let { render(it) }
+        })
+        viewModel.navigation
+                .bindTo(lifecycle)
+                .subscribe { navigateTo(this, it) }
+    }
+
+    private fun render(state: GridState) {
+        binding.spGridSort.setSelection(sortOptions.indexOf(state.sort))
     }
 
     private fun setupSortSpinner() {
@@ -96,21 +111,6 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) =
                     viewModel.uiEvents.sortSelections.accept(position)
         }
-    }
-
-    private fun initViewModel() {
-        val factory = GridViewModelFactory(sharedPrefs, movieStorage, sortOptions)
-        viewModel = ViewModelProviders.of(this, factory).get(GridViewModel::class.java)
-        viewModel.state.observe(this, Observer<GridState> {
-            it?.let { render(it) }
-        })
-        viewModel.navigation.observe(this, Observer<NavigationTarget> {
-            it?.let { navigateTo(this, it) }
-        })
-    }
-
-    private fun render(state: GridState) {
-        binding.spGridSort.setSelection(sortOptions.indexOf(state.sort))
     }
 
     private fun addFragment() {

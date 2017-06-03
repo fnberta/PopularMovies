@@ -56,6 +56,7 @@ ext {
     retrofitVersion = '2.3.0'
     paperParcelVersion = '2.0.1'
     stethoVersion = '1.5.0'
+    leakCanaryVersion = '1.5.1'
 }
 
 dependencies {
@@ -80,6 +81,10 @@ dependencies {
     compile "android.arch.persistence.room:runtime:$archComponentsVersion"
     compile "android.arch.persistence.room:rxjava2:$archComponentsVersion"
     kapt "android.arch.persistence.room:compiler:$archComponentsVersion"
+
+    debugCompile "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
+    releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
+    testCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
 
     compile "com.google.dagger:dagger:${daggerVersion}"
     kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
