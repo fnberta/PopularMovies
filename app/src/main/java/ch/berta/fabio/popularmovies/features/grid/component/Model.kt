@@ -106,23 +106,23 @@ fun model(
             .skip(1) // skip initial scan emission
 }
 
-fun snackbarReducer(): GridStateReducer = {
+private fun snackbarReducer(): GridStateReducer = {
     it.copy(snackbar = it.snackbar.copy(show = false))
 }
 
-fun sortSelectionsReducer(sortSelection: GridAction.SortSelection): GridStateReducer = {
+private fun sortSelectionsReducer(sortSelection: GridAction.SortSelection): GridStateReducer = {
     it.copy(sort = sortSelection.sort, loading = true)
 }
 
-fun refreshingReducer(): GridStateReducer = {
+private fun refreshingReducer(): GridStateReducer = {
     it.copy(refreshing = true)
 }
 
-fun loadMoreReducer(loadMoreViewData: GridRowLoadMoreViewData): GridStateReducer = {
+private fun loadMoreReducer(loadMoreViewData: GridRowLoadMoreViewData): GridStateReducer = {
     it.copy(loadingMore = true, movies = it.movies.plus(loadMoreViewData))
 }
 
-fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
+private fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
     when (result) {
         is GetOnlMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
@@ -140,7 +140,7 @@ fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
     }
 }
 
-fun moviesFavReducer(result: GetFavMoviesResult): GridStateReducer = { state ->
+private fun moviesFavReducer(result: GetFavMoviesResult): GridStateReducer = { state ->
     when (result) {
         is GetFavMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
@@ -158,7 +158,7 @@ fun moviesFavReducer(result: GetFavMoviesResult): GridStateReducer = { state ->
     }
 }
 
-fun moviesOnlMoreReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
+private fun moviesOnlMoreReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
     when (result) {
         is GetOnlMoviesResult.Failure -> state.copy(loadingMore = false,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
@@ -170,7 +170,7 @@ fun moviesOnlMoreReducer(result: GetOnlMoviesResult): GridStateReducer = { state
     }
 }
 
-fun favDeleteReducer(successful: Boolean): GridStateReducer = {
+private fun favDeleteReducer(successful: Boolean): GridStateReducer = {
     it.copy(snackbar = SnackbarMessage(true,
             if (successful) R.string.snackbar_movie_removed_from_favorites
             else R.string.snackbar_movie_delete_failed))
