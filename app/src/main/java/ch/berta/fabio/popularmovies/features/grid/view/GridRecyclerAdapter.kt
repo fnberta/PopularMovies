@@ -83,15 +83,11 @@ class GridRecyclerAdapter(
                 val oldItem = movies[oldItemPosition]
                 val newItem = newMovies[newItemPosition]
 
-                if (oldItem.viewType != newItem.viewType) {
-                    return false
+                return when {
+                    oldItem.viewType != newItem.viewType -> false
+                    oldItem.viewType == R.layout.row_progress -> true
+                    else -> (oldItem as GridRowMovieViewData).id == (newItem as GridRowMovieViewData).id
                 }
-
-                if (oldItem.viewType == R.layout.row_progress) {
-                    return true
-                }
-
-                return (oldItem as GridRowMovieViewData).id == (newItem as GridRowMovieViewData).id
             }
 
             override fun getOldListSize(): Int = movies.size
