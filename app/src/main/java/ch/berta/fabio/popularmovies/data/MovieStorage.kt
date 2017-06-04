@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.data
 
+import ch.berta.fabio.popularmovies.data.dtos.MovieDetails
 import ch.berta.fabio.popularmovies.data.dtos.Review
 import ch.berta.fabio.popularmovies.data.dtos.Video
 import ch.berta.fabio.popularmovies.data.localmoviedb.MovieDb
@@ -31,7 +32,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 import javax.inject.Inject
 
 sealed class GetFavMoviesResult {
@@ -54,19 +54,6 @@ sealed class LocalDbWriteResult {
     data class DeleteFromFav(val successful: Boolean) : LocalDbWriteResult()
     data class UpdateFav(val successful: Boolean) : LocalDbWriteResult()
 }
-
-data class MovieDetails(
-        val isFav: Boolean,
-        val id: Int,
-        val title: String,
-        val overview: String,
-        val releaseDate: Date,
-        val voteAverage: Double,
-        val poster: String,
-        val backdrop: String,
-        val videos: List<Video>,
-        val reviews: List<Review>
-)
 
 class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService, val movieDb: MovieDb) {
 
@@ -106,7 +93,8 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                             movieDb.reviewDao().getByMovieId(movieId),
                             Function3<MovieEntity, List<VideoEntity>, List<ReviewEntity>, MovieDetails>
                             { movie, videos, reviews ->
-                                MovieDetails(true, movie.id, movie.title, movie.overview, movie.releaseDate,
+                                MovieDetails(true, movie.id, movie.title,
+                                        movie.overview, movie.releaseDate,
                                         movie.voteAverage, movie.poster, movie.backdrop,
                                         videos.map { Video(it.name, it.key, it.site, it.size, it.type) },
                                         reviews.map { Review(it.author, it.content, it.url) })
@@ -115,12 +103,13 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                             .toObservable()
                 } else {
                     Observable.combineLatest(
-                            theMovieDbService.loadMovieDetails(movieId).toObservable(),
+                            theMovieDbService.loadMovieInfo(movieId).toObservable(),
                             movieDb.movieDao().existsById(movieId)
                                     .map { it == 1 }
                                     .toObservable(),
                             BiFunction<MovieInfo, Boolean, MovieDetails> { details, fav ->
-                                MovieDetails(fav, details.id, details.title, details.overview,
+                                MovieDetails(fav, details.id, details.title,
+                                        details.overview,
                                         details.releaseDate, details.voteAverage, details.poster, details.backdrop,
                                         details.videosPage.videos, details.reviewsPage.reviews)
                             }
@@ -171,7 +160,7 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
-    fun updateFavMovie(movieId: Int): Observable<LocalDbWriteResult> = theMovieDbService.loadMovieDetails(movieId)
+    fun updateFavMovie(movieId: Int): Observable<LocalDbWriteResult> = theMovieDbService.loadMovieInfo(movieId)
             .toObservable()
             .flatMap {
                 Observable.fromCallable {

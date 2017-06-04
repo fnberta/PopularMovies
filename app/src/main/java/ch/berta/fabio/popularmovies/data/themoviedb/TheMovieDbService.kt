@@ -52,7 +52,7 @@ interface TheMovieDbService {
      * @return a [Single] with the query
      */
     @GET("movie/{id}")
-    fun loadMovieDetails(
+    fun loadMovieInfo(
             @Path("id") movieId: Int,
             @Query("append_to_response") appendTo: String = "reviews,videos",
             @Query("api_key") apiKey: String = BuildConfig.MOVIE_DB_API_KEY

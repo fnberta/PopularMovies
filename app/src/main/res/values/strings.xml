@@ -37,7 +37,7 @@
     <string name="youtube_thumb_url">https://img.youtube.com/vi/%1$s/default.jpg"</string>
     <string name="no_movie_selected">No movie selected</string>
     <string name="snackbar_movie_no_data">No data for this movie</string>
-    <string name="snackbar_movie_load_reviews_videos_failed">Failed to load reviews and trailers</string>
+    <string name="snackbar_movie_load_details">Failed to load movie details</string>
     <string name="action_share">Share</string>
     <string name="snackbar_movie_insert_failed">Failed to mark movie as favoured</string>
     <string name="snackbar_movie_updated">Updated movie details</string>

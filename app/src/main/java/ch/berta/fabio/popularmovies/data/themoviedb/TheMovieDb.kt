@@ -42,7 +42,7 @@ class TheMovieDb @Inject constructor(private val theMovieDbService: TheMovieDbSe
             .observeOn(AndroidSchedulers.mainThread())
             .toObservable()
 
-    fun movieDetails(movieId: Int): Observable<LoadMovieDetailsResult> = theMovieDbService.loadMovieDetails(movieId)
+    fun movieDetails(movieId: Int): Observable<LoadMovieDetailsResult> = theMovieDbService.loadMovieInfo(movieId)
             .map<LoadMovieDetailsResult> { LoadMovieDetailsResult.Success(it) }
             .onErrorReturn { LoadMovieDetailsResult.Failure }
             .subscribeOn(Schedulers.io())

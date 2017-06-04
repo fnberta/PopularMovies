@@ -25,13 +25,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import ch.berta.fabio.popularmovies.R
+import ch.berta.fabio.popularmovies.calcPosterHeight
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieGridBinding
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.grid.SortOption
 import ch.berta.fabio.popularmovies.features.grid.component.GridState
 import ch.berta.fabio.popularmovies.features.grid.vdos.GridViewData
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModel
-import ch.berta.fabio.popularmovies.calcPosterHeight
 import com.mugen.Mugen
 import com.mugen.MugenCallbacks
 
@@ -58,6 +58,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        binding.srlGrid.setOnRefreshListener { viewModel.uiEvents.refreshSwipes.accept(Unit) }
     }
 
     private fun setupRecyclerView() {
@@ -87,7 +88,6 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        binding.srlGrid.setOnRefreshListener { viewModel.uiEvents.refreshSwipes.accept(Unit) }
         viewModel.state.observe(this, Observer<GridState> {
             it?.let { render(it) }
         })

@@ -51,6 +51,11 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
 
     @Inject
     lateinit var movieStorage: MovieStorage
+    private val viewModel by lazy {
+        val args = intent.getParcelableExtra<DetailsArgs>(KEY_ACTIVITY_ARGS)
+        val factory = DetailsViewModelFactory(movieStorage, args)
+        ViewModelProviders.of(this, factory).get(DetailsViewModel::class.java)
+    }
     private val component: ApplicationComponent by lazy { PopularMovies.getAppComponent(this) }
     private val viewData = DetailsHeaderViewData()
     private val binding by lazy {
@@ -70,7 +75,7 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = null
 
-        val viewModel = initViewModel()
+        initViewModel()
         binding.fabDetailsFavorite.setOnClickListener { viewModel.uiEvents.favClicks.accept(Unit) }
 
         if (savedInstanceState == null) {
@@ -78,18 +83,13 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         }
     }
 
-    private fun initViewModel(): DetailsViewModel {
-        val args = intent.getParcelableExtra<DetailsArgs>(KEY_ACTIVITY_ARGS)
-        val factory = DetailsViewModelFactory(movieStorage, args)
-        val viewModel = ViewModelProviders.of(this, factory).get(DetailsViewModel::class.java)
+    private fun initViewModel() {
         viewModel.state.observe(this, Observer<DetailsState> {
             it?.let { render(it) }
         })
         viewModel.navigation
                 .bindTo(lifecycle)
                 .subscribe { navigateTo(this, it) }
-
-        return viewModel
     }
 
     private fun render(state: DetailsState) {
@@ -98,6 +98,7 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         viewData.favoured = state.favoured
         if (state.snackbar.show) {
             Snackbar.make(binding.container, state.snackbar.message, Snackbar.LENGTH_LONG).show()
+            viewModel.uiEvents.snackbarShown.accept(Unit)
         }
     }
 

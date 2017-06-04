@@ -39,6 +39,7 @@ data class DetailsUiEvents(
 )
 
 sealed class DetailsAction {
+    object SnackbarShown : DetailsAction()
     object UpdateSwipe : DetailsAction()
     object FavClick : DetailsAction()
     data class VideoClick(val videoViewModel: DetailsVideoRowViewData) : DetailsAction()

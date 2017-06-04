@@ -87,7 +87,7 @@ class GridRecyclerAdapter(
                     return false
                 }
 
-                if (oldItem.viewType == R.layout.row_progress && newItem.viewType == R.layout.row_progress) {
+                if (oldItem.viewType == R.layout.row_progress) {
                     return true
                 }
 

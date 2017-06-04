@@ -22,11 +22,6 @@ import android.os.Build
 private const val POSTER_ASPECT_RATIO = 0.675
 
 /**
- * @return whether the running Android version is lollipop and higher or an older version
- */
-fun isRunningLollipopAndHigher(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-
-/**
  * Returns the correct poster height for a given width and number of columns, respecting the
  * default aspect ratio.
 

@@ -38,7 +38,6 @@ fun intention(
             .scan(SortSelectionState(sortOptions[0], sortOptions[0]),
                     { (sort), curr -> SortSelectionState(curr, sort) })
             .skip(1) // skip initial scan emission
-//            .distinctUntilChanged()
 
     val sortSelections = Observable.merge(sortSelectionsSharedPrefs, sortSelectionsSpinner)
             .map { GridAction.SortSelection(it.sort, it.sortPrev) }

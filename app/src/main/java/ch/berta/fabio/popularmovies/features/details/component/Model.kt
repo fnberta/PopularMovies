@@ -42,6 +42,10 @@ fun model(
         localDbWriteResults: Observable<LocalDbWriteResult>,
         detailsArgs: DetailsArgs
 ): Observable<DetailsState> {
+    val snackbarShown = actions
+            .ofType(DetailsAction.SnackbarShown::class.java)
+            .map { snackbarReducer() }
+
     val movieDetails = getMovieDetails
             .map(::movieDetailsReducer)
 
@@ -61,16 +65,20 @@ fun model(
             .map(::updateFavReducer)
 
     val initialState = DetailsState()
-    val reducers = listOf(movieDetails, updateSwipes, favSave, favDelete, updateFav)
+    val reducers = listOf(snackbarShown, movieDetails, updateSwipes, favSave, favDelete, updateFav)
     return Observable.merge(reducers)
             .scan(initialState, { state, reducer -> reducer(state) })
             .skip(1) // skip initial scan emission
 }
 
+fun snackbarReducer(): DetailsStateReducer = {
+    it.copy(snackbar = it.snackbar.copy(show = false))
+}
+
 private fun movieDetailsReducer(result: GetMovieDetailsResult): DetailsStateReducer = {
     when (result) {
-        is GetMovieDetailsResult.Failure -> it.copy(snackbar = SnackbarMessage(false,
-                R.string.snackbar_movie_load_reviews_videos_failed))
+        is GetMovieDetailsResult.Failure -> it.copy(snackbar = SnackbarMessage(true,
+                R.string.snackbar_movie_load_details))
         is GetMovieDetailsResult.Success -> {
             val movieDetails = result.movieDetails
             val details = listOf<DetailsRowViewData>(
