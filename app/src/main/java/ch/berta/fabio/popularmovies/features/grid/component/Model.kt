@@ -124,7 +124,7 @@ fun loadMoreReducer(loadMoreViewData: GridRowLoadMoreViewData): GridStateReducer
 
 fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
     when (result) {
-        is GetOnlMoviesResult.Failure -> state.copy(loading = false, refreshing = false,
+        is GetOnlMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
         is GetOnlMoviesResult.Success -> {
             val movies = result.movies
@@ -142,7 +142,7 @@ fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
 
 fun moviesFavReducer(result: GetFavMoviesResult): GridStateReducer = { state ->
     when (result) {
-        is GetFavMoviesResult.Failure -> state.copy(loading = false, refreshing = false,
+        is GetFavMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
         is GetFavMoviesResult.Success -> {
             val movies = result.movies
