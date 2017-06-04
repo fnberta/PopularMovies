@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@
         <import type="android.view.View"/>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.common.vdos.LoadingEmptyViewData"
             />
     </data>
 
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true"
-            android:visibility="@{viewModel.moviesLoaded ? View.GONE : View.VISIBLE}"
+            android:visibility="@{viewData.loading ? View.VISIBLE : View.GONE}"
             />
 
         <TextView
@@ -53,7 +53,7 @@
             android:drawableTop="@drawable/ic_movie_white_144dp"
             android:gravity="center_horizontal"
             android:text="@string/no_movies"
-            android:visibility="@{viewModel.moviesAvailable ? View.GONE : viewModel.moviesLoaded ? View.VISIBLE : View.GONE}"
+            android:visibility="@{viewData.empty ? View.VISIBLE : View.GONE}"
             />
 
     </FrameLayout>

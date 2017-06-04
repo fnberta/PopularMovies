@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,18 +18,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".features.grid.view.GridActivity"
     >
 
     <data>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieGridViewModel"
-            />
-
-        <variable
-            name="viewModelDetails"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.grid.vdos.GridHeaderViewData"
             />
     </data>
 
@@ -39,7 +35,6 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay"
-        tools:context=".MainActivity"
         >
 
         <android.support.design.widget.AppBarLayout
@@ -56,10 +51,9 @@
                 >
 
                 <Spinner
-                    android:id="@+id/sp_grid_sort"
+                    android:id="@+id/spGridSort"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:onItemSelected="@{viewModel.onSortSelected}"
                     />
 
             </android.support.v7.widget.Toolbar>
@@ -67,8 +61,7 @@
 
         <include
             layout="@layout/activity_movie_grid_content"
-            app:viewModel="@{viewModel}"
-            app:viewModelDetails="@{viewModelDetails}"
+            app:viewData="@{viewData}"
             />
 
     </android.support.design.widget.CoordinatorLayout>

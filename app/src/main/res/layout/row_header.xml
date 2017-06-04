@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@
     <data>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.rows.HeaderRowViewModelImpl"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.common.vdos.HeaderRowViewData"
             />
     </data>
 
@@ -34,6 +34,6 @@
         android:gravity="center_vertical"
         android:paddingEnd="@dimen/key_line_1"
         android:paddingStart="@dimen/key_line_1"
-        android:text="@{viewModel.header}"
+        android:text="@{viewData.header}"
         />
 </layout>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2017 Fabio Berta
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <data>
+
+        <import type="android.view.View"/>
+
+        <variable
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.grid.vdos.GridViewData"
+            />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".presentation.grid.onl.MovieGridOnlFragment"
+        >
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/srlGrid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:enabled="@{viewData.refreshEnabled}"
+            app:colorScheme="@{@intArray/srl_color_scheme}"
+            app:refreshing="@{viewData.refreshing}"
+            >
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rvGrid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                android:visibility="@{viewData.loading ? View.GONE : View.VISIBLE}"
+                />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <include
+            layout="@layout/include_pb_empty"
+            app:viewData="@{viewData}"
+            />
+
+    </FrameLayout>
+</layout>

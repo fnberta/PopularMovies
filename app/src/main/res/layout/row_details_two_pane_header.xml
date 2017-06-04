@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@
     <data>
 
         <variable
-            name="movie"
-            type="ch.berta.fabio.popularmovies.domain.models.Movie"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsTwoPaneHeaderViewData"
             />
     </data>
 
@@ -40,7 +40,7 @@
             android:layout_height="match_parent"
             android:contentDescription="@string/movie_backdrop"
             android:scaleType="centerCrop"
-            app:backdropUrl="@{@string/movie_backdrop_url(movie.backdropPath)}"
+            app:backdropUrl="@{@string/movie_backdrop_url(viewData.backdropPath)}"
             />
 
         <View
@@ -60,7 +60,7 @@
             android:layout_marginStart="@dimen/key_line_1"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="@{movie.title}"
+            android:text="@{viewData.title}"
             />
     </FrameLayout>
 </layout>

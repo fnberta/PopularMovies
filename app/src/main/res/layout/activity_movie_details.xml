@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".features.details.view.DetailsActivity"
     >
 
     <data>
 
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.MovieDetailsViewModel"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.details.vdos.DetailsHeaderViewData"
             />
     </data>
 
@@ -33,7 +34,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context=".presentation.ui.activities.MovieDetailsActivity"
         >
 
         <android.support.design.widget.AppBarLayout
@@ -53,7 +53,7 @@
                 app:expandedTitleMarginEnd="@dimen/key_line_2"
                 app:expandedTitleMarginStart="@dimen/key_line_1"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:title="@{viewModel.movieTitle}"
+                app:title="@{viewData.title}"
                 >
 
                 <FrameLayout
@@ -69,7 +69,7 @@
                         android:layout_height="match_parent"
                         android:contentDescription="@string/movie_backdrop"
                         android:scaleType="centerCrop"
-                        app:backdropUrl="@{@string/movie_backdrop_url(viewModel.movieBackdropPath)}"
+                        app:backdropUrl="@{@string/movie_backdrop_url(viewData.backdropPath)}"
                         />
 
                     <View
@@ -104,8 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/normal_space"
-            android:onClick="@{viewModel.onFabClick}"
-            android:src="@{viewModel.movieFavoured ? @drawable/ic_favorite_white_24dp : @drawable/ic_favorite_outline_white_24dp}"
+            android:src="@{viewData.favoured ? @drawable/ic_favorite_white_24dp : @drawable/ic_favorite_outline_white_24dp}"
             app:layout_anchor="@id/app_bar"
             app:layout_anchorGravity="bottom|end"
             />

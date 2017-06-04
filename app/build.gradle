@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Fabio Berta
+ * Copyright (c) 2017 Fabio Berta
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,20 @@
  */
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+def keysProperties = new Properties()
+keysProperties.load(new FileInputStream(rootProject.file("keys.properties")))
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "ch.berta.fabio.popularmovies"
-        minSdkVersion 18
-        targetSdkVersion 23
+        minSdkVersion 19
+        targetSdkVersion 25
         versionCode 3
         versionName "3.0"
     }
@@ -36,33 +40,72 @@ android {
         }
     }
 
+    buildTypes.each {
+        it.buildConfigField 'String', 'MOVIE_DB_API_KEY', keysProperties['MovieDbApiKey']
+    }
+
     dataBinding {
         enabled = true
     }
 }
 
 ext {
-    supportLibVersion = '23.1.1'
-    retrofitVersion = '2.0.0-beta2'
+    supportLibVersion = '25.3.1'
+    archComponentsVersion = '1.0.0-alpha1'
+    daggerVersion = '2.7'
+    retrofitVersion = '2.3.0'
+    paperParcelVersion = '2.0.1'
+    stethoVersion = '1.5.0'
+    leakCanaryVersion = '1.5.1'
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    kapt 'com.android.databinding:compiler:2.3.0'
 
     compile "com.android.support:support-v4:${supportLibVersion}"
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.android.support:design:${supportLibVersion}"
     compile "com.android.support:recyclerview-v7:${supportLibVersion}"
     compile "com.android.support:support-annotations:${supportLibVersion}"
-    compile 'com.google.dagger:dagger:2.0.2'
-    apt 'com.google.dagger:dagger-compiler:2.0.2'
+    compile "android.arch.lifecycle:runtime:$archComponentsVersion"
+    compile "android.arch.lifecycle:extensions:$archComponentsVersion"
+    compile "android.arch.lifecycle:reactivestreams:$archComponentsVersion"
+    kapt "android.arch.lifecycle:compiler:$archComponentsVersion"
+    compile "android.arch.persistence.room:runtime:$archComponentsVersion"
+    compile "android.arch.persistence.room:rxjava2:$archComponentsVersion"
+    kapt "android.arch.persistence.room:compiler:$archComponentsVersion"
+
+    debugCompile "com.squareup.leakcanary:leakcanary-android:${leakCanaryVersion}"
+    releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
+    testCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakCanaryVersion}"
+
+    compile "com.google.dagger:dagger:${daggerVersion}"
+    kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
     provided 'javax.annotation:jsr250-api:1.0'
-    compile 'com.github.bumptech.glide:glide:3.6.1'
-    compile "com.squareup.retrofit:retrofit:${retrofitVersion}"
-    compile "com.squareup.retrofit:converter-gson:${retrofitVersion}"
-    compile "com.squareup.retrofit:adapter-rxjava:${retrofitVersion}"
+
+    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'com.jakewharton.rxrelay2:rxrelay:2.0.0'
+
+    compile "com.facebook.stetho:stetho:${stethoVersion}"
+    compile "com.facebook.stetho:stetho-okhttp3:${stethoVersion}"
+    compile 'com.jakewharton.timber:timber:4.5.1'
+
+    compile "nz.bradcampbell:paperparcel:${paperParcelVersion}"
+    compile "nz.bradcampbell:paperparcel-kotlin:${paperParcelVersion}"
+    kapt "nz.bradcampbell:paperparcel-compiler:${paperParcelVersion}"
+
+    compile "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+    compile "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+    compile "com.squareup.retrofit2:adapter-rxjava2:${retrofitVersion}"
+
+    compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.vinaysshenoy:mugen:1.0.2'
-    compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'io.reactivex:rxjava:1.1.0'
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
   ~ limitations under the License.
   -->
 <manifest
-    package="ch.berta.fabio.popularmovies"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    package="ch.berta.fabio.popularmovies"
     >
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -31,7 +31,7 @@
         >
 
         <activity
-            android:name=".presentation.ui.activities.MovieGridActivity"
+            android:name=".features.grid.view.GridActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme"
             >
@@ -42,18 +42,12 @@
         </activity>
 
         <activity
-            android:name=".presentation.ui.activities.MovieDetailsActivity"
+            android:name=".features.details.view.DetailsActivity"
             android:label="@string/title_activity_movie_details"
-            android:parentActivityName=".presentation.ui.activities.MovieGridActivity"
+            android:parentActivityName=".features.grid.view.GridActivity"
             android:theme="@style/AppTheme.DrawStatusBar.Explode"
             />
 
-        <provider
-            android:name=".data.storage.MovieProvider"
-            android:authorities="ch.berta.fabio.popularmovies"
-            android:enabled="true"
-            android:exported="false"
-            />
     </application>
 
 </manifest>

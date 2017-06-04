@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -22,19 +22,17 @@
 
     <data>
 
-        <import type="ch.berta.fabio.popularmovies.utils.Utils"/>
-
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.rows.MovieRowViewModelImpl"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowMovieViewData"
             />
     </data>
 
     <FrameLayout
+        android:id="@+id/fl_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:foreground="?selectableItemBackground"
-        app:moviePosterHeight="@{viewModel.moviePosterHeight}"
         >
 
         <ImageView
@@ -44,7 +42,7 @@
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
-            app:imageUrl="@{@string/movie_poster_url(viewModel.moviePosterPath)}"
+            app:imageUrl="@{@string/movie_poster_url(viewData.posterPath)}"
             />
 
         <View
@@ -70,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{viewModel.movieTitle}"
+                android:text="@{viewData.title}"
                 />
 
             <TextView
@@ -80,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="@{Utils.formatDateShort(viewModel.movieReleaseDate)}"
+                android:text="@{viewData.releaseDate}"
                 />
 
         </LinearLayout>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2015 Fabio Berta
+  ~ Copyright (c) 2017 Fabio Berta
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,24 +17,22 @@
 
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     >
 
     <data>
 
         <import type="android.view.View"/>
 
-        <import type="ch.berta.fabio.popularmovies.utils.Utils"/>
-
         <variable
-            name="viewModel"
-            type="ch.berta.fabio.popularmovies.presentation.viewmodels.rows.DetailsInfoRowViewModelImpl"
+            name="viewData"
+            type="ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsInfoRowViewData"
             />
 
         <variable
-            name="detailsListener"
-            type="ch.berta.fabio.popularmovies.presentation.ui.adapters.listeners.MovieDetailsInteractionListener"
+            name="posterListener"
+            type="ch.berta.fabio.popularmovies.features.details.view.PosterLoadListener"
             />
     </data>
 
@@ -53,10 +51,10 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
-            android:transitionName="@{viewModel.transitionEnabled ? @string/shared_transition_details_poster : null}"
-            app:imageUrl="@{@string/movie_poster_url(viewModel.moviePosterPath)}"
+            android:transitionName="@{viewData.transitionEnabled ? @string/shared_transition_details_poster : null}"
+            app:poster="@{@string/movie_poster_url(viewData.posterPath)}"
+            app:listener="@{posterListener}"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
-            app:loadedListener="@{detailsListener}"
             tools:layout_height="222dp"
             />
 
@@ -84,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
-                android:text="@{Utils.formatDateLong(viewModel.movieDate)}"
+                android:text="@{viewData.date}"
                 />
 
             <TextView
@@ -95,7 +93,7 @@
                 android:layout_marginBottom="@dimen/normal_space"
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
-                android:text="@{@string/details_rating(viewModel.movieRating)}"
+                android:text="@{@string/details_rating(viewData.rating)}"
                 />
 
             <TextView
@@ -106,9 +104,8 @@
                 android:layout_marginEnd="@dimen/key_line_1"
                 android:layout_marginStart="@dimen/key_line_1"
                 android:ellipsize="end"
-                android:maxLines="@integer/plot_max_lines"
-                android:onClick="@{viewModel.onPlotClick}"
-                android:text="@{viewModel.moviePlot}"
+                android:maxLines="@integer/plot_max_lines_collapsed"
+                android:text="@{viewData.plot}"
                 />
 
         </LinearLayout>
