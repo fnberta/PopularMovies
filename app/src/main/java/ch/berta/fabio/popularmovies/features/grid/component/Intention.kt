@@ -30,7 +30,7 @@ fun intention(
             .map { GridAction.SnackbarShown }
 
     val sortSelectionsSharedPrefs = sources.sharedPrefs
-            .sortPos()
+            .getSortPos()
             .map { SortSelectionState(sortOptions[it], sortOptions[0]) }
     val sortSelectionsSpinner = sources.uiEvents.sortSelections
             .skip(1) // skip initial position 0 emission (spinner always emit this)
