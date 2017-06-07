@@ -55,31 +55,33 @@ const val KEY_ACTIVITY_ARGS = "KEY_ACTIVITY_ARGS"
 
 fun navigateTo(activity: FragmentActivity, target: NavigationTarget) {
     when (target) {
-        is NavigationTarget.Finish -> {
-            if (target.result != null) {
-                if (target.data != null) {
-                    val resultData = Intent().apply {
-                        target.data.forEach { key, value -> putExtra(key, value) }
-                    }
-                    activity.setResult(target.result, resultData)
-                } else {
-                    activity.setResult(target.result)
-                }
-            }
-            ActivityCompat.finishAfterTransition(activity)
-        }
+        is NavigationTarget.Finish -> navigateFinish(activity, target)
         is NavigationTarget.Action -> navigateAction(activity, target)
         is NavigationTarget.Activity -> navigateActivity(activity, target)
         is NavigationTarget.Fragment -> navigateFragment(activity, target)
     }
 }
 
-fun navigateAction(activity: FragmentActivity, target: NavigationTarget.Action) {
+private fun navigateFinish(activity: FragmentActivity, target: NavigationTarget.Finish) {
+    if (target.result != null) {
+        if (target.data != null) {
+            val resultData = Intent().apply {
+                target.data.forEach { key, value -> putExtra(key, value) }
+            }
+            activity.setResult(target.result, resultData)
+        } else {
+            activity.setResult(target.result)
+        }
+    }
+    ActivityCompat.finishAfterTransition(activity)
+}
+
+private fun navigateAction(activity: FragmentActivity, target: NavigationTarget.Action) {
     val intent = Intent(target.action, target.uri)
     activity.startActivity(intent)
 }
 
-fun navigateActivity(activity: FragmentActivity, target: NavigationTarget.Activity) {
+private fun navigateActivity(activity: FragmentActivity, target: NavigationTarget.Activity) {
     val intent = Intent(activity, target.name).apply {
         putExtra(KEY_ACTIVITY_ARGS, target.args)
     }
@@ -99,15 +101,15 @@ fun navigateActivity(activity: FragmentActivity, target: NavigationTarget.Activi
     }
 }
 
-fun navigateFragment(
+private fun navigateFragment(
         activity: FragmentActivity,
         target: NavigationTarget.Fragment,
         container: Int = R.id.container_main
 ) {
     activity.supportFragmentManager.beginTransaction().apply {
-        when {
-            target.action == FragmentAction.ADD -> add(container, target.instance)
-            target.action == FragmentAction.REPLACE -> replace(container, target.instance)
+        when (target.action) {
+            FragmentAction.ADD -> add(container, target.instance)
+            FragmentAction.REPLACE -> replace(container, target.instance)
         }
 
         if (target.transition > -1) {

@@ -25,7 +25,6 @@ import io.reactivex.Observable
 import java.text.DateFormat
 import java.util.*
 
-
 fun <T> Observable<T>.log(tag: String): Observable<T> = doOnNext { timber.log.Timber.d("$tag: $it") }
 
 fun <T> Observable<T>.bindTo(lifecycleRegistry: LifecycleRegistry): Observable<T> = compose {
