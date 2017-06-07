@@ -41,23 +41,22 @@ typealias DetailsStateReducer = (DetailsState) -> DetailsState
 fun model(
         actions: Observable<DetailsAction>,
         movieStorage: MovieStorage,
-        getMovieDetails: Observable<GetMovieDetailsResult>,
         detailsArgs: DetailsArgs
 ): Observable<DetailsState> {
     val snackbarShown = actions
             .ofType(DetailsAction.SnackbarShown::class.java)
             .map { snackbarReducer() }
 
-    val args = Observable.just(detailsArgs)
-            .map(::argsReducer)
-
-    val movieDetails = getMovieDetails
-            .map(::movieDetailsReducer)
-
     val updateSwipes = actions
             .ofType(DetailsAction.UpdateSwipe::class.java)
             .map { updateSwipeReducer() }
 
+    val args = Observable.just(detailsArgs)
+            .map(::argsReducer)
+
+    val getMovieDetails = movieStorage.getMovieDetails(detailsArgs.id, detailsArgs.fromFavList).share()
+    val movieDetails = getMovieDetails
+            .map(::movieDetailsReducer)
     val favClicksWithDetails = actions
             .ofType(DetailsAction.FavClick::class.java)
             .filter { !detailsArgs.fromFavList }
@@ -70,12 +69,10 @@ fun model(
             .filter { !it.isFav }
             .flatMap { movieStorage.saveMovieAsFav(it) }
             .map(::saveAsFavReducer)
-
     val favDelete = favClicksWithDetails
             .filter { it.isFav && !detailsArgs.fromFavList }
             .flatMap { movieStorage.deleteMovieFromFav(it.id) }
             .map(::deleteFromFavReducer)
-
     val favUpdate = actions
             .ofType(DetailsAction.UpdateSwipe::class.java)
             .flatMap {
@@ -83,7 +80,6 @@ fun model(
                         .map(::updateFavReducer)
                         .startWith(updateSwipeReducer())
             }
-
 
     val initialState = DetailsState()
     val reducers = listOf(snackbarShown, args, movieDetails, updateSwipes, favSave, favDelete, favUpdate)

@@ -51,10 +51,7 @@ sealed class DetailsSink {
 fun main(sources: DetailsSources, detailsArgs: DetailsArgs): Observable<DetailsSink> = intention(sources)
         .log("action")
         .publish {
-            val getMovieDetails = sources.movieStorage.getMovieDetails(detailsArgs.id, detailsArgs.fromFavList)
-                    .share()
-
-            val state = model(it, sources.movieStorage, getMovieDetails, detailsArgs)
+            val state = model(it, sources.movieStorage, detailsArgs)
                     .map { DetailsSink.State(it) }
             val navigationTargets = navigationTargets(it, detailsArgs)
                     .map { DetailsSink.Navigation(it) }
