@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.features.details.viewmodels
+package ch.berta.fabio.popularmovies.features.details.viewmodel
 
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider

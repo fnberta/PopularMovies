@@ -30,7 +30,7 @@ import ch.berta.fabio.popularmovies.features.details.view.viewholders.InfoViewHo
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.ReviewViewHolder
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.TwoPaneHeaderViewHolder
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.VideoViewHolder
-import ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsViewModel
+import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModel
 
 class DetailsRecyclerAdapter(
         val viewModel: DetailsViewModel,

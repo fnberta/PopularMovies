@@ -29,8 +29,8 @@ import ch.berta.fabio.popularmovies.features.base.BaseActivity
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.details.component.DetailsState
 import ch.berta.fabio.popularmovies.features.details.vdos.DetailsHeaderViewData
-import ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsViewModel
-import ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsViewModelFactory
+import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModel
+import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModelFactory
 import paperparcel.PaperParcel
 import paperparcel.PaperParcelable
 import javax.inject.Inject

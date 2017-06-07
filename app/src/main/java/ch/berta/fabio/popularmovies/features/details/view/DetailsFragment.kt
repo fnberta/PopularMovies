@@ -29,7 +29,7 @@ import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsBinding
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.details.component.DetailsState
 import ch.berta.fabio.popularmovies.features.details.vdos.DetailsViewData
-import ch.berta.fabio.popularmovies.features.details.viewmodels.DetailsViewModel
+import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModel
 
 
 const val KEY_ARGS = "KEY_ARGS"

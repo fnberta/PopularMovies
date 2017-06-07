@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.features.details.viewmodels
+package ch.berta.fabio.popularmovies.features.details.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.ViewModel
 import ch.berta.fabio.popularmovies.NavigationTarget
-import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.features.details.component.*
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
-import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
-import io.reactivex.disposables.CompositeDisposable
 
 class DetailsViewModel(
         movieStorage: MovieStorage,
