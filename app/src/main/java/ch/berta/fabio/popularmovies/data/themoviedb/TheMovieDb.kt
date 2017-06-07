@@ -16,7 +16,7 @@
 
 package ch.berta.fabio.popularmovies.data.themoviedb
 
-import ch.berta.fabio.popularmovies.data.themoviedb.dtos.Movie
+import ch.berta.fabio.popularmovies.data.dtos.Movie
 import ch.berta.fabio.popularmovies.data.themoviedb.dtos.MovieInfo
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers

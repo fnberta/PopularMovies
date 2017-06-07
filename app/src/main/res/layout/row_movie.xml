@@ -42,7 +42,7 @@
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
-            app:imageUrl="@{@string/movie_poster_url(viewData.posterPath)}"
+            app:imageUrl="@{@string/movie_poster_url(viewData.poster)}"
             />
 
         <View

@@ -27,10 +27,10 @@ class DetailsHeaderViewData : BaseObservable() {
             notifyPropertyChanged(BR.title)
         }
 
-    @get:Bindable var backdropPath: String? = ""
+    @get:Bindable var backdrop: String? = ""
         set(value) {
             field = value
-            notifyPropertyChanged(BR.backdropPath)
+            notifyPropertyChanged(BR.backdrop)
         }
 
     @get:Bindable var favoured: Boolean = false

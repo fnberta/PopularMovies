@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.data.themoviedb.dtos
+package ch.berta.fabio.popularmovies.features.details.vdos.rows
 
-import com.google.gson.annotations.SerializedName
-import java.util.*
+import ch.berta.fabio.popularmovies.R
 
-/**
- * Represents a movie, queried from TheMovieDB.
- */
-data class Movie(
-        val id: Int,
-        @SerializedName("backdrop_path") val backdrop: String,
-        val overview: String,
-        @SerializedName("release_date") val releaseDate: Date,
-        @SerializedName("poster_path") val poster: String,
-        val title: String,
-        @SerializedName("vote_average") val voteAverage: Double
-)
+data class DetailsLoadingRowViewData(override val viewType: Int = R.layout.row_progress) : DetailsRowViewData

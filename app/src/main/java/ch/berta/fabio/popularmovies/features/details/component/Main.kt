@@ -17,7 +17,6 @@
 package ch.berta.fabio.popularmovies.features.details.component
 
 import ch.berta.fabio.popularmovies.NavigationTarget
-import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
@@ -27,8 +26,7 @@ import io.reactivex.Observable
 
 data class DetailsSources(
         val uiEvents: DetailsUiEvents,
-        val movieStorage: MovieStorage,
-        val localDbWriteResults: Observable<LocalDbWriteResult>
+        val movieStorage: MovieStorage
 )
 
 data class DetailsUiEvents(
@@ -48,21 +46,19 @@ sealed class DetailsAction {
 sealed class DetailsSink {
     data class State(val state: DetailsState) : DetailsSink()
     data class Navigation(val target: NavigationTarget) : DetailsSink()
-    data class LocalDbWrite(val result: LocalDbWriteResult) : DetailsSink()
 }
 
 fun main(sources: DetailsSources, detailsArgs: DetailsArgs): Observable<DetailsSink> = intention(sources)
         .log("action")
         .publish {
-            val getMovieDetails = sources.movieStorage.getMovieDetails(detailsArgs.movieId, detailsArgs.fromFavList).share()
+            val getMovieDetails = sources.movieStorage.getMovieDetails(detailsArgs.id, detailsArgs.fromFavList)
+                    .share()
 
-            val state = model(it, getMovieDetails, sources.localDbWriteResults, detailsArgs)
+            val state = model(it, sources.movieStorage, getMovieDetails, detailsArgs)
                     .map { DetailsSink.State(it) }
             val navigationTargets = navigationTargets(it, detailsArgs)
                     .map { DetailsSink.Navigation(it) }
-            val localDbWrites = localMovieDbWrites(it, sources.movieStorage, getMovieDetails, detailsArgs)
-                    .map { DetailsSink.LocalDbWrite(it) }
 
-            Observable.merge(state, navigationTargets, localDbWrites)
+            Observable.merge(state, navigationTargets)
         }
         .share()

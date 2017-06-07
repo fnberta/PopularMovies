@@ -21,7 +21,7 @@ import android.databinding.Bindable
 import ch.berta.fabio.popularmovies.R
 
 data class DetailsInfoRowViewData(
-        @get:Bindable val posterPath: String?,
+        @get:Bindable val poster: String?,
         @get:Bindable val date: String?,
         @get:Bindable val rating: Double?,
         @get:Bindable val plot: String?,

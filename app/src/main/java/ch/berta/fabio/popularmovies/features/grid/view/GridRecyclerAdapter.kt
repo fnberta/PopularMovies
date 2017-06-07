@@ -32,7 +32,16 @@ import ch.berta.fabio.popularmovies.setHeight
 
 class MovieViewHolder(binding: RowMovieBinding) : BaseBindingViewHolder<RowMovieBinding>(binding)
 
-data class SelectedMovie(val movieId: Int, val posterView: View?)
+data class SelectedMovie(
+        val id: Int,
+        val title: String,
+        val releaseDate: String,
+        val overview: String,
+        val voteAverage: Double,
+        val poster: String?,
+        val backdrop: String?,
+        val posterView: View?
+)
 
 /**
  * Provides the adapter for a movie poster images grid.
@@ -51,7 +60,17 @@ class GridRecyclerAdapter(
                 MovieViewHolder(it).apply {
                     binding.root.setOnClickListener {
                         val rowData = movies[adapterPosition] as GridRowMovieViewData
-                        viewModel.uiEvents.movieClicks.accept(SelectedMovie(rowData.id, binding.ivPoster))
+                        val selectedMovie = SelectedMovie(
+                                rowData.id,
+                                rowData.title,
+                                rowData.releaseDate,
+                                rowData.overview,
+                                rowData.voteAverage,
+                                rowData.poster,
+                                rowData.backdrop,
+                                binding.ivPoster
+                        )
+                        viewModel.uiEvents.movieClicks.accept(selectedMovie)
                     }
                 }
             }

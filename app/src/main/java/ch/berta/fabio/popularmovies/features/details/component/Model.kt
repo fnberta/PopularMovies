@@ -19,16 +19,18 @@ package ch.berta.fabio.popularmovies.features.details.component
 import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.data.GetMovieDetailsResult
 import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
+import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.features.common.SnackbarMessage
 import ch.berta.fabio.popularmovies.features.details.vdos.rows.*
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
 import ch.berta.fabio.popularmovies.formatLong
 import io.reactivex.Observable
+import io.reactivex.functions.BiFunction
 
 data class DetailsState(
         val updating: Boolean = false,
         val title: String = "",
-        val backdropPath: String = "",
+        val backdrop: String? = "",
         val favoured: Boolean = false,
         val details: List<DetailsRowViewData> = emptyList(),
         val snackbar: SnackbarMessage = SnackbarMessage(false)
@@ -38,13 +40,16 @@ typealias DetailsStateReducer = (DetailsState) -> DetailsState
 
 fun model(
         actions: Observable<DetailsAction>,
+        movieStorage: MovieStorage,
         getMovieDetails: Observable<GetMovieDetailsResult>,
-        localDbWriteResults: Observable<LocalDbWriteResult>,
         detailsArgs: DetailsArgs
 ): Observable<DetailsState> {
     val snackbarShown = actions
             .ofType(DetailsAction.SnackbarShown::class.java)
             .map { snackbarReducer() }
+
+    val args = Observable.just(detailsArgs)
+            .map(::argsReducer)
 
     val movieDetails = getMovieDetails
             .map(::movieDetailsReducer)
@@ -53,42 +58,75 @@ fun model(
             .ofType(DetailsAction.UpdateSwipe::class.java)
             .map { updateSwipeReducer() }
 
-    val favSave = localDbWriteResults
-            .ofType(LocalDbWriteResult.SaveAsFav::class.java)
-            .map(::saveAsFavReducer)
-    val favDelete = localDbWriteResults
-            .ofType(LocalDbWriteResult.DeleteFromFav::class.java)
+    val favClicksWithDetails = actions
+            .ofType(DetailsAction.FavClick::class.java)
             .filter { !detailsArgs.fromFavList }
+            .withLatestFrom(getMovieDetails,
+                    BiFunction<DetailsAction, GetMovieDetailsResult, GetMovieDetailsResult> { _, result -> result })
+            .ofType(GetMovieDetailsResult.Success::class.java)
+            .map { it.movieDetails }
+
+    val favSave = favClicksWithDetails
+            .filter { !it.isFav }
+            .flatMap { movieStorage.saveMovieAsFav(it) }
+            .map(::saveAsFavReducer)
+
+    val favDelete = favClicksWithDetails
+            .filter { it.isFav && !detailsArgs.fromFavList }
+            .flatMap { movieStorage.deleteMovieFromFav(it.id) }
             .map(::deleteFromFavReducer)
-    val updateFav = localDbWriteResults
-            .ofType(LocalDbWriteResult.UpdateFav::class.java)
-            .map(::updateFavReducer)
+
+    val favUpdate = actions
+            .ofType(DetailsAction.UpdateSwipe::class.java)
+            .flatMap {
+                movieStorage.updateFavMovie(detailsArgs.id)
+                        .map(::updateFavReducer)
+                        .startWith(updateSwipeReducer())
+            }
+
 
     val initialState = DetailsState()
-    val reducers = listOf(snackbarShown, movieDetails, updateSwipes, favSave, favDelete, updateFav)
+    val reducers = listOf(snackbarShown, args, movieDetails, updateSwipes, favSave, favDelete, favUpdate)
     return Observable.merge(reducers)
             .scan(initialState, { state, reducer -> reducer(state) })
             .skip(1) // skip initial scan emission
 }
 
-fun snackbarReducer(): DetailsStateReducer = {
+private fun snackbarReducer(): DetailsStateReducer = {
     it.copy(snackbar = it.snackbar.copy(show = false))
+}
+
+private fun argsReducer(args: DetailsArgs): DetailsStateReducer = {
+    val details = listOf(
+            DetailsInfoRowViewData(
+                    args.poster,
+                    args.releaseDate,
+                    args.voteAverage,
+                    args.overview
+            ),
+            DetailsLoadingRowViewData()
+    )
+    it.copy(
+            title = args.title,
+            backdrop = args.backdrop,
+            details = details
+    )
 }
 
 private fun movieDetailsReducer(result: GetMovieDetailsResult): DetailsStateReducer = {
     when (result) {
-        is GetMovieDetailsResult.Failure -> it.copy(snackbar = SnackbarMessage(true,
-                R.string.snackbar_movie_load_details))
+        is GetMovieDetailsResult.Failure -> it.copy(
+                snackbar = SnackbarMessage(true, R.string.snackbar_movie_load_reviews_videos_failed),
+                details = it.details.minus(it.details.last())
+        )
         is GetMovieDetailsResult.Success -> {
             val movieDetails = result.movieDetails
-            val details = listOf<DetailsRowViewData>(
-                    DetailsInfoRowViewData(
-                            movieDetails.poster,
-                            movieDetails.releaseDate.formatLong(),
-                            movieDetails.voteAverage,
-                            movieDetails.overview
-                    )
-            ).let {
+            val details = listOf<DetailsRowViewData>(DetailsInfoRowViewData(
+                    movieDetails.poster,
+                    movieDetails.releaseDate.formatLong(),
+                    movieDetails.voteAverage,
+                    movieDetails.overview
+            )).let {
                 if (movieDetails.videos.isNotEmpty()) {
                     it
                             .plus(DetailsHeaderRowViewData(R.string.header_trailers))
@@ -107,7 +145,7 @@ private fun movieDetailsReducer(result: GetMovieDetailsResult): DetailsStateRedu
             }
             it.copy(
                     title = movieDetails.title,
-                    backdropPath = movieDetails.backdrop,
+                    backdrop = movieDetails.backdrop,
                     details = details,
                     favoured = movieDetails.isFav
 

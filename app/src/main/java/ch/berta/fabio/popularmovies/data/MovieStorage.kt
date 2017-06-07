@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.data
 
+import ch.berta.fabio.popularmovies.data.dtos.Movie
 import ch.berta.fabio.popularmovies.data.dtos.MovieDetails
 import ch.berta.fabio.popularmovies.data.dtos.Review
 import ch.berta.fabio.popularmovies.data.dtos.Video
@@ -24,7 +25,6 @@ import ch.berta.fabio.popularmovies.data.localmoviedb.tables.MovieEntity
 import ch.berta.fabio.popularmovies.data.localmoviedb.tables.ReviewEntity
 import ch.berta.fabio.popularmovies.data.localmoviedb.tables.VideoEntity
 import ch.berta.fabio.popularmovies.data.themoviedb.TheMovieDbService
-import ch.berta.fabio.popularmovies.data.themoviedb.dtos.Movie
 import ch.berta.fabio.popularmovies.data.themoviedb.dtos.MovieInfo
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -34,14 +34,9 @@ import io.reactivex.functions.Function3
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-sealed class GetFavMoviesResult {
-    data class Success(val movies: List<MovieEntity>) : GetFavMoviesResult()
-    object Failure : GetFavMoviesResult()
-}
-
-sealed class GetOnlMoviesResult {
-    data class Success(val movies: List<Movie>) : GetOnlMoviesResult()
-    object Failure : GetOnlMoviesResult()
+sealed class GetMoviesResult {
+    data class Success(val movies: List<Movie>) : GetMoviesResult()
+    object Failure : GetMoviesResult()
 }
 
 sealed class GetMovieDetailsResult {
@@ -57,32 +52,33 @@ sealed class LocalDbWriteResult {
 
 class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService, val movieDb: MovieDb) {
 
-    fun getFavMovies(): Observable<GetFavMoviesResult> = movieDb.movieDao().getAll()
-            .map<GetFavMoviesResult> { GetFavMoviesResult.Success(it) }
-            .onErrorReturn { GetFavMoviesResult.Failure }
-            .toObservable()
-
-    fun getOnlMovies(page: Int, sort: String, fetchAllPages: Boolean): Observable<GetOnlMoviesResult> {
-        val movies =
-                if (fetchAllPages) {
-                    Observable.range(1, page)
-                            .concatMap {
-                                theMovieDbService.loadMovies(it, sort)
-                                        .flatMapObservable { Observable.fromIterable(it.movies) }
-                            }
-                            .toList()
-
-                } else {
-                    theMovieDbService.loadMovies(page, sort)
-                            .map { it.movies }
+    fun getFavMovies(): Observable<GetMoviesResult> = movieDb.movieDao().getAll().toObservable()
+            .map {
+                it.map {
+                    Movie(it.id, it.backdrop, it.overview, it.releaseDate, it.poster, it.title, it.voteAverage)
                 }
-        return movies
-                .map<GetOnlMoviesResult> { GetOnlMoviesResult.Success(it) }
-                .onErrorReturn { GetOnlMoviesResult.Failure }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .toObservable()
-    }
+            }
+            .map<GetMoviesResult> { GetMoviesResult.Success(it) }
+            .onErrorReturn { GetMoviesResult.Failure }
+
+    fun getOnlMovies(page: Int, sort: String, fetchAllPages: Boolean): Observable<GetMoviesResult> =
+            if (fetchAllPages) {
+                Observable.range(1, page)
+                        .concatMap {
+                            theMovieDbService.loadMovies(it, sort)
+                                    .flatMapObservable { Observable.fromIterable(it.movies) }
+                        }
+                        .toList()
+
+            } else {
+                theMovieDbService.loadMovies(page, sort)
+                        .map { it.movies }
+            }
+                    .toObservable()
+                    .map<GetMoviesResult> { GetMoviesResult.Success(it) }
+                    .onErrorReturn { GetMoviesResult.Failure }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
 
     fun getMovieDetails(movieId: Int, fromFavList: Boolean): Observable<GetMovieDetailsResult> {
         val movieDetails =
@@ -123,7 +119,7 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun saveMovieAsFav(movieDetails: MovieDetails): Observable<LocalDbWriteResult> = Observable.fromCallable {
+    fun saveMovieAsFav(movieDetails: MovieDetails): Observable<LocalDbWriteResult.SaveAsFav> = Observable.fromCallable {
         movieDb.beginTransaction()
         try {
             val movieEntity = MovieEntity(movieDetails.id, movieDetails.title, movieDetails.releaseDate,
@@ -147,20 +143,21 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             movieDb.endTransaction()
         }
     }
-            .map<LocalDbWriteResult> { LocalDbWriteResult.SaveAsFav(true) }
+            .map { LocalDbWriteResult.SaveAsFav(true) }
             .onErrorReturn { LocalDbWriteResult.SaveAsFav(false) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
-    fun deleteMovieFromFav(movieId: Int): Observable<LocalDbWriteResult> = Observable.fromCallable {
+    fun deleteMovieFromFav(movieId: Int): Observable<LocalDbWriteResult.DeleteFromFav> = Observable.fromCallable {
         movieDb.movieDao().deleteById(movieId)
     }
-            .map<LocalDbWriteResult> { LocalDbWriteResult.DeleteFromFav(it > 0) }
+            .map { LocalDbWriteResult.DeleteFromFav(it > 0) }
             .onErrorReturn { LocalDbWriteResult.DeleteFromFav(false) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
-    fun updateFavMovie(movieId: Int): Observable<LocalDbWriteResult> = theMovieDbService.loadMovieInfo(movieId)
+    fun updateFavMovie(movieId: Int): Observable<LocalDbWriteResult.UpdateFav> = theMovieDbService.loadMovieInfo(
+            movieId)
             .toObservable()
             .flatMap {
                 Observable.fromCallable {
@@ -190,8 +187,8 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                     }
                 }
             }
-            .map<LocalDbWriteResult> { LocalDbWriteResult.UpdateFav(true) }
-            .onErrorReturn { LocalDbWriteResult.DeleteFromFav(false) }
+            .map { LocalDbWriteResult.UpdateFav(true) }
+            .onErrorReturn { LocalDbWriteResult.UpdateFav(false) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 }

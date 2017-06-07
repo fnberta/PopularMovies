@@ -50,7 +50,7 @@ fun intention(
     val refreshSwipes = sources.uiEvents.refreshSwipes
             .map { GridAction.RefreshSwipe }
 
-    val favDelete = sources.activityResults
+    val favDelete = sources.uiEvents.activityResults
             .filter { it.requestCode == RQ_DETAILS && it.resultCode == RS_REMOVE_FROM_FAV && it.data != null }
             .map { GridAction.FavDelete(it.data!!.getIntExtra(RS_DATA_MOVIE_ID, -1)) }
 

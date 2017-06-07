@@ -36,7 +36,16 @@ import paperparcel.PaperParcelable
 import javax.inject.Inject
 
 @PaperParcel
-data class DetailsArgs(val movieId: Int, val fromFavList: Boolean) : PaperParcelable {
+data class DetailsArgs(
+        val id: Int,
+        val title: String,
+        val releaseDate: String,
+        val overview: String,
+        val voteAverage: Double,
+        val poster: String?,
+        val backdrop: String?,
+        val fromFavList: Boolean
+) : PaperParcelable {
     companion object {
         @Suppress("unused")
         @JvmField
@@ -94,7 +103,7 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
 
     private fun render(state: DetailsState) {
         viewData.title = state.title
-        viewData.backdropPath = state.backdropPath
+        viewData.backdrop = state.backdrop
         viewData.favoured = state.favoured
         if (state.snackbar.show) {
             Snackbar.make(binding.container, state.snackbar.message, Snackbar.LENGTH_LONG).show()

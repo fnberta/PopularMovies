@@ -19,7 +19,6 @@ package ch.berta.fabio.popularmovies.features.details.component
 import android.content.Intent
 import android.net.Uri
 import ch.berta.fabio.popularmovies.NavigationTarget
-import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
 import io.reactivex.Observable
 
@@ -34,7 +33,7 @@ fun navigationTargets(
     val favDelete = actions
             .ofType(DetailsAction.FavClick::class.java)
             .filter { detailsArgs.fromFavList }
-            .map { NavigationTarget.Finish(RS_REMOVE_FROM_FAV, mapOf(RS_DATA_MOVIE_ID to detailsArgs.movieId)) }
+            .map { NavigationTarget.Finish(RS_REMOVE_FROM_FAV, mapOf(RS_DATA_MOVIE_ID to detailsArgs.id)) }
     val videoClick = actions
             .ofType(DetailsAction.VideoClick::class.java)
             .map { "$YOUTUBE_BASE_URL${it.videoViewModel.key}" }

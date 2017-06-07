@@ -38,15 +38,11 @@ class DetailsViewModel(
     val navigation: Observable<NavigationTarget>
 
     val uiEvents = DetailsUiEvents()
-    val localDbWriteResults: PublishRelay<LocalDbWriteResult> = PublishRelay.create()
-
-    val disposable: CompositeDisposable
 
     init {
-        val sources = DetailsSources(uiEvents, movieStorage, localDbWriteResults)
+        val sources = DetailsSources(uiEvents, movieStorage)
         val sinks = main(sources, detailsArgs)
 
-        disposable = initWriteEffectSubscriptions(sinks, localDbWriteResults)
         state = LiveDataReactiveStreams.fromPublisher(sinks
                 .ofType(DetailsSink.State::class.java)
                 .map { it.state }
@@ -55,20 +51,5 @@ class DetailsViewModel(
         navigation = sinks
                 .ofType(DetailsSink.Navigation::class.java)
                 .map { it.target }
-    }
-
-    private fun initWriteEffectSubscriptions(
-            sinks: Observable<DetailsSink>,
-            localDbWriteResults: PublishRelay<LocalDbWriteResult>
-    ): CompositeDisposable = CompositeDisposable().apply {
-        add(sinks.ofType(DetailsSink.LocalDbWrite::class.java)
-                .map { it.result }
-                .subscribe(localDbWriteResults))
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-
-        disposable.clear()
     }
 }

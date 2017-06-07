@@ -123,6 +123,6 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        viewModel.activityResults.accept(ActivityResult(requestCode, resultCode, data))
+        viewModel.uiEvents.activityResults.accept(ActivityResult(requestCode, resultCode, data))
     }
 }

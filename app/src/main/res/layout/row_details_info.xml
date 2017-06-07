@@ -52,7 +52,7 @@
             android:contentDescription="@string/movie_poster"
             android:scaleType="fitXY"
             android:transitionName="@{viewData.transitionEnabled ? @string/shared_transition_details_poster : null}"
-            app:poster="@{@string/movie_poster_url(viewData.posterPath)}"
+            app:poster="@{@string/movie_poster_url(viewData.poster)}"
             app:listener="@{posterListener}"
             app:fallback="@{@drawable/ic_movie_white_72dp}"
             tools:layout_height="222dp"

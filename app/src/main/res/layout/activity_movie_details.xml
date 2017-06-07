@@ -69,7 +69,7 @@
                         android:layout_height="match_parent"
                         android:contentDescription="@string/movie_backdrop"
                         android:scaleType="centerCrop"
-                        app:backdropUrl="@{@string/movie_backdrop_url(viewData.backdropPath)}"
+                        app:backdropUrl="@{@string/movie_backdrop_url(viewData.backdrop)}"
                         />
 
                     <View

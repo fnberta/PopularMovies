@@ -17,10 +17,10 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.data.GetFavMoviesResult
-import ch.berta.fabio.popularmovies.data.GetOnlMoviesResult
+import ch.berta.fabio.popularmovies.data.GetMoviesResult
 import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.data.MovieStorage
+import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.features.common.SnackbarMessage
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.SortOption
@@ -49,7 +49,7 @@ fun model(
         sortOptions: List<Sort>,
         actions: Observable<GridAction>,
         movieStorage: MovieStorage,
-        localDbWriteResults: Observable<LocalDbWriteResult>
+        sharedPrefs: SharedPrefs
 ): Observable<GridState> {
     val snackbars = actions
             .ofType(GridAction.SnackbarShown::class.java)
@@ -62,12 +62,17 @@ fun model(
             .switchMap {
                 if (it.sort.option == SortOption.SORT_FAVORITE) {
                     movieStorage.getFavMovies()
-                            .map(::moviesFavReducer)
+                            .map(::moviesReducer)
                 } else {
                     movieStorage.getOnlMovies(1, it.sort.value, false)
-                            .map(::moviesOnlReducer)
+                            .map(::moviesReducer)
                 }.startWith(sortSelectionsReducer(it))
             }
+
+    val sortSelectionSave = sortSelectionActions
+            .map { sortOptions.indexOf(it.sort) }
+            .flatMap { sharedPrefs.writeSortPos(it) }
+            .map { sortSelectionSaveReducer() }
 
     val pageWithSort = actions
             .ofType(GridAction.LoadMore::class.java)
@@ -89,18 +94,17 @@ fun model(
             { _, pageWithSort -> pageWithSort })
             .switchMap {
                 movieStorage.getOnlMovies(it.page, it.sort.value, true)
-                        .map(::moviesOnlReducer)
+                        .map(::moviesReducer)
                         .startWith(refreshingReducer())
             }
 
-
-    val favDelete = localDbWriteResults
-            .ofType(LocalDbWriteResult.DeleteFromFav::class.java)
-            .map { it.successful }
+    val favDelete = actions
+            .ofType(GridAction.FavDelete::class.java)
+            .flatMap { movieStorage.deleteMovieFromFav(it.movieId) }
             .map(::favDeleteReducer)
 
     val initialState = GridState(sortOptions[0])
-    val reducer = listOf(snackbars, sortSelections, loadMore, refreshSwipes, favDelete)
+    val reducer = listOf(snackbars, sortSelections, sortSelectionSave, loadMore, refreshSwipes, favDelete)
     return Observable.merge(reducer)
             .scan(initialState, { state, reducer -> reducer(state) })
             .skip(1) // skip initial scan emission
@@ -114,21 +118,24 @@ private fun sortSelectionsReducer(sortSelection: GridAction.SortSelection): Grid
     it.copy(sort = sortSelection.sort, loading = true)
 }
 
-private fun refreshingReducer(): GridStateReducer = {
-    it.copy(refreshing = true)
-}
+private fun sortSelectionSaveReducer(): GridStateReducer = { it }
+
+private fun refreshingReducer(): GridStateReducer = { it.copy(refreshing = true) }
 
 private fun loadMoreReducer(loadMoreViewData: GridRowLoadMoreViewData): GridStateReducer = {
     it.copy(loadingMore = true, movies = it.movies.plus(loadMoreViewData))
 }
 
-private fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
+private fun moviesReducer(result: GetMoviesResult): GridStateReducer = { state ->
     when (result) {
-        is GetOnlMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
+        is GetMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
-        is GetOnlMoviesResult.Success -> {
+        is GetMoviesResult.Success -> {
             val movies = result.movies
-                    .map { GridRowMovieViewData(it.id, it.title, it.releaseDate.formatLong(), it.poster) }
+                    .map {
+                        GridRowMovieViewData(it.id, it.title, it.overview, it.releaseDate.formatLong(), it.voteAverage,
+                                it.poster, it.backdrop)
+                    }
             state.copy(
                     movies = movies,
                     empty = movies.isEmpty(),
@@ -140,38 +147,23 @@ private fun moviesOnlReducer(result: GetOnlMoviesResult): GridStateReducer = { s
     }
 }
 
-private fun moviesFavReducer(result: GetFavMoviesResult): GridStateReducer = { state ->
+private fun moviesOnlMoreReducer(result: GetMoviesResult): GridStateReducer = { state ->
     when (result) {
-        is GetFavMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
+        is GetMoviesResult.Failure -> state.copy(loadingMore = false,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
-        is GetFavMoviesResult.Success -> {
+        is GetMoviesResult.Success -> {
             val movies = result.movies
-                    .map { GridRowMovieViewData(it.id, it.title, it.releaseDate.formatLong(), it.poster) }
-            state.copy(
-                    movies = movies,
-                    empty = movies.isEmpty(),
-                    loading = false,
-                    loadingMore = false,
-                    refreshing = false
-            )
-        }
-    }
-}
-
-private fun moviesOnlMoreReducer(result: GetOnlMoviesResult): GridStateReducer = { state ->
-    when (result) {
-        is GetOnlMoviesResult.Failure -> state.copy(loadingMore = false,
-                snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
-        is GetOnlMoviesResult.Success -> {
-            val movies = result.movies
-                    .map { GridRowMovieViewData(it.id, it.title, it.releaseDate.formatLong(), it.poster) }
+                    .map {
+                        GridRowMovieViewData(it.id, it.title, it.overview, it.releaseDate.formatLong(), it.voteAverage,
+                                it.poster, it.backdrop)
+                    }
             state.copy(movies = state.movies.minus(state.movies.last()).plus(movies), loadingMore = false)
         }
     }
 }
 
-private fun favDeleteReducer(successful: Boolean): GridStateReducer = {
+private fun favDeleteReducer(result: LocalDbWriteResult.DeleteFromFav): GridStateReducer = {
     it.copy(snackbar = SnackbarMessage(true,
-            if (successful) R.string.snackbar_movie_removed_from_favorites
+            if (result.successful) R.string.snackbar_movie_removed_from_favorites
             else R.string.snackbar_movie_delete_failed))
 }

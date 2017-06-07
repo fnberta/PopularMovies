@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.features.grid.vdos.rows
+package ch.berta.fabio.popularmovies.data.dtos
 
-import android.databinding.BaseObservable
-import android.databinding.Bindable
-import ch.berta.fabio.popularmovies.R
+import com.google.gson.annotations.SerializedName
+import java.util.*
 
 /**
- * Provides a view model for the movie row.
+ * Represents a movie, queried from TheMovieDB.
  */
-data class GridRowMovieViewData(
+data class Movie(
         val id: Int,
-        @get:Bindable val title: String,
+        @SerializedName("backdrop_path") val backdrop: String,
         val overview: String,
-        @get:Bindable val releaseDate: String,
-        val voteAverage: Double,
-        @get:Bindable val poster: String?,
-        val backdrop: String?,
-        override val viewType: Int = R.layout.row_movie
-) : BaseObservable(), GridRowViewData
+        @SerializedName("release_date") val releaseDate: Date,
+        @SerializedName("poster_path") val poster: String,
+        val title: String,
+        @SerializedName("vote_average") val voteAverage: Double
+)

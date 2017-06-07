@@ -17,7 +17,6 @@
 package ch.berta.fabio.popularmovies.features.grid.component
 
 import ch.berta.fabio.popularmovies.NavigationTarget
-import ch.berta.fabio.popularmovies.data.LocalDbWriteResult
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.features.base.ActivityResult
@@ -29,13 +28,12 @@ import io.reactivex.Observable
 
 data class GridSources(
         val uiEvents: GridUiEvents,
-        val activityResults: Observable<ActivityResult>,
         val sharedPrefs: SharedPrefs,
-        val movieStorage: MovieStorage,
-        val localDbWriteResults: Observable<LocalDbWriteResult>
+        val movieStorage: MovieStorage
 )
 
 data class GridUiEvents(
+        val activityResults: PublishRelay<ActivityResult> = PublishRelay.create(),
         val snackbarShown: PublishRelay<Unit> = PublishRelay.create(),
         val sortSelections: PublishRelay<Int> = PublishRelay.create(),
         val movieClicks: PublishRelay<SelectedMovie> = PublishRelay.create(),
@@ -55,8 +53,6 @@ sealed class GridAction {
 sealed class GridSink {
     data class State(val state: GridState) : GridSink()
     data class Navigation(val target: NavigationTarget) : GridSink()
-    object SharedPrefsWrite : GridSink()
-    data class LocalDbWrite(val result: LocalDbWriteResult) : GridSink()
 }
 
 fun main(
@@ -65,15 +61,11 @@ fun main(
 ): Observable<GridSink> = intention(sources, sortOptions)
         .log("action")
         .publish {
-            val state = model(sortOptions, it, sources.movieStorage, sources.localDbWriteResults)
+            val state = model(sortOptions, it, sources.movieStorage, sources.sharedPrefs)
                     .map { GridSink.State(it) }
             val navigationTargets = navigationTargets(it)
                     .map { GridSink.Navigation(it) }
-            val sharedPrefWrites = sharedPrefWrites(it, sources.sharedPrefs, sortOptions)
-                    .map { GridSink.SharedPrefsWrite }
-            val localDbWrites = localMovieDbWrites(it, sources.movieStorage)
-                    .map { GridSink.LocalDbWrite(it) }
 
-            Observable.merge(state, navigationTargets, sharedPrefWrites, localDbWrites)
+            Observable.merge(state, navigationTargets)
         }
         .share()

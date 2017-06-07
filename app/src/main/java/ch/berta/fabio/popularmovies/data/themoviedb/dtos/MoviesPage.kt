@@ -16,6 +16,7 @@
 
 package ch.berta.fabio.popularmovies.data.themoviedb.dtos
 
+import ch.berta.fabio.popularmovies.data.dtos.Movie
 import com.google.gson.annotations.SerializedName
 
 /**

@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.databinding.*
 import ch.berta.fabio.popularmovies.features.common.vdos.HeaderRowViewData
+import ch.berta.fabio.popularmovies.features.common.viewholders.DefaultViewHolder
 import ch.berta.fabio.popularmovies.features.common.viewholders.HeaderViewHolder
 import ch.berta.fabio.popularmovies.features.details.vdos.rows.*
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.InfoViewHolder
@@ -65,6 +66,9 @@ class DetailsRecyclerAdapter(
                         }
                     }
                 }
+            R.layout.row_progress -> inflater.inflate(R.layout.row_progress, parent, false).let {
+                DefaultViewHolder(it)
+            }
             else -> throw RuntimeException("there is no type that matches the type $viewType, " +
                     "make sure you are using types correctly")
         }
