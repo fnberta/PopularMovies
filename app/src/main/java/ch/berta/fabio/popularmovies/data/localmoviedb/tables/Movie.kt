@@ -22,7 +22,7 @@ import android.arch.persistence.room.PrimaryKey
 import java.util.*
 
 @Entity(tableName = "movie")
-open class MovieEntity(
+data class MovieEntity(
         @PrimaryKey val id: Int,
         val title: String,
         @ColumnInfo(name = "release_date") val releaseDate: Date,
