@@ -40,7 +40,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
     private val viewModel: GridViewModel by lazy { ViewModelProviders.of(activity).get(GridViewModel::class.java) }
     private val viewData = GridViewData()
     private val recyclerAdapter: GridRecyclerAdapter by lazy {
-        GridRecyclerAdapter(calcPosterHeight(resources), viewModel)
+        GridRecyclerAdapter(calcPosterHeight(resources), viewModel.uiEvents.movieClicks)
     }
     lateinit private var binding: FragmentMovieGridBinding
 

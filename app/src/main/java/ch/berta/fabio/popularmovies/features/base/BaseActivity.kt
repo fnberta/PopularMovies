@@ -25,7 +25,7 @@ data class ActivityResult(val requestCode: Int, val resultCode: Int, val data: I
 
 abstract class BaseActivity : AppCompatActivity(), LifecycleRegistryOwner {
 
-    private val mRegistry = LifecycleRegistry(this)
+    private val registry = LifecycleRegistry(this)
 
-    override fun getLifecycle(): LifecycleRegistry = mRegistry
+    override fun getLifecycle(): LifecycleRegistry = registry
 }

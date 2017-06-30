@@ -30,10 +30,10 @@ import ch.berta.fabio.popularmovies.features.details.view.viewholders.InfoViewHo
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.ReviewViewHolder
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.TwoPaneHeaderViewHolder
 import ch.berta.fabio.popularmovies.features.details.view.viewholders.VideoViewHolder
-import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModel
+import com.jakewharton.rxrelay2.PublishRelay
 
 class DetailsRecyclerAdapter(
-        val viewModel: DetailsViewModel,
+        val videoClicks: PublishRelay<DetailsVideoRowViewData>,
         val posterListener: PosterLoadListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -62,7 +62,7 @@ class DetailsRecyclerAdapter(
                     VideoViewHolder(it).apply {
                         binding.root.setOnClickListener {
                             val viewData = movieDetails[adapterPosition] as DetailsVideoRowViewData
-                            viewModel.uiEvents.videoClicks.accept(viewData)
+                            videoClicks.accept(viewData)
                         }
                     }
                 }

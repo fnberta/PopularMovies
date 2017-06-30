@@ -27,8 +27,8 @@ import ch.berta.fabio.popularmovies.features.base.BaseBindingViewHolder
 import ch.berta.fabio.popularmovies.features.common.viewholders.DefaultViewHolder
 import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowMovieViewData
 import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowViewData
-import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModel
 import ch.berta.fabio.popularmovies.setHeight
+import com.jakewharton.rxrelay2.PublishRelay
 
 class MovieViewHolder(binding: RowMovieBinding) : BaseBindingViewHolder<RowMovieBinding>(binding)
 
@@ -48,7 +48,7 @@ data class SelectedMovie(
  */
 class GridRecyclerAdapter(
         val posterHeight: Int,
-        val viewModel: GridViewModel
+        val movieClicks: PublishRelay<SelectedMovie>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val movies = mutableListOf<GridRowViewData>()
@@ -70,7 +70,7 @@ class GridRecyclerAdapter(
                                 rowData.backdrop,
                                 binding.ivPoster
                         )
-                        viewModel.uiEvents.movieClicks.accept(selectedMovie)
+                        movieClicks.accept(selectedMovie)
                     }
                 }
             }

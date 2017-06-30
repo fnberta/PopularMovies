@@ -39,7 +39,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
 
     private val viewModel by lazy { ViewModelProviders.of(activity).get(DetailsViewModel::class.java) }
     private val viewData = DetailsViewData()
-    private val recyclerAdapter by lazy { DetailsRecyclerAdapter(viewModel, this) }
+    private val recyclerAdapter by lazy { DetailsRecyclerAdapter(viewModel.uiEvents.videoClicks, this) }
     private lateinit var binding: FragmentMovieDetailsBinding
 
     companion object {
