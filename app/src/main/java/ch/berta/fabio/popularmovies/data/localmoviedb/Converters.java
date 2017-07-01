@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.data.localmoviedb
+package ch.berta.fabio.popularmovies.data.localmoviedb;
 
-import android.arch.persistence.room.TypeConverter
-import java.util.*
+import android.arch.persistence.room.TypeConverter;
 
-class Converters {
+import java.util.Date;
+
+public class Converters {
     @TypeConverter
-    fun fromTimestamp(value: Long?): Date = Date(value ?: 0L)
+    public static Date fromTimestamp(Long value) {
+        if (value == null) {
+            return new Date(0L);
+        }
+
+        return new Date(value);
+    }
 
     @TypeConverter
-    fun dateToTimestamp(date: Date?): Long = date?.time ?: 0L
+    public static Long toTimestamp(Date date) {
+        if (date == null) {
+            return 0L;
+        }
+
+        return date.getTime();
+    }
 }

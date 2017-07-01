@@ -50,8 +50,8 @@ android {
 }
 
 ext {
-    supportLibVersion = '25.3.1'
-    archComponentsVersion = '1.0.0-alpha1'
+    supportLibVersion = '25.4.0'
+    archComponentsVersion = '1.0.0-alpha3'
     daggerVersion = '2.7'
     retrofitVersion = '2.3.0'
     paperParcelVersion = '2.0.1'
@@ -90,7 +90,7 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:${daggerVersion}"
     provided 'javax.annotation:jsr250-api:1.0'
 
-    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
+    compile 'io.reactivex.rxjava2:rxjava:2.1.1'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     compile 'com.jakewharton.rxrelay2:rxrelay:2.0.0'
 
@@ -106,6 +106,6 @@ dependencies {
     compile "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
     compile "com.squareup.retrofit2:adapter-rxjava2:${retrofitVersion}"
 
-    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.github.bumptech.glide:glide:3.8.0'
     compile 'com.vinaysshenoy:mugen:1.0.2'
 }

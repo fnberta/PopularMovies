@@ -16,9 +16,9 @@
 
 package ch.berta.fabio.popularmovies.data.localmoviedb.tables
 
-import android.arch.persistence.room.ColumnInfo
-import android.arch.persistence.room.Entity
-import android.arch.persistence.room.PrimaryKey
+import android.arch.persistence.room.*
+import android.arch.persistence.room.OnConflictStrategy.REPLACE
+import io.reactivex.Flowable
 import java.util.*
 
 @Entity(tableName = "movie")
@@ -31,3 +31,25 @@ data class MovieEntity(
         val poster: String,
         val backdrop: String
 )
+
+@Dao
+interface MovieDao {
+
+    @Query("SELECT * FROM movie")
+    fun getAll(): Flowable<List<MovieEntity>>
+
+    @Query("SELECT * FROM movie WHERE id = :id")
+    fun getById(id: Int): Flowable<MovieEntity>
+
+    @Query("SELECT EXISTS(SELECT id FROM movie WHERE id = :id)")
+    fun existsById(id: Int): Flowable<Int>
+
+    @Insert(onConflict = REPLACE)
+    fun insert(movie: MovieEntity): Long
+
+    @Update
+    fun update(movie: MovieEntity)
+
+    @Query("DELETE FROM movie WHERE id = :id")
+    fun deleteById(id: Int): Int
+}
