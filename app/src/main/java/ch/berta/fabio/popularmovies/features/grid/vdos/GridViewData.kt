@@ -23,7 +23,7 @@ import ch.berta.fabio.popularmovies.features.common.vdos.LoadingEmptyViewData
 
 class GridViewData : BaseObservable(), LoadingEmptyViewData {
     @get:Bindable
-    override var loading: Boolean = true
+    override var loading: Boolean = false
         set(value) {
             field = value
             notifyPropertyChanged(BR.loading)

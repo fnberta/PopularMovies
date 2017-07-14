@@ -29,8 +29,7 @@ fun intention(
     val snackbarShown = sources.uiEvents.snackbarShown
             .map { GridAction.SnackbarShown }
 
-    val sortSelectionsSharedPrefs = sources.sharedPrefs
-            .getSortPos()
+    val sortSelectionsSharedPrefs = sources.sharedPrefs.getSortPos()
             .map { SortSelectionState(sortOptions[it], sortOptions[0]) }
     val sortSelectionsSpinner = sources.uiEvents.sortSelections
             .skip(1) // skip initial position 0 emission (spinner always emit this)
@@ -40,19 +39,28 @@ fun intention(
             .skip(1) // skip initial scan emission
 
     val sortSelections = Observable.merge(sortSelectionsSharedPrefs, sortSelectionsSpinner)
+            .distinctUntilChanged()
             .map { GridAction.SortSelection(it.sort, it.sortPrev) }
     val movieClicks = sources.uiEvents.movieClicks
             .map { GridAction.MovieClick(it) }
     val loadMore = sources.uiEvents.loadMore
             .map { 1 }
-            .scan(1) { acc, curr -> acc + curr }
+            .scan(1, { acc, curr -> acc + curr })
+            .skip(1) // skip initial scan emission
             .map { GridAction.LoadMore(it) }
     val refreshSwipes = sources.uiEvents.refreshSwipes
             .map { GridAction.RefreshSwipe }
 
     val favDelete = sources.uiEvents.activityResults
-            .filter { it.requestCode == RQ_DETAILS && it.resultCode == RS_REMOVE_FROM_FAV && it.data != null }
-            .map { GridAction.FavDelete(it.data!!.getIntExtra(RS_DATA_MOVIE_ID, -1)) }
+            .filter { it.requestCode == RQ_DETAILS && it.resultCode == RS_REMOVE_FROM_FAV }
+            .map {
+                when {
+                    it.data == null -> -1
+                    else -> it.data.getIntExtra(RS_DATA_MOVIE_ID, -1)
+                }
+            }
+            .filter { it > -1 }
+            .map { GridAction.FavDelete(it) }
 
     val actions = listOf(snackbarShown, sortSelections, movieClicks, loadMore, refreshSwipes, favDelete)
     return Observable.merge(actions)

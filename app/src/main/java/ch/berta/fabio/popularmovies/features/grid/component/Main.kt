@@ -57,11 +57,12 @@ sealed class GridSink {
 
 fun main(
         sources: GridSources,
+        initialState: GridState,
         sortOptions: List<Sort>
 ): Observable<GridSink> = intention(sources, sortOptions)
         .log("action")
         .publish {
-            val state = model(sortOptions, it, sources.movieStorage, sources.sharedPrefs)
+            val state = model(sortOptions, initialState, it, sources.movieStorage, sources.sharedPrefs)
                     .map { GridSink.State(it) }
             val navigationTargets = navigationTargets(it)
                     .map { GridSink.Navigation(it) }

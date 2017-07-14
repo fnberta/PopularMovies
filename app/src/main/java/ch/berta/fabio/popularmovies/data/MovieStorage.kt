@@ -26,6 +26,7 @@ import ch.berta.fabio.popularmovies.data.localmoviedb.tables.ReviewEntity
 import ch.berta.fabio.popularmovies.data.localmoviedb.tables.VideoEntity
 import ch.berta.fabio.popularmovies.data.themoviedb.TheMovieDbService
 import ch.berta.fabio.popularmovies.data.themoviedb.dtos.MovieInfo
+import ch.berta.fabio.popularmovies.features.grid.SortOption
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -61,17 +62,17 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             .map<GetMoviesResult> { GetMoviesResult.Success(it) }
             .onErrorReturn { GetMoviesResult.Failure }
 
-    fun getOnlMovies(page: Int, sort: String, fetchAllPages: Boolean): Observable<GetMoviesResult> =
+    fun getOnlMovies(page: Int, sortOption: SortOption, fetchAllPages: Boolean): Observable<GetMoviesResult> =
             if (fetchAllPages) {
                 Observable.range(1, page)
                         .concatMap {
-                            theMovieDbService.loadMovies(it, sort)
+                            theMovieDbService.loadMovies(it, sortOption.value)
                                     .flatMapObservable { Observable.fromIterable(it.movies) }
                         }
                         .toList()
 
             } else {
-                theMovieDbService.loadMovies(page, sort)
+                theMovieDbService.loadMovies(page, sortOption.value)
                         .map { it.movies }
             }
                     .toObservable()

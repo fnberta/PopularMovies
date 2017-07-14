@@ -86,6 +86,7 @@ fun model(
     return Observable.merge(reducers)
             .scan(initialState, { state, reducer -> reducer(state) })
             .skip(1) // skip initial scan emission
+            .distinctUntilChanged()
 }
 
 private fun snackbarReducer(): DetailsStateReducer = {

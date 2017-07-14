@@ -35,7 +35,7 @@ data class GridState(
         val sort: Sort,
         val movies: List<GridRowViewData> = emptyList(),
         val empty: Boolean = false,
-        val loading: Boolean = true,
+        val loading: Boolean = false,
         val loadingMore: Boolean = false,
         val refreshing: Boolean = false,
         val snackbar: SnackbarMessage = SnackbarMessage(false)
@@ -47,6 +47,7 @@ data class PageWithSort(val page: Int, val sort: Sort)
 
 fun model(
         sortOptions: List<Sort>,
+        initialState: GridState,
         actions: Observable<GridAction>,
         movieStorage: MovieStorage,
         sharedPrefs: SharedPrefs
@@ -64,7 +65,7 @@ fun model(
                     movieStorage.getFavMovies()
                             .map(::moviesReducer)
                 } else {
-                    movieStorage.getOnlMovies(1, it.sort.value, false)
+                    movieStorage.getOnlMovies(1, it.sort.option, false)
                             .map(::moviesReducer)
                 }.startWith(sortSelectionsReducer(it))
             }
@@ -81,9 +82,8 @@ fun model(
                     { (page), (sort) -> PageWithSort(page, sort) })
 
     val loadMore = pageWithSort
-            .skip(1) // skip initial page 1 emission
             .switchMap {
-                movieStorage.getOnlMovies(it.page, it.sort.value, false)
+                movieStorage.getOnlMovies(it.page, it.sort.option, false)
                         .map(::moviesOnlMoreReducer)
                         .startWith(loadMoreReducer(GridRowLoadMoreViewData()))
             }
@@ -93,7 +93,7 @@ fun model(
             .withLatestFrom(pageWithSort, BiFunction<GridAction, PageWithSort, PageWithSort>
             { _, pageWithSort -> pageWithSort })
             .switchMap {
-                movieStorage.getOnlMovies(it.page, it.sort.value, true)
+                movieStorage.getOnlMovies(it.page, it.sort.option, true)
                         .map(::moviesReducer)
                         .startWith(refreshingReducer())
             }
@@ -103,11 +103,11 @@ fun model(
             .flatMap { movieStorage.deleteMovieFromFav(it.movieId) }
             .map(::favDeleteReducer)
 
-    val initialState = GridState(sortOptions[0])
-    val reducer = listOf(snackbars, sortSelections, sortSelectionSave, loadMore, refreshSwipes, favDelete)
-    return Observable.merge(reducer)
+    val reducers = listOf(snackbars, sortSelections, sortSelectionSave, loadMore, refreshSwipes, favDelete)
+    return Observable.merge(reducers)
             .scan(initialState, { state, reducer -> reducer(state) })
             .skip(1) // skip initial scan emission
+            .distinctUntilChanged()
 }
 
 private fun snackbarReducer(): GridStateReducer = {
@@ -128,7 +128,11 @@ private fun loadMoreReducer(loadMoreViewData: GridRowLoadMoreViewData): GridStat
 
 private fun moviesReducer(result: GetMoviesResult): GridStateReducer = { state ->
     when (result) {
-        is GetMoviesResult.Failure -> state.copy(loading = false, refreshing = false, empty = true,
+        is GetMoviesResult.Failure -> state.copy(
+                loading = false,
+                refreshing = false,
+                movies = emptyList(),
+                empty = true,
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
         is GetMoviesResult.Success -> {
             val movies = result.movies
@@ -149,7 +153,9 @@ private fun moviesReducer(result: GetMoviesResult): GridStateReducer = { state -
 
 private fun moviesOnlMoreReducer(result: GetMoviesResult): GridStateReducer = { state ->
     when (result) {
-        is GetMoviesResult.Failure -> state.copy(loadingMore = false,
+        is GetMoviesResult.Failure -> state.copy(
+                loadingMore = false,
+                movies = state.movies.minus(state.movies.last()),
                 snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed))
         is GetMoviesResult.Success -> {
             val movies = result.movies

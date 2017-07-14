@@ -16,11 +16,15 @@
 
 package ch.berta.fabio.popularmovies.features.grid
 
+import ch.berta.fabio.popularmovies.R
 import paperparcel.PaperParcel
 import paperparcel.PaperParcelable
 
-enum class SortOption {
-    SORT_POPULARITY, SORT_RATING, SORT_RELEASE_DATE, SORT_FAVORITE
+enum class SortOption(val value: String) {
+    SORT_POPULARITY("popularity.desc"),
+    SORT_RATING( "vote_average.desc"),
+    SORT_RELEASE_DATE("release_date.desc"),
+    SORT_FAVORITE("favorite")
 }
 
 /**
@@ -29,8 +33,7 @@ enum class SortOption {
 @PaperParcel
 data class Sort(
         val option: SortOption,
-        val value: String,
-        val readableValue: String
+        val title: String
 ) : PaperParcelable {
     companion object {
         @Suppress("unused")
@@ -39,11 +42,18 @@ data class Sort(
     }
 
     override fun toString(): String {
-        return readableValue
+        return title
     }
 }
 
 data class SortSelectionState(
         val sort: Sort,
         val sortPrev: Sort
+)
+
+fun makeSortOptions(getTitle: (Int) -> String): List<Sort> = listOf(
+        Sort(SortOption.SORT_POPULARITY, getTitle(R.string.sort_popularity)),
+        Sort(SortOption.SORT_RATING, getTitle(R.string.sort_rating)),
+        Sort(SortOption.SORT_RELEASE_DATE, getTitle(R.string.sort_release_date)),
+        Sort(SortOption.SORT_FAVORITE, getTitle(R.string.sort_favorite))
 )

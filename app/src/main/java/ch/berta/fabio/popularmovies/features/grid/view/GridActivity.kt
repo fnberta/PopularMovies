@@ -35,8 +35,8 @@ import ch.berta.fabio.popularmovies.features.base.ActivityResult
 import ch.berta.fabio.popularmovies.features.base.BaseActivity
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.grid.Sort
-import ch.berta.fabio.popularmovies.features.grid.SortOption.*
 import ch.berta.fabio.popularmovies.features.grid.component.GridState
+import ch.berta.fabio.popularmovies.features.grid.makeSortOptions
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModel
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelFactory
 import ch.berta.fabio.popularmovies.navigateTo
@@ -55,14 +55,8 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
     private val binding by lazy {
         DataBindingUtil.setContentView<ActivityMovieGridBinding>(this, R.layout.activity_movie_grid)
     }
-    private val sortOptions by lazy {
-        listOf(
-                Sort(SORT_POPULARITY, "popularity.desc", getString(R.string.sort_popularity)),
-                Sort(SORT_RATING, "vote_average.desc", getString(R.string.sort_rating)),
-                Sort(SORT_RELEASE_DATE, "release_date.desc", getString(R.string.sort_release_date)),
-                Sort(SORT_FAVORITE, "favorite", getString(R.string.sort_favorite))
-        )
-    }
+    private val sortOptions by lazy { makeSortOptions { getString(it) } }
+
     private val spinnerAdapter by lazy {
         ArrayAdapter<Sort>(this, R.layout.spinner_item_toolbar, sortOptions).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

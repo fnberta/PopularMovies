@@ -40,7 +40,8 @@ class GridViewModel(
 
     init {
         val sources = GridSources(uiEvents, sharedPrefs, movieStorage)
-        val sinks = main(sources, sortOptions)
+        val initialState = GridState(sortOptions[0])
+        val sinks = main(sources, initialState, sortOptions)
 
         state = LiveDataReactiveStreams.fromPublisher(sinks
                 .ofType(GridSink.State::class.java)
