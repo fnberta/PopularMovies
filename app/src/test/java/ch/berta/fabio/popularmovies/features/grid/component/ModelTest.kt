@@ -100,8 +100,10 @@ class ModelTest {
                 .thenReturn(Observable.just(GetMoviesResult.Success(ratingMovies)))
         val ratingGridViewData = mapGridRowMovieViewData(ratingMovies)
 
+        val dateMovies = getMovies(7)
         Mockito.`when`(movieStorage.getOnlMovies(1, SortOption.SORT_RELEASE_DATE, false))
-                .thenReturn(Observable.just(GetMoviesResult.Failure))
+                .thenReturn(Observable.just(GetMoviesResult.Success(dateMovies)))
+        val dateGridViewData = mapGridRowMovieViewData(dateMovies)
 
         val expectedStates = listOf(
                 GridState(sort = initialSort, loading = true),
@@ -109,18 +111,7 @@ class ModelTest {
                 GridState(sort = sortOptions[1], movies = popGridViewData, loading = true),
                 GridState(sort = sortOptions[1], movies = ratingGridViewData, loading = false),
                 GridState(sort = sortOptions[2], movies = ratingGridViewData, loading = true),
-                GridState(
-                        sort = sortOptions[2],
-                        movies = emptyList(),
-                        empty = true,
-                        loading = false,
-                        snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed)),
-                GridState(
-                        sort = sortOptions[2],
-                        movies = emptyList(),
-                        empty = true,
-                        loading = false,
-                        snackbar = SnackbarMessage(false, R.string.snackbar_movies_load_failed))
+                GridState(sort = sortOptions[2], movies = dateGridViewData, loading = false)
         )
 
         actions.accept(GridAction.SortSelection(sortOptions[0], initialSort))
