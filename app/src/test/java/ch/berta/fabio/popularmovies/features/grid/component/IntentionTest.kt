@@ -20,6 +20,8 @@ import android.content.Intent
 import ch.berta.fabio.popularmovies.ImmediateSchedulersRule
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
+import ch.berta.fabio.popularmovies.data.localmoviedb.MovieDb
+import ch.berta.fabio.popularmovies.data.themoviedb.TheMovieDbService
 import ch.berta.fabio.popularmovies.features.base.ActivityResult
 import ch.berta.fabio.popularmovies.features.details.component.RS_DATA_MOVIE_ID
 import ch.berta.fabio.popularmovies.features.details.component.RS_REMOVE_FROM_FAV
@@ -34,7 +36,7 @@ import org.mockito.Mockito
 class IntentionTest {
 
     val sharedPrefs: SharedPrefs = Mockito.mock(SharedPrefs::class.java)
-    val movieStorage: MovieStorage = Mockito.mock(MovieStorage::class.java)
+    val movieStorage = MovieStorage(Mockito.mock(TheMovieDbService::class.java), Mockito.mock(MovieDb::class.java))
 
     /*
     * 0: by popularity
@@ -164,11 +166,14 @@ class IntentionTest {
         )
 
         uiEvents.activityResults.accept(ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent))
-        uiEvents.activityResults.accept(ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, null)) // data is null, should be ignored
-        uiEvents.activityResults.accept(ActivityResult(0, RS_REMOVE_FROM_FAV, intent)) // other reqCode, should be ignored
+        uiEvents.activityResults.accept(
+                ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, null)) // data is null, should be ignored
+        uiEvents.activityResults.accept(
+                ActivityResult(0, RS_REMOVE_FROM_FAV, intent)) // other reqCode, should be ignored
         uiEvents.activityResults.accept(ActivityResult(RQ_DETAILS, 2, intent)) // other resCode, should be ignored
         Mockito.`when`(intent.getIntExtra(RS_DATA_MOVIE_ID, -1)).thenReturn(-1)
-        uiEvents.activityResults.accept(ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent)) // intent returns -1, should be ignored
+        uiEvents.activityResults.accept(
+                ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent)) // intent returns -1, should be ignored
 
         observer.assertValues(*expectedActions.toTypedArray())
         observer.assertNoErrors()

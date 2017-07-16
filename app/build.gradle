@@ -51,7 +51,7 @@ android {
 
 ext {
     supportLibVersion = '25.4.0'
-    archComponentsVersion = '1.0.0-alpha3'
+    archComponentsVersion = '1.0.0-alpha4'
     daggerVersion = '2.7'
     retrofitVersion = '2.3.0'
     paperParcelVersion = '2.0.1'

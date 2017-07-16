@@ -29,7 +29,7 @@ class ImmediateSchedulersRule : TestRule {
     override fun apply(base: Statement, description: Description): Statement = object : Statement() {
         override fun evaluate() {
             RxJavaPlugins.setIoSchedulerHandler { Schedulers.trampoline() }
-            RxAndroidPlugins.initMainThreadScheduler { Schedulers.trampoline() }
+            RxAndroidPlugins.setInitMainThreadSchedulerHandler { Schedulers.trampoline() }
 
             try {
                 base.evaluate()

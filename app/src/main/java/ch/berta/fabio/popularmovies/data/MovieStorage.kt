@@ -67,7 +67,7 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                 Observable.range(1, page)
                         .concatMap {
                             theMovieDbService.loadMovies(it, sortOption.value)
-                                    .flatMapObservable { Observable.fromIterable(it.movies) }
+                                    .flattenAsObservable { it.movies }
                         }
                         .toList()
 
@@ -90,8 +90,7 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                             movieDb.reviewDao().getByMovieId(movieId),
                             Function3<MovieEntity, List<VideoEntity>, List<ReviewEntity>, MovieDetails>
                             { movie, videos, reviews ->
-                                MovieDetails(true, movie.id, movie.title,
-                                        movie.overview, movie.releaseDate,
+                                MovieDetails(true, movie.id, movie.title, movie.overview, movie.releaseDate,
                                         movie.voteAverage, movie.poster, movie.backdrop,
                                         videos.map { Video(it.name, it.key, it.site, it.size, it.type) },
                                         reviews.map { Review(it.author, it.content, it.url) })
@@ -105,9 +104,8 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                                     .map { it == 1 }
                                     .toObservable(),
                             BiFunction<MovieInfo, Boolean, MovieDetails> { details, fav ->
-                                MovieDetails(fav, details.id, details.title,
-                                        details.overview,
-                                        details.releaseDate, details.voteAverage, details.poster, details.backdrop,
+                                MovieDetails(fav, details.id, details.title, details.overview, details.releaseDate,
+                                        details.voteAverage, details.poster, details.backdrop,
                                         details.videosPage.videos, details.reviewsPage.reviews)
                             }
                     )
@@ -121,8 +119,7 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
     }
 
     fun saveMovieAsFav(movieDetails: MovieDetails): Observable<LocalDbWriteResult.SaveAsFav> = Observable.fromCallable {
-        movieDb.beginTransaction()
-        try {
+        movieDb.runInTransaction {
             val movieEntity = MovieEntity(movieDetails.id, movieDetails.title, movieDetails.releaseDate,
                     movieDetails.voteAverage, movieDetails.overview, movieDetails.poster, movieDetails.backdrop)
             movieDb.movieDao().insert(movieEntity)
@@ -138,10 +135,6 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
                         .map { ReviewEntity(movieDetails.id, it.author, it.content, it.url) }
                 movieDb.reviewDao().insertAll(reviewEntities)
             }
-
-            movieDb.setTransactionSuccessful()
-        } finally {
-            movieDb.endTransaction()
         }
     }
             .map { LocalDbWriteResult.SaveAsFav(true) }
@@ -157,39 +150,35 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
 
-    fun updateFavMovie(movieId: Int): Observable<LocalDbWriteResult.UpdateFav> = theMovieDbService.loadMovieInfo(
-            movieId)
-            .toObservable()
-            .flatMap {
-                Observable.fromCallable {
-                    movieDb.beginTransaction()
-                    try {
-                        val movieEntity = MovieEntity(it.id, it.title, it.releaseDate, it.voteAverage, it.overview,
-                                it.poster, it.backdrop)
-                        movieDb.movieDao().update(movieEntity)
-                        movieDb.videoDao().deleteByMovieId(it.id)
-                        movieDb.reviewDao().deleteByMovieId(it.id)
+    fun updateFavMovie(movieId: Int): Observable<LocalDbWriteResult.UpdateFav> =
+            theMovieDbService.loadMovieInfo(movieId)
+                    .toObservable()
+                    .flatMap {
+                        Observable.fromCallable {
+                            movieDb.runInTransaction {
+                                val movieEntity = MovieEntity(it.id, it.title, it.releaseDate, it.voteAverage,
+                                        it.overview,
+                                        it.poster, it.backdrop)
+                                movieDb.movieDao().update(movieEntity)
+                                movieDb.videoDao().deleteByMovieId(it.id)
+                                movieDb.reviewDao().deleteByMovieId(it.id)
 
-                        if (it.videosPage.videos.isNotEmpty()) {
-                            val videoEntities = it.videosPage.videos
-                                    .map { VideoEntity(movieId, it.name, it.key, it.site, it.size, it.type) }
-                            movieDb.videoDao().insertAll(videoEntities)
+                                if (it.videosPage.videos.isNotEmpty()) {
+                                    val videoEntities = it.videosPage.videos
+                                            .map { VideoEntity(movieId, it.name, it.key, it.site, it.size, it.type) }
+                                    movieDb.videoDao().insertAll(videoEntities)
+                                }
+
+                                if (it.reviewsPage.reviews.isNotEmpty()) {
+                                    val reviewEntities = it.reviewsPage.reviews
+                                            .map { ReviewEntity(movieId, it.author, it.content, it.url) }
+                                    movieDb.reviewDao().insertAll(reviewEntities)
+                                }
+                            }
                         }
-
-                        if (it.reviewsPage.reviews.isNotEmpty()) {
-                            val reviewEntities = it.reviewsPage.reviews
-                                    .map { ReviewEntity(movieId, it.author, it.content, it.url) }
-                            movieDb.reviewDao().insertAll(reviewEntities)
-                        }
-
-                        movieDb.setTransactionSuccessful()
-                    } finally {
-                        movieDb.endTransaction()
                     }
-                }
-            }
-            .map { LocalDbWriteResult.UpdateFav(true) }
-            .onErrorReturn { LocalDbWriteResult.UpdateFav(false) }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+                    .map { LocalDbWriteResult.UpdateFav(true) }
+                    .onErrorReturn { LocalDbWriteResult.UpdateFav(false) }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
 }
