@@ -27,6 +27,7 @@ import ch.berta.fabio.popularmovies.features.details.component.RS_DATA_MOVIE_ID
 import ch.berta.fabio.popularmovies.features.details.component.RS_REMOVE_FROM_FAV
 import ch.berta.fabio.popularmovies.features.grid.makeSortOptions
 import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
+import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import org.junit.Before
 import org.junit.Rule
@@ -45,7 +46,13 @@ class IntentionTest {
     * 3: favorites
     */
     val sortOptions = makeSortOptions { "someRandomTitle" }
-    val uiEvents = GridUiEvents()
+    val activityResults: PublishRelay<ActivityResult> = PublishRelay.create()
+    val snackbarShown: PublishRelay<Unit> = PublishRelay.create()
+    val sortSelections: PublishRelay<Int> = PublishRelay.create()
+    val movieClicks: PublishRelay<SelectedMovie> = PublishRelay.create()
+    val loadMore: PublishRelay<Unit> = PublishRelay.create()
+    val refreshSwipes: PublishRelay<Unit> = PublishRelay.create()
+    val uiEvents = GridUiEvents(activityResults, snackbarShown, sortSelections, movieClicks, loadMore, refreshSwipes)
     val sources = GridSources(uiEvents, sharedPrefs, movieStorage)
 
     @Suppress("unused")
@@ -68,11 +75,11 @@ class IntentionTest {
                 GridAction.SortSelection(sortOptions[2], sortOptions[1])
         )
 
-        uiEvents.sortSelections.accept(0) // imitate spinner behaviour, emit 0 emission even if nothing is selected yet
-        uiEvents.sortSelections.accept(0)
-        uiEvents.sortSelections.accept(0) // same value emission should be ignored
-        uiEvents.sortSelections.accept(1)
-        uiEvents.sortSelections.accept(2)
+        sortSelections.accept(0) // imitate spinner behaviour, emit 0 emission even if nothing is selected yet
+        sortSelections.accept(0)
+        sortSelections.accept(0) // same value emission should be ignored
+        sortSelections.accept(1)
+        sortSelections.accept(2)
 
         observer.assertValues(*expectedActions.toTypedArray())
         observer.assertNoErrors()
@@ -106,7 +113,7 @@ class IntentionTest {
                 GridAction.MovieClick(selectedMovie)
         )
 
-        uiEvents.movieClicks.accept(selectedMovie)
+        movieClicks.accept(selectedMovie)
 
         observer.assertValues(*expectedActions.toTypedArray())
         observer.assertNoErrors()
@@ -125,9 +132,9 @@ class IntentionTest {
                 GridAction.LoadMore(4)
         )
 
-        uiEvents.loadMore.accept(Unit)
-        uiEvents.loadMore.accept(Unit)
-        uiEvents.loadMore.accept(Unit)
+        loadMore.accept(Unit)
+        loadMore.accept(Unit)
+        loadMore.accept(Unit)
 
         observer.assertValues(*expectedActions.toTypedArray())
         observer.assertNoErrors()
@@ -144,7 +151,7 @@ class IntentionTest {
                 GridAction.RefreshSwipe
         )
 
-        uiEvents.refreshSwipes.accept(Unit)
+        refreshSwipes.accept(Unit)
 
         observer.assertValues(*expectedActions.toTypedArray())
         observer.assertNoErrors()
@@ -165,14 +172,14 @@ class IntentionTest {
                 GridAction.FavDelete(0)
         )
 
-        uiEvents.activityResults.accept(ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent))
-        uiEvents.activityResults.accept(
+        activityResults.accept(ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent))
+        activityResults.accept(
                 ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, null)) // data is null, should be ignored
-        uiEvents.activityResults.accept(
+        activityResults.accept(
                 ActivityResult(0, RS_REMOVE_FROM_FAV, intent)) // other reqCode, should be ignored
-        uiEvents.activityResults.accept(ActivityResult(RQ_DETAILS, 2, intent)) // other resCode, should be ignored
+        activityResults.accept(ActivityResult(RQ_DETAILS, 2, intent)) // other resCode, should be ignored
         Mockito.`when`(intent.getIntExtra(RS_DATA_MOVIE_ID, -1)).thenReturn(-1)
-        uiEvents.activityResults.accept(
+        activityResults.accept(
                 ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent)) // intent returns -1, should be ignored
 
         observer.assertValues(*expectedActions.toTypedArray())

@@ -39,7 +39,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
 
     private val viewModel by lazy { ViewModelProviders.of(activity).get(DetailsViewModel::class.java) }
     private val viewData = DetailsViewData()
-    private val recyclerAdapter by lazy { DetailsRecyclerAdapter(viewModel.uiEvents.videoClicks, this) }
+    private val recyclerAdapter by lazy { DetailsRecyclerAdapter(viewModel.videoClicks, this) }
     private lateinit var binding: FragmentMovieDetailsBinding
 
     companion object {
@@ -75,7 +75,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        binding.srlDetailsFav.setOnRefreshListener { viewModel.uiEvents.updateSwipes.accept(Unit) }
+        binding.srlDetailsFav.setOnRefreshListener { viewModel.updateSwipes.accept(Unit) }
         viewData.refreshEnabled = arguments.getParcelable<DetailsArgs>(KEY_ARGS).fromFavList
         viewModel.state.observe(this, Observer<DetailsState> {
             it?.let { render(it) }

@@ -18,23 +18,29 @@ package ch.berta.fabio.popularmovies.features.details.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.LiveDataReactiveStreams
-import android.arch.lifecycle.ViewModel
 import ch.berta.fabio.popularmovies.NavigationTarget
 import ch.berta.fabio.popularmovies.data.MovieStorage
+import ch.berta.fabio.popularmovies.features.base.BaseViewModel
 import ch.berta.fabio.popularmovies.features.details.component.*
+import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
+import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 
 class DetailsViewModel(
         movieStorage: MovieStorage,
         detailsArgs: DetailsArgs
-) : ViewModel() {
+) : BaseViewModel() {
+
+    val updateSwipes: PublishRelay<Unit> = PublishRelay.create()
+    val favClicks: PublishRelay<Unit> = PublishRelay.create()
+    val videoClicks: PublishRelay<DetailsVideoRowViewData> = PublishRelay.create()
 
     val state: LiveData<DetailsState>
     val navigation: Observable<NavigationTarget>
 
-    val uiEvents = DetailsUiEvents()
+    val uiEvents = DetailsUiEvents(snackbarShown, updateSwipes, favClicks, videoClicks)
 
     init {
         val sources = DetailsSources(uiEvents, movieStorage)

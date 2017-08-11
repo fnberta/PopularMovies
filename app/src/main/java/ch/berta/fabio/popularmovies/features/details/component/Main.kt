@@ -21,7 +21,6 @@ import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData
 import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
 import ch.berta.fabio.popularmovies.log
-import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 
 data class DetailsSources(
@@ -30,10 +29,10 @@ data class DetailsSources(
 )
 
 data class DetailsUiEvents(
-        val snackbarShown: PublishRelay<Unit> = PublishRelay.create(),
-        val updateSwipes: PublishRelay<Unit> = PublishRelay.create(),
-        val favClicks: PublishRelay<Unit> = PublishRelay.create(),
-        val videoClicks: PublishRelay<DetailsVideoRowViewData> = PublishRelay.create()
+        val snackbarShown: Observable<Unit>,
+        val updateSwipes: Observable<Unit>,
+        val favClicks: Observable<Unit>,
+        val videoClicks: Observable<DetailsVideoRowViewData>
 )
 
 sealed class DetailsAction {

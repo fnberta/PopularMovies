@@ -85,7 +85,7 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         supportActionBar?.title = null
 
         initViewModel()
-        binding.fabDetailsFavorite.setOnClickListener { viewModel.uiEvents.favClicks.accept(Unit) }
+        binding.fabDetailsFavorite.setOnClickListener { viewModel.favClicks.accept(Unit) }
 
         if (savedInstanceState == null) {
             addFragment()
@@ -107,7 +107,7 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         viewData.favoured = state.favoured
         if (state.snackbar.show) {
             Snackbar.make(binding.container, state.snackbar.message, Snackbar.LENGTH_LONG).show()
-            viewModel.uiEvents.snackbarShown.accept(Unit)
+            viewModel.snackbarShown.accept(Unit)
         }
     }
 

@@ -18,12 +18,14 @@ package ch.berta.fabio.popularmovies.features.grid.viewmodel
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.LiveDataReactiveStreams
-import android.arch.lifecycle.ViewModel
 import ch.berta.fabio.popularmovies.NavigationTarget
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
+import ch.berta.fabio.popularmovies.features.base.BaseViewModel
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.component.*
+import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
+import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 
@@ -31,12 +33,17 @@ class GridViewModel(
         sharedPrefs: SharedPrefs,
         movieStorage: MovieStorage,
         sortOptions: List<Sort>
-) : ViewModel() {
+) : BaseViewModel() {
+
+    val sortSelections: PublishRelay<Int> = PublishRelay.create()
+    val movieClicks: PublishRelay<SelectedMovie> = PublishRelay.create()
+    val loadMore: PublishRelay<Unit> = PublishRelay.create()
+    val refreshSwipes: PublishRelay<Unit> = PublishRelay.create()
 
     val state: LiveData<GridState>
     val navigation: Observable<NavigationTarget>
 
-    val uiEvents = GridUiEvents()
+    val uiEvents = GridUiEvents(activityResults, snackbarShown, sortSelections, movieClicks, loadMore, refreshSwipes)
 
     init {
         val sources = GridSources(uiEvents, sharedPrefs, movieStorage)

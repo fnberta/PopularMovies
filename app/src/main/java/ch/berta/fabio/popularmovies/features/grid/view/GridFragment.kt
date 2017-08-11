@@ -40,7 +40,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
     private val viewModel: GridViewModel by lazy { ViewModelProviders.of(activity).get(GridViewModel::class.java) }
     private val viewData = GridViewData()
     private val recyclerAdapter: GridRecyclerAdapter by lazy {
-        GridRecyclerAdapter(calcPosterHeight(resources), viewModel.uiEvents.movieClicks)
+        GridRecyclerAdapter(calcPosterHeight(resources), viewModel.movieClicks)
     }
     lateinit private var binding: FragmentMovieGridBinding
 
@@ -58,7 +58,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
-        binding.srlGrid.setOnRefreshListener { viewModel.uiEvents.refreshSwipes.accept(Unit) }
+        binding.srlGrid.setOnRefreshListener { viewModel.refreshSwipes.accept(Unit) }
     }
 
     private fun setupRecyclerView() {
@@ -76,7 +76,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
         binding.rvGrid.adapter = recyclerAdapter
         Mugen.with(binding.rvGrid, object : MugenCallbacks {
             override fun onLoadMore() {
-                if (viewData.refreshEnabled) viewModel.uiEvents.loadMore.accept(Unit)
+                if (viewData.refreshEnabled) viewModel.loadMore.accept(Unit)
             }
 
             override fun isLoading(): Boolean = viewData.loading || viewData.refreshing || viewData.loadingMore
@@ -103,7 +103,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
 
         if (state.snackbar.show) {
             Snackbar.make(binding.rvGrid, state.snackbar.message, Snackbar.LENGTH_LONG).show()
-            viewModel.uiEvents.snackbarShown.accept(Unit)
+            viewModel.snackbarShown.accept(Unit)
         }
     }
 }

@@ -33,12 +33,12 @@ data class GridSources(
 )
 
 data class GridUiEvents(
-        val activityResults: PublishRelay<ActivityResult> = PublishRelay.create(),
-        val snackbarShown: PublishRelay<Unit> = PublishRelay.create(),
-        val sortSelections: PublishRelay<Int> = PublishRelay.create(),
-        val movieClicks: PublishRelay<SelectedMovie> = PublishRelay.create(),
-        val loadMore: PublishRelay<Unit> = PublishRelay.create(),
-        val refreshSwipes: PublishRelay<Unit> = PublishRelay.create()
+        val activityResults: Observable<ActivityResult>,
+        val snackbarShown: Observable<Unit>,
+        val sortSelections: Observable<Int>,
+        val movieClicks: Observable<SelectedMovie>,
+        val loadMore: Observable<Unit>,
+        val refreshSwipes: Observable<Unit>
 )
 
 sealed class GridAction {
