@@ -27,7 +27,7 @@ import android.view.View
 
 class ReviewsItemDecoration(
         context: Context,
-        val dividerViewType: Int
+        private val dividerViewType: Int
 ) : RecyclerView.ItemDecoration() {
 
     private val divider: Drawable

@@ -51,7 +51,10 @@ sealed class LocalDbWriteResult {
     data class UpdateFav(val successful: Boolean) : LocalDbWriteResult()
 }
 
-class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService, val movieDb: MovieDb) {
+class MovieStorage @Inject constructor(
+        private val theMovieDbService: TheMovieDbService,
+        private val movieDb: MovieDb
+) {
 
     fun getFavMovies(): Observable<GetMoviesResult> = movieDb.movieDao().getAll().toObservable()
             .map {
@@ -66,14 +69,12 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
             if (fetchAllPages) {
                 Observable.range(1, page)
                         .concatMap {
-                            theMovieDbService.loadMovies(it, sortOption.value)
-                                    .flattenAsObservable { it.movies }
+                            theMovieDbService.loadMovies(it, sortOption.value).flattenAsObservable { it.movies }
                         }
                         .toList()
 
             } else {
-                theMovieDbService.loadMovies(page, sortOption.value)
-                        .map { it.movies }
+                theMovieDbService.loadMovies(page, sortOption.value).map { it.movies }
             }
                     .toObservable()
                     .map<GetMoviesResult> { GetMoviesResult.Success(it) }
@@ -84,7 +85,7 @@ class MovieStorage @Inject constructor(val theMovieDbService: TheMovieDbService,
     fun getMovieDetails(movieId: Int, fromFavList: Boolean): Observable<GetMovieDetailsResult> {
         val movieDetails =
                 if (fromFavList) {
-                    Flowable.combineLatest(
+                    Flowable.zip(
                             movieDb.movieDao().getById(movieId),
                             movieDb.videoDao().getByMovieId(movieId),
                             movieDb.reviewDao().getByMovieId(movieId),

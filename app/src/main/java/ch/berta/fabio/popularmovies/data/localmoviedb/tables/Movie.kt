@@ -34,7 +34,6 @@ data class MovieEntity(
 
 @Dao
 interface MovieDao {
-
     @Query("SELECT * FROM movie")
     fun getAll(): Flowable<List<MovieEntity>>
 

@@ -22,7 +22,7 @@ import paperparcel.PaperParcelable
 
 enum class SortOption(val value: String) {
     SORT_POPULARITY("popularity.desc"),
-    SORT_RATING( "vote_average.desc"),
+    SORT_RATING("vote_average.desc"),
     SORT_RELEASE_DATE("release_date.desc"),
     SORT_FAVORITE("favorite")
 }
@@ -31,25 +31,17 @@ enum class SortOption(val value: String) {
  * Represents an value how to sort a movie poster images list or grid.
  */
 @PaperParcel
-data class Sort(
-        val option: SortOption,
-        val title: String
-) : PaperParcelable {
+data class Sort(val option: SortOption, val title: String) : PaperParcelable {
     companion object {
         @Suppress("unused")
         @JvmField
         val CREATOR = PaperParcelSort.CREATOR
     }
 
-    override fun toString(): String {
-        return title
-    }
+    override fun toString(): String = title
 }
 
-data class SortSelectionState(
-        val sort: Sort,
-        val sortPrev: Sort
-)
+data class SortSelectionState(val sort: Sort, val sortPrev: Sort)
 
 fun makeSortOptions(getTitle: (Int) -> String): List<Sort> = listOf(
         Sort(SortOption.SORT_POPULARITY, getTitle(R.string.sort_popularity)),

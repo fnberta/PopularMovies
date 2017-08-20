@@ -38,7 +38,7 @@
         >
 
         <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/srlGrid"
+            android:id="@+id/srl_grid"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:enabled="@{viewData.refreshEnabled}"
@@ -47,7 +47,7 @@
             >
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/rvGrid"
+                android:id="@+id/rv_grid"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"

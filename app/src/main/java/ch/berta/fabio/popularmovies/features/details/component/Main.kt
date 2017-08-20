@@ -16,45 +16,47 @@
 
 package ch.berta.fabio.popularmovies.features.details.component
 
-import ch.berta.fabio.popularmovies.NavigationTarget
+import android.support.annotation.StringRes
 import ch.berta.fabio.popularmovies.data.MovieStorage
+import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsRowViewData
 import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData
-import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
+import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
 import ch.berta.fabio.popularmovies.log
 import io.reactivex.Observable
 
-data class DetailsSources(
-        val uiEvents: DetailsUiEvents,
-        val movieStorage: MovieStorage
-)
-
-data class DetailsUiEvents(
-        val snackbarShown: Observable<Unit>,
-        val updateSwipes: Observable<Unit>,
-        val favClicks: Observable<Unit>,
-        val videoClicks: Observable<DetailsVideoRowViewData>
-)
-
 sealed class DetailsAction {
-    object SnackbarShown : DetailsAction()
+    object TransientClear : DetailsAction()
+    data class MovieSelected(val selectedMovie: SelectedMovie) : DetailsAction()
+    object SortSelection : DetailsAction()
     object UpdateSwipe : DetailsAction()
     object FavClick : DetailsAction()
     data class VideoClick(val videoViewModel: DetailsVideoRowViewData) : DetailsAction()
 }
 
-sealed class DetailsSink {
-    data class State(val state: DetailsState) : DetailsSink()
-    data class Navigation(val target: NavigationTarget) : DetailsSink()
-}
+data class DetailsSources(val uiEvents: DetailsUiEvents, val movieStorage: MovieStorage)
 
-fun main(sources: DetailsSources, detailsArgs: DetailsArgs): Observable<DetailsSink> = intention(sources)
-        .log("action")
-        .publish {
-            val state = model(it, sources.movieStorage, detailsArgs)
-                    .map { DetailsSink.State(it) }
-            val navigationTargets = navigationTargets(it, detailsArgs)
-                    .map { DetailsSink.Navigation(it) }
+data class DetailsUiEvents(
+        val transientClears: Observable<Unit>,
+        val movieSelections: Observable<SelectedMovie>,
+        val sortSelections: Observable<Int>,
+        val updateSwipes: Observable<Unit>,
+        val favClicks: Observable<Unit>,
+        val videoClicks: Observable<DetailsVideoRowViewData>
+)
 
-            Observable.merge(state, navigationTargets)
-        }
+data class DetailsState(
+        val updateEnabled: Boolean = false,
+        val updating: Boolean = false,
+        val title: String = "",
+        val backdrop: String? = "",
+        val favoured: Boolean = false,
+        val details: List<DetailsRowViewData> = emptyList(),
+        val movieDeletedFromFavScreen: Boolean = false,
+        @StringRes val message: Int? = null,
+        val selectedVideoUrl: String? = null
+)
+
+fun main(sources: DetailsSources, initialState: DetailsState): Observable<DetailsState> = intention(sources)
+        .log("details action")
+        .publish { model(initialState, it, sources.movieStorage) }
         .share()

@@ -52,7 +52,7 @@
                 >
 
                 <Spinner
-                    android:id="@+id/spGridSort"
+                    android:id="@+id/sp_grid_sort"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     />
@@ -61,6 +61,7 @@
         </android.support.design.widget.AppBarLayout>
 
         <include
+            android:id="@+id/grid_content"
             layout="@layout/activity_movie_grid_content"
             app:viewData="@{viewData}"
             />

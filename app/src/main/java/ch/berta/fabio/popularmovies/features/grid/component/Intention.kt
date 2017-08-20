@@ -16,18 +16,14 @@
 
 package ch.berta.fabio.popularmovies.features.grid.component
 
-import ch.berta.fabio.popularmovies.features.details.component.RS_DATA_MOVIE_ID
-import ch.berta.fabio.popularmovies.features.details.component.RS_REMOVE_FROM_FAV
+import ch.berta.fabio.popularmovies.features.details.view.RQ_DETAILS
+import ch.berta.fabio.popularmovies.features.details.view.RS_DELETED_FROM_FAV
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.SortSelectionState
 import io.reactivex.Observable
 
-fun intention(
-        sources: GridSources,
-        sortOptions: List<Sort>
-): Observable<GridAction> {
-    val snackbarShown = sources.uiEvents.snackbarShown
-            .map { GridAction.SnackbarShown }
+fun intention(sources: GridSources, sortOptions: List<Sort>): Observable<GridAction> {
+    val transientClears = sources.uiEvents.transientClears.map { GridAction.TransientClear }
 
     val sortSelectionsSharedPrefs = sources.sharedPrefs.getSortPos()
             .map { SortSelectionState(sortOptions[it], sortOptions[0]) }
@@ -41,27 +37,18 @@ fun intention(
     val sortSelections = Observable.merge(sortSelectionsSharedPrefs, sortSelectionsSpinner)
             .distinctUntilChanged()
             .map { GridAction.SortSelection(it.sort, it.sortPrev) }
-    val movieClicks = sources.uiEvents.movieClicks
-            .map { GridAction.MovieClick(it) }
+    val movieClicks = sources.uiEvents.movieSelections.map { GridAction.MovieSelection(it) }
     val loadMore = sources.uiEvents.loadMore
             .map { 1 }
             .scan(1, { acc, curr -> acc + curr })
             .skip(1) // skip initial scan emission
             .map { GridAction.LoadMore(it) }
-    val refreshSwipes = sources.uiEvents.refreshSwipes
-            .map { GridAction.RefreshSwipe }
+    val refreshSwipes = sources.uiEvents.refreshSwipes.map { GridAction.RefreshSwipe }
 
     val favDelete = sources.uiEvents.activityResults
-            .filter { it.requestCode == RQ_DETAILS && it.resultCode == RS_REMOVE_FROM_FAV }
-            .map {
-                when {
-                    it.data == null -> -1
-                    else -> it.data.getIntExtra(RS_DATA_MOVIE_ID, -1)
-                }
-            }
-            .filter { it > -1 }
-            .map { GridAction.FavDelete(it) }
+            .filter { it.requestCode == RQ_DETAILS && it.resultCode == RS_DELETED_FROM_FAV }
+            .map { GridAction.MovieFavDeleted }
 
-    val actions = listOf(snackbarShown, sortSelections, movieClicks, loadMore, refreshSwipes, favDelete)
+    val actions = listOf(transientClears, sortSelections, movieClicks, loadMore, refreshSwipes, favDelete)
     return Observable.merge(actions)
 }

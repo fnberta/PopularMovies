@@ -26,7 +26,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import ch.berta.fabio.popularmovies.PopularMovies
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.bindTo
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.databinding.ActivityMovieGridBinding
@@ -34,12 +33,13 @@ import ch.berta.fabio.popularmovies.di.ApplicationComponent
 import ch.berta.fabio.popularmovies.features.base.ActivityResult
 import ch.berta.fabio.popularmovies.features.base.BaseActivity
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
+import ch.berta.fabio.popularmovies.features.details.component.DetailsState
+import ch.berta.fabio.popularmovies.features.details.view.DetailsFragment
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.component.GridState
 import ch.berta.fabio.popularmovies.features.grid.makeSortOptions
-import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModel
-import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelFactory
-import ch.berta.fabio.popularmovies.navigateTo
+import ch.berta.fabio.popularmovies.features.grid.vdos.GridHeaderViewData
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.*
 import javax.inject.Inject
 
 /**
@@ -55,44 +55,58 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
     private val binding by lazy {
         DataBindingUtil.setContentView<ActivityMovieGridBinding>(this, R.layout.activity_movie_grid)
     }
+    private val useTwoPane by lazy { resources.getBoolean(R.bool.use_two_pane_layout) }
     private val sortOptions by lazy { makeSortOptions { getString(it) } }
-
     private val spinnerAdapter by lazy {
         ArrayAdapter<Sort>(this, R.layout.spinner_item_toolbar, sortOptions).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
     }
+    private val viewData = GridHeaderViewData()
     private val viewModel by lazy {
-        val factory = GridViewModelFactory(sharedPrefs, movieStorage, sortOptions)
-        ViewModelProviders.of(this, factory).get(GridViewModel::class.java)
+        val factory = GridViewModelFactory(useTwoPane, sharedPrefs, movieStorage, sortOptions)
+        if (useTwoPane) {
+            ViewModelProviders.of(this, factory).get(GridViewModelTwoPane::class.java) as GridViewModel
+        } else {
+            ViewModelProviders.of(this, factory).get(GridViewModelOnePane::class.java) as GridViewModel
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         component.inject(this)
+        binding.viewData = viewData
         initViewModel()
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.title = null
         setupSortSpinner()
+        if (useTwoPane) {
+            setupFab()
+        }
 
         if (savedInstanceState == null) {
-            addFragment()
+            addFragments()
         }
     }
 
     private fun initViewModel() {
-        viewModel.state.observe(this, Observer<GridState> {
-            it?.let { render(it) }
+        viewModel.state.observe(this, Observer<MoviesState> {
+            when (it) {
+                is MoviesState.Grid -> renderGrid(it.value)
+                is MoviesState.Details -> renderDetails(it.value)
+            }
         })
-        viewModel.navigation
-                .bindTo(lifecycle)
-                .subscribe { navigateTo(this, it) }
     }
 
-    private fun render(state: GridState) {
+    private fun renderGrid(state: GridState) {
         binding.spGridSort.setSelection(sortOptions.indexOf(state.sort))
+    }
+
+    private fun renderDetails(state: DetailsState) {
+        viewData.movieSelected = true
+        viewData.favoured = state.favoured
     }
 
     private fun setupSortSpinner() {
@@ -107,10 +121,22 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
         }
     }
 
-    private fun addFragment() {
-        val fragment = GridFragment()
+    private fun setupFab() {
+        binding.gridContent.fabGridFavorite.setOnClickListener {
+            (viewModel as GridViewModelTwoPane).favClicks.accept(Unit)
+        }
+    }
+
+    private fun addFragments() {
         supportFragmentManager.beginTransaction()
-                .add(R.id.container_main, fragment, fragment.javaClass.canonicalName)
+                .apply {
+                    val gridFragment = GridFragment()
+                    add(R.id.container_main, gridFragment, gridFragment.javaClass.canonicalName)
+                    if (useTwoPane) {
+                        val detailsFragment = DetailsFragment()
+                        add(R.id.container_details, detailsFragment, detailsFragment.javaClass.canonicalName)
+                    }
+                }
                 .commit()
     }
 

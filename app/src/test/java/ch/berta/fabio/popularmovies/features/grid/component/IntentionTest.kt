@@ -23,8 +23,8 @@ import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.data.localmoviedb.MovieDb
 import ch.berta.fabio.popularmovies.data.themoviedb.TheMovieDbService
 import ch.berta.fabio.popularmovies.features.base.ActivityResult
-import ch.berta.fabio.popularmovies.features.details.component.RS_DATA_MOVIE_ID
-import ch.berta.fabio.popularmovies.features.details.component.RS_REMOVE_FROM_FAV
+import ch.berta.fabio.popularmovies.features.details.view.RQ_DETAILS
+import ch.berta.fabio.popularmovies.features.details.view.RS_DELETED_FROM_FAV
 import ch.berta.fabio.popularmovies.features.grid.makeSortOptions
 import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
 import com.jakewharton.rxrelay2.PublishRelay
@@ -36,8 +36,9 @@ import org.mockito.Mockito
 
 class IntentionTest {
 
-    val sharedPrefs: SharedPrefs = Mockito.mock(SharedPrefs::class.java)
-    val movieStorage = MovieStorage(Mockito.mock(TheMovieDbService::class.java), Mockito.mock(MovieDb::class.java))
+    private val sharedPrefs: SharedPrefs = Mockito.mock(SharedPrefs::class.java)
+    private val movieStorage = MovieStorage(Mockito.mock(TheMovieDbService::class.java),
+            Mockito.mock(MovieDb::class.java))
 
     /*
     * 0: by popularity
@@ -45,15 +46,16 @@ class IntentionTest {
     * 2: by release date
     * 3: favorites
     */
-    val sortOptions = makeSortOptions { "someRandomTitle" }
-    val activityResults: PublishRelay<ActivityResult> = PublishRelay.create()
-    val snackbarShown: PublishRelay<Unit> = PublishRelay.create()
-    val sortSelections: PublishRelay<Int> = PublishRelay.create()
-    val movieClicks: PublishRelay<SelectedMovie> = PublishRelay.create()
-    val loadMore: PublishRelay<Unit> = PublishRelay.create()
-    val refreshSwipes: PublishRelay<Unit> = PublishRelay.create()
-    val uiEvents = GridUiEvents(activityResults, snackbarShown, sortSelections, movieClicks, loadMore, refreshSwipes)
-    val sources = GridSources(uiEvents, sharedPrefs, movieStorage)
+    private val sortOptions = makeSortOptions { "someRandomTitle" }
+    private val activityResults: PublishRelay<ActivityResult> = PublishRelay.create()
+    private val transientClears: PublishRelay<Unit> = PublishRelay.create()
+    private val sortSelections: PublishRelay<Int> = PublishRelay.create()
+    private val movieSelections: PublishRelay<SelectedMovie> = PublishRelay.create()
+    private val loadMore: PublishRelay<Unit> = PublishRelay.create()
+    private val refreshSwipes: PublishRelay<Unit> = PublishRelay.create()
+    private val uiEvents = GridUiEvents(transientClears, activityResults, sortSelections, movieSelections, loadMore,
+            refreshSwipes)
+    private val sources = GridSources(uiEvents, sharedPrefs, movieStorage)
 
     @Suppress("unused")
     @get:Rule
@@ -107,13 +109,13 @@ class IntentionTest {
         val intentions = intention(sources, sortOptions)
         val observer = intentions.test()
 
-        val selectedMovie = SelectedMovie(0, "title", "releaseData", "overview", 12.5, "poster", "backdrop", null)
+        val selectedMovie = SelectedMovie(0, "title", "releaseData", "overview", 12.5, "poster", "backdrop", false)
         val expectedActions = listOf(
                 GridAction.SortSelection(sortOptions[0], sortOptions[0]),
-                GridAction.MovieClick(selectedMovie)
+                GridAction.MovieSelection(selectedMovie)
         )
 
-        movieClicks.accept(selectedMovie)
+        movieSelections.accept(selectedMovie)
 
         observer.assertValues(*expectedActions.toTypedArray())
         observer.assertNoErrors()
@@ -161,26 +163,18 @@ class IntentionTest {
     @Test
     fun shouldMapActivityResultsCorrectly() {
         val intent = Mockito.mock(Intent::class.java)
-        Mockito.`when`(intent.putExtra(RS_DATA_MOVIE_ID, 0)).thenReturn(intent)
-        Mockito.`when`(intent.getIntExtra(RS_DATA_MOVIE_ID, -1)).thenReturn(0)
 
         val intentions = intention(sources, sortOptions)
         val observer = intentions.test()
 
         val expectedActions = listOf(
                 GridAction.SortSelection(sortOptions[0], sortOptions[0]),
-                GridAction.FavDelete(0)
+                GridAction.MovieFavDeleted
         )
 
-        activityResults.accept(ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent))
-        activityResults.accept(
-                ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, null)) // data is null, should be ignored
-        activityResults.accept(
-                ActivityResult(0, RS_REMOVE_FROM_FAV, intent)) // other reqCode, should be ignored
+        activityResults.accept(ActivityResult(RQ_DETAILS, RS_DELETED_FROM_FAV, intent))
+        activityResults.accept(ActivityResult(0, RS_DELETED_FROM_FAV, intent)) // other reqCode, should be ignored
         activityResults.accept(ActivityResult(RQ_DETAILS, 2, intent)) // other resCode, should be ignored
-        Mockito.`when`(intent.getIntExtra(RS_DATA_MOVIE_ID, -1)).thenReturn(-1)
-        activityResults.accept(
-                ActivityResult(RQ_DETAILS, RS_REMOVE_FROM_FAV, intent)) // intent returns -1, should be ignored
 
         observer.assertValues(*expectedActions.toTypedArray())
         observer.assertNoErrors()

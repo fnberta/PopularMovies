@@ -31,5 +31,6 @@ data class GridRowMovieViewData(
         val voteAverage: Double,
         @get:Bindable val poster: String?,
         val backdrop: String?,
+        val fromFav: Boolean,
         override val viewType: Int = R.layout.row_movie
 ) : BaseObservable(), GridRowViewData

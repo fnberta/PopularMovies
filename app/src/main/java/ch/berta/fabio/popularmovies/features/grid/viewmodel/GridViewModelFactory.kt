@@ -23,6 +23,7 @@ import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.features.grid.Sort
 
 class GridViewModelFactory(
+        val useTwoPane: Boolean,
         val sharedPrefs: SharedPrefs,
         val movieStorage: MovieStorage,
         val sortOptions: List<Sort>
@@ -30,6 +31,11 @@ class GridViewModelFactory(
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return GridViewModel(sharedPrefs, movieStorage, sortOptions) as T
+        if (useTwoPane) {
+            return GridViewModelTwoPane(sharedPrefs, movieStorage, sortOptions) as T
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        return GridViewModelOnePane(sharedPrefs, movieStorage, sortOptions) as T
     }
 }

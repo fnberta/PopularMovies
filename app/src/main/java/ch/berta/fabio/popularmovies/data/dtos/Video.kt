@@ -28,6 +28,4 @@ data class Video(
         val site: String,
         val size: Int,
         val type: String
-) {
-    fun siteIsYouTube(): Boolean = site == ch.berta.fabio.popularmovies.data.dtos.YOU_TUBE
-}
+)

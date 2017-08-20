@@ -29,10 +29,13 @@ import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowMovieViewData
 import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowViewData
 import ch.berta.fabio.popularmovies.setHeight
 import com.jakewharton.rxrelay2.PublishRelay
+import paperparcel.PaperParcel
+import paperparcel.PaperParcelable
 
 class MovieViewHolder(binding: RowMovieBinding) : BaseBindingViewHolder<RowMovieBinding>(binding)
 
-data class SelectedMovie(
+@PaperParcel
+data class SelectedMovie @JvmOverloads constructor(
         val id: Int,
         val title: String,
         val releaseDate: String,
@@ -40,15 +43,22 @@ data class SelectedMovie(
         val voteAverage: Double,
         val poster: String?,
         val backdrop: String?,
-        val posterView: View?
-)
+        val fromFav: Boolean,
+        @Transient val posterView: View? = null
+) : PaperParcelable {
+    companion object {
+        @Suppress("unused")
+        @JvmField
+        val CREATOR = PaperParcelSelectedMovie.CREATOR
+    }
+}
 
 /**
  * Provides the adapter for a movie poster images grid.
  */
 class GridRecyclerAdapter(
-        val posterHeight: Int,
-        val movieClicks: PublishRelay<SelectedMovie>
+        private val posterHeight: Int,
+        val movieSelections: PublishRelay<SelectedMovie>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val movies = mutableListOf<GridRowViewData>()
@@ -68,9 +78,10 @@ class GridRecyclerAdapter(
                                 rowData.voteAverage,
                                 rowData.poster,
                                 rowData.backdrop,
+                                rowData.fromFav,
                                 binding.ivPoster
                         )
-                        movieClicks.accept(selectedMovie)
+                        movieSelections.accept(selectedMovie)
                     }
                 }
             }

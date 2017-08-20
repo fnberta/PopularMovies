@@ -43,12 +43,12 @@ data class VideoEntity(
 
 @Dao
 interface VideoDao {
-    @Query("SELECT id, movie_id, name, key, site, size, type FROM video " + "WHERE movie_id = :movieId")
+    @Query("SELECT id, movie_id, name, key, site, size, type FROM video WHERE movie_id = :movieId")
     fun getByMovieId(movieId: Int): Flowable<List<VideoEntity>>
 
     @Insert
     fun insertAll(videos: List<VideoEntity>)
 
-    @Query("DELETE FROM video " + "WHERE movie_id IN (SELECT id FROM movie WHERE id = :movieId)")
+    @Query("DELETE FROM video WHERE movie_id IN (SELECT id FROM movie WHERE id = :movieId)")
     fun deleteByMovieId(movieId: Int): Int
 }

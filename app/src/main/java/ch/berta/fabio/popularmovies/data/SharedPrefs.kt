@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 const val KEY_SORT_POS = "KEY_SORT_POS"
 
-class SharedPrefs @Inject constructor(val sharedPreferences: SharedPreferences) {
+class SharedPrefs @Inject constructor(private val sharedPreferences: SharedPreferences) {
 
     fun getSortPos(): Observable<Int> = Observable.fromCallable { sharedPreferences.getInt(KEY_SORT_POS, 0) }
 

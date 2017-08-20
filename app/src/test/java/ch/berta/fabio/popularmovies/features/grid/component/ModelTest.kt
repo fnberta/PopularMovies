@@ -18,7 +18,6 @@ package ch.berta.fabio.popularmovies.features.grid.component
 
 import ch.berta.fabio.popularmovies.ImmediateSchedulersRule
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.data.GetMoviesResult
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.data.dtos.Movie
@@ -27,18 +26,16 @@ import ch.berta.fabio.popularmovies.data.localmoviedb.tables.MovieDao
 import ch.berta.fabio.popularmovies.data.localmoviedb.tables.MovieEntity
 import ch.berta.fabio.popularmovies.data.themoviedb.TheMovieDbService
 import ch.berta.fabio.popularmovies.data.themoviedb.dtos.MoviesPage
-import ch.berta.fabio.popularmovies.features.common.SnackbarMessage
 import ch.berta.fabio.popularmovies.features.grid.SortOption
 import ch.berta.fabio.popularmovies.features.grid.makeSortOptions
 import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowLoadMoreViewData
 import ch.berta.fabio.popularmovies.features.grid.vdos.rows.GridRowMovieViewData
+import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
 import ch.berta.fabio.popularmovies.formatLong
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.android.plugins.RxAndroidPlugins
-import io.reactivex.schedulers.Schedulers
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,11 +44,11 @@ import java.util.*
 
 class ModelTest {
 
-    val sharedPrefs: SharedPrefs = Mockito.mock(SharedPrefs::class.java)
-    val theMovieDbService: TheMovieDbService = Mockito.mock(TheMovieDbService::class.java)
-    val movieDao: MovieDao = Mockito.mock(MovieDao::class.java)
-    val movieDb: MovieDb = Mockito.mock(MovieDb::class.java)
-    val movieStorage = MovieStorage(theMovieDbService, movieDb)
+    private val sharedPrefs: SharedPrefs = Mockito.mock(SharedPrefs::class.java)
+    private val theMovieDbService: TheMovieDbService = Mockito.mock(TheMovieDbService::class.java)
+    private val movieDao: MovieDao = Mockito.mock(MovieDao::class.java)
+    private val movieDb: MovieDb = Mockito.mock(MovieDb::class.java)
+    private val movieStorage = MovieStorage(theMovieDbService, movieDb)
 
     /*
     * 0: by popularity
@@ -59,9 +56,9 @@ class ModelTest {
     * 2: by release date
     * 3: favorites
     */
-    val sortOptions = makeSortOptions { "someRandomTitle" }
-    val initialSort = sortOptions[0]
-    val actions: PublishRelay<GridAction> = PublishRelay.create()
+    private val sortOptions = makeSortOptions { "someRandomTitle" }
+    private val initialSort = sortOptions[0]
+    private val actions: PublishRelay<GridAction> = PublishRelay.create()
 
     @Suppress("unused")
     @get:Rule
@@ -129,7 +126,7 @@ class ModelTest {
         actions.accept(GridAction.SortSelection(sortOptions[0], initialSort))
         actions.accept(GridAction.SortSelection(sortOptions[1], sortOptions[0]))
         actions.accept(GridAction.SortSelection(sortOptions[2], sortOptions[1]))
-        actions.accept(GridAction.SnackbarShown)
+        actions.accept(GridAction.TransientClear)
 
         Mockito.verify(sharedPrefs).writeSortPos(0)
         Mockito.verify(sharedPrefs).writeSortPos(1)
@@ -173,18 +170,18 @@ class ModelTest {
                         sort = sortOptions[3],
                         loading = false,
                         empty = true,
-                        snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed)
+                        message = R.string.snackbar_movies_load_failed
                 ),
                 GridState(
                         sort = sortOptions[3],
                         loading = false,
                         empty = true,
-                        snackbar = SnackbarMessage(false, R.string.snackbar_movies_load_failed)
+                        message = null
                 )
         )
 
         actions.accept(GridAction.SortSelection(sortOptions[3], initialSort))
-        actions.accept(GridAction.SnackbarShown)
+        actions.accept(GridAction.TransientClear)
 
         observer.assertValues(*expectedStates.toTypedArray())
         observer.assertNoErrors()
@@ -205,18 +202,18 @@ class ModelTest {
                         sort = initialSort,
                         loading = false,
                         empty = true,
-                        snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed)
+                        message = R.string.snackbar_movies_load_failed
                 ),
                 GridState(
                         sort = initialSort,
                         loading = false,
                         empty = true,
-                        snackbar = SnackbarMessage(false, R.string.snackbar_movies_load_failed)
+                        message = null
                 )
         )
 
         actions.accept(GridAction.SortSelection(initialSort, initialSort))
-        actions.accept(GridAction.SnackbarShown)
+        actions.accept(GridAction.TransientClear)
 
         observer.assertValues(*expectedStates.toTypedArray())
         observer.assertNoErrors()
@@ -285,17 +282,18 @@ class ModelTest {
                         sort = initialSort,
                         movies = page1GridViewData,
                         loadingMore = false,
-                        snackbar = SnackbarMessage(true, R.string.snackbar_movies_load_failed)),
+                        message = R.string.snackbar_movies_load_failed
+                ),
                 GridState(
                         sort = initialSort,
                         movies = page1GridViewData,
-                        snackbar = SnackbarMessage(false, R.string.snackbar_movies_load_failed)
+                        message = null
                 )
         )
 
         actions.accept(GridAction.SortSelection(initialSort, initialSort))
         actions.accept(GridAction.LoadMore(2))
-        actions.accept(GridAction.SnackbarShown)
+        actions.accept(GridAction.TransientClear)
 
         observer.assertValues(*expectedStates.toTypedArray())
         observer.assertNoErrors()
@@ -343,31 +341,40 @@ class ModelTest {
     }
 
     @Test
-    fun shouldHaveCorrectMessageOnDeleteFromFavClick() {
-        Mockito.`when`(movieDao.deleteById(0)).thenReturn(1)
-        Mockito.`when`(movieDao.deleteById(1)).thenReturn(0)
-
+    fun shouldHaveCorrectMessageOnDeletedFromFavResult() {
         val state = model(sortOptions, GridState(initialSort), actions, movieStorage, sharedPrefs)
         val observer = state.test()
         observer.assertNoValues()
 
         val expectedStates = listOf(
-                GridState(
-                        sort = initialSort,
-                        snackbar = SnackbarMessage(true, R.string.snackbar_movie_removed_from_favorites)
-                ),
-                GridState(
-                        sort = initialSort,
-                        snackbar = SnackbarMessage(false, R.string.snackbar_movie_removed_from_favorites)
-                ),
-                GridState(sort = initialSort, snackbar = SnackbarMessage(true, R.string.snackbar_movie_delete_failed)),
-                GridState(sort = initialSort, snackbar = SnackbarMessage(false, R.string.snackbar_movie_delete_failed))
+                GridState(sort = initialSort, message = R.string.snackbar_movie_removed_from_favorites),
+                GridState(sort = initialSort, message = null)
         )
 
-        actions.accept(GridAction.FavDelete(0))
-        actions.accept(GridAction.SnackbarShown)
-        actions.accept(GridAction.FavDelete(1))
-        actions.accept(GridAction.SnackbarShown)
+        actions.accept(GridAction.MovieFavDeleted)
+        actions.accept(GridAction.TransientClear)
+
+        observer.assertValues(*expectedStates.toTypedArray())
+        observer.assertNoErrors()
+        observer.assertNotComplete()
+    }
+
+    @Test
+    fun shouldHaveCorrectSelectedMovieOnClick() {
+        val state = model(sortOptions, GridState(initialSort), actions, movieStorage, sharedPrefs)
+        val observer = state.test()
+        observer.assertNoValues()
+
+        val selectedMovieOnl = SelectedMovie(0, "title", "releaseData", "overview", 12.5, "poster", "backdrop", false)
+        val selectedMovieFav = SelectedMovie(0, "title", "releaseData", "overview", 12.5, "poster", "backdrop", true)
+
+        val expectedStates = listOf(
+                GridState(sort = initialSort, selectedMovie = selectedMovieOnl),
+                GridState(sort = initialSort, selectedMovie = selectedMovieFav)
+        )
+
+        actions.accept(GridAction.MovieSelection(selectedMovieOnl))
+        actions.accept(GridAction.MovieSelection(selectedMovieFav))
 
         observer.assertValues(*expectedStates.toTypedArray())
         observer.assertNoErrors()
@@ -380,7 +387,7 @@ class ModelTest {
     private fun mapGridRowMovieViewData(movies: List<Movie>): List<GridRowMovieViewData> = movies
             .map {
                 GridRowMovieViewData(it.id, it.title, it.overview, it.releaseDate.formatLong(), it.voteAverage,
-                        it.poster, it.backdrop)
+                        it.poster, it.backdrop, false)
             }
 
     private fun getMovieEntities(count: Int): List<MovieEntity> = (1..count)
@@ -389,6 +396,6 @@ class ModelTest {
     private fun mapGridRowMovieEntityViewData(movies: List<MovieEntity>): List<GridRowMovieViewData> = movies
             .map {
                 GridRowMovieViewData(it.id, it.title, it.overview, it.releaseDate.formatLong(), it.voteAverage,
-                        it.poster, it.backdrop)
+                        it.poster, it.backdrop, true)
             }
 }

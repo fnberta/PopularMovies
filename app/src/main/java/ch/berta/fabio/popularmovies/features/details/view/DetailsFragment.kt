@@ -18,40 +18,46 @@ package ch.berta.fabio.popularmovies.features.details.view
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.app.ActivityCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import ch.berta.fabio.popularmovies.R
+import ch.berta.fabio.popularmovies.bindTo
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsBinding
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.details.component.DetailsState
 import ch.berta.fabio.popularmovies.features.details.vdos.DetailsViewData
 import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModel
-
-
-const val KEY_ARGS = "KEY_ARGS"
+import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModelOnePane
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelTwoPane
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.MoviesState
 
 class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
                         PosterLoadListener {
 
-    private val viewModel by lazy { ViewModelProviders.of(activity).get(DetailsViewModel::class.java) }
+    private val useTwoPane by lazy { resources.getBoolean(R.bool.use_two_pane_layout) }
+    private val viewModel by lazy {
+        if (useTwoPane) {
+            ViewModelProviders.of(activity).get(GridViewModelTwoPane::class.java) as DetailsViewModel
+        } else {
+            ViewModelProviders.of(activity).get(DetailsViewModelOnePane::class.java) as DetailsViewModel
+        }
+    }
     private val viewData = DetailsViewData()
     private val recyclerAdapter by lazy { DetailsRecyclerAdapter(viewModel.videoClicks, this) }
     private lateinit var binding: FragmentMovieDetailsBinding
 
-    companion object {
-        fun newInstance(detailsArgs: DetailsArgs): DetailsFragment {
-            val args = Bundle().apply { putParcelable(KEY_ARGS, detailsArgs) }
-            return DetailsFragment().apply { arguments = args }
-        }
-    }
-
-    override fun onCreateView(inflater: LayoutInflater?,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+            inflater: LayoutInflater?,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentMovieDetailsBinding.inflate(inflater, container, false)
         binding.viewData = viewData
         return binding.root
@@ -76,15 +82,36 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
         super.onActivityCreated(savedInstanceState)
 
         binding.srlDetailsFav.setOnRefreshListener { viewModel.updateSwipes.accept(Unit) }
-        viewData.refreshEnabled = arguments.getParcelable<DetailsArgs>(KEY_ARGS).fromFavList
-        viewModel.state.observe(this, Observer<DetailsState> {
-            it?.let { render(it) }
+        viewModel.state.observe(this, Observer<MoviesState> {
+            if (it is MoviesState.Details) {
+                render(it.value)
+            }
         })
     }
 
     private fun render(state: DetailsState) {
-        recyclerAdapter.swapData(state.details)
-        viewData.refreshing = state.updating
+        with(state) {
+            if (movieDeletedFromFavScreen && !useTwoPane) {
+                activity.setResult(RS_DELETED_FROM_FAV)
+                ActivityCompat.finishAfterTransition(activity)
+                return
+            }
+
+            viewData.refreshEnabled = updateEnabled
+            viewData.refreshing = updating
+            recyclerAdapter.swapData(details)
+
+            if (selectedVideoUrl != null) {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(selectedVideoUrl))
+                startActivity(intent)
+                viewModel.transientClears.accept(Unit)
+            }
+
+            if (message != null) {
+                Snackbar.make(binding.srlDetailsFav, message, Snackbar.LENGTH_LONG).show()
+                viewModel.transientClears.accept(Unit)
+            }
+        }
     }
 
     override fun onPosterLoaded() {

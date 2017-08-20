@@ -17,42 +17,17 @@
 package ch.berta.fabio.popularmovies.features.details.viewmodel
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
-import ch.berta.fabio.popularmovies.NavigationTarget
-import ch.berta.fabio.popularmovies.data.MovieStorage
-import ch.berta.fabio.popularmovies.features.base.BaseViewModel
-import ch.berta.fabio.popularmovies.features.details.component.*
 import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData
-import ch.berta.fabio.popularmovies.features.details.view.DetailsArgs
+import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.MoviesState
 import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Observable
 
-class DetailsViewModel(
-        movieStorage: MovieStorage,
-        detailsArgs: DetailsArgs
-) : BaseViewModel() {
-
-    val updateSwipes: PublishRelay<Unit> = PublishRelay.create()
-    val favClicks: PublishRelay<Unit> = PublishRelay.create()
-    val videoClicks: PublishRelay<DetailsVideoRowViewData> = PublishRelay.create()
-
-    val state: LiveData<DetailsState>
-    val navigation: Observable<NavigationTarget>
-
-    val uiEvents = DetailsUiEvents(snackbarShown, updateSwipes, favClicks, videoClicks)
-
-    init {
-        val sources = DetailsSources(uiEvents, movieStorage)
-        val sinks = main(sources, detailsArgs)
-
-        state = LiveDataReactiveStreams.fromPublisher(sinks
-                .ofType(DetailsSink.State::class.java)
-                .map { it.state }
-                .toFlowable(BackpressureStrategy.LATEST)
-        )
-        navigation = sinks
-                .ofType(DetailsSink.Navigation::class.java)
-                .map { it.target }
-    }
+interface DetailsViewModel {
+    val transientClears: PublishRelay<Unit>
+    val movieSelections: PublishRelay<SelectedMovie>
+    val sortSelections: PublishRelay<Int>
+    val updateSwipes: PublishRelay<Unit>
+    val favClicks: PublishRelay<Unit>
+    val videoClicks: PublishRelay<DetailsVideoRowViewData>
+    val state: LiveData<MoviesState>
 }

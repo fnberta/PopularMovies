@@ -18,10 +18,12 @@ package ch.berta.fabio.popularmovies.features.details.view
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import ch.berta.fabio.popularmovies.*
+import android.support.v4.app.FragmentActivity
+import ch.berta.fabio.popularmovies.PopularMovies
+import ch.berta.fabio.popularmovies.R
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.databinding.ActivityMovieDetailsBinding
 import ch.berta.fabio.popularmovies.di.ApplicationComponent
@@ -29,29 +31,15 @@ import ch.berta.fabio.popularmovies.features.base.BaseActivity
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.details.component.DetailsState
 import ch.berta.fabio.popularmovies.features.details.vdos.DetailsHeaderViewData
-import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModel
 import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModelFactory
-import paperparcel.PaperParcel
-import paperparcel.PaperParcelable
+import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModelOnePane
+import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.MoviesState
 import javax.inject.Inject
 
-@PaperParcel
-data class DetailsArgs(
-        val id: Int,
-        val title: String,
-        val releaseDate: String,
-        val overview: String,
-        val voteAverage: Double,
-        val poster: String?,
-        val backdrop: String?,
-        val fromFavList: Boolean
-) : PaperParcelable {
-    companion object {
-        @Suppress("unused")
-        @JvmField
-        val CREATOR = PaperParcelDetailsArgs.CREATOR
-    }
-}
+const val KEY_EXTRAS = "KEY_EXTRAS"
+const val RQ_DETAILS = 1
+const val RS_DELETED_FROM_FAV = 3
 
 /**
  * Presents the backdrop image of a selected movie in a collapsing toolbar.
@@ -61,14 +49,22 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
     @Inject
     lateinit var movieStorage: MovieStorage
     private val viewModel by lazy {
-        val args = intent.getParcelableExtra<DetailsArgs>(KEY_ACTIVITY_ARGS)
-        val factory = DetailsViewModelFactory(movieStorage, args)
-        ViewModelProviders.of(this, factory).get(DetailsViewModel::class.java)
+        val factory = DetailsViewModelFactory(movieStorage)
+        ViewModelProviders.of(this, factory).get(DetailsViewModelOnePane::class.java)
     }
     private val component: ApplicationComponent by lazy { PopularMovies.getAppComponent(this) }
     private val viewData = DetailsHeaderViewData()
     private val binding by lazy {
         DataBindingUtil.setContentView<ActivityMovieDetailsBinding>(this, R.layout.activity_movie_details)
+    }
+
+    companion object {
+        fun startWithExtras(activity: FragmentActivity, extras: SelectedMovie, rqCode: Int, bundle: Bundle?) {
+            val intent = Intent(activity, DetailsActivity::class.java).apply {
+                putExtra(KEY_EXTRAS, extras)
+            }
+            activity.startActivityForResult(intent, rqCode, bundle)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,31 +85,27 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
 
         if (savedInstanceState == null) {
             addFragment()
+            val selectedMovie = intent.getParcelableExtra<SelectedMovie>(KEY_EXTRAS)
+            viewModel.movieSelections.accept(selectedMovie)
         }
     }
 
     private fun initViewModel() {
-        viewModel.state.observe(this, Observer<DetailsState> {
-            it?.let { render(it) }
+        viewModel.state.observe(this, Observer<MoviesState> {
+            if (it is MoviesState.Details) {
+                render(it.value)
+            }
         })
-        viewModel.navigation
-                .bindTo(lifecycle)
-                .subscribe { navigateTo(this, it) }
     }
 
     private fun render(state: DetailsState) {
         viewData.title = state.title
         viewData.backdrop = state.backdrop
         viewData.favoured = state.favoured
-        if (state.snackbar.show) {
-            Snackbar.make(binding.container, state.snackbar.message, Snackbar.LENGTH_LONG).show()
-            viewModel.snackbarShown.accept(Unit)
-        }
     }
 
     private fun addFragment() {
-        val args = intent.getParcelableExtra<DetailsArgs>(KEY_ACTIVITY_ARGS)
-        val fragment = DetailsFragment.newInstance(args)
+        val fragment = DetailsFragment()
         supportFragmentManager.beginTransaction()
                 .add(R.id.container, fragment, fragment.javaClass.canonicalName)
                 .commit()

@@ -48,16 +48,12 @@ class MovieServiceModule {
             .registerTypeAdapter(Date::class.java, object : JsonDeserializer<Date> {
                 private val dateFormat: DateFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
 
-                override fun deserialize(
-                        json: JsonElement, typeOfT: Type,
-                        context: JsonDeserializationContext
-                ): Date {
-                    try {
-                        return dateFormat.parse(json.asString)
-                    } catch (e: ParseException) {
-                        return Date()
-                    }
-                }
+                override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Date =
+                        try {
+                            dateFormat.parse(json.asString)
+                        } catch (e: ParseException) {
+                            Date()
+                        }
             })
             .create()
 
