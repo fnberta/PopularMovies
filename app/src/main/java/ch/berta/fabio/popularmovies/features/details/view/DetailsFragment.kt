@@ -28,15 +28,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.bindTo
 import ch.berta.fabio.popularmovies.databinding.FragmentMovieDetailsBinding
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.details.component.DetailsState
 import ch.berta.fabio.popularmovies.features.details.vdos.DetailsViewData
+import ch.berta.fabio.popularmovies.features.details.view.viewholders.InfoViewHolder
 import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModel
 import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModelOnePane
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelTwoPane
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.MoviesState
+
 
 class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
                         PosterLoadListener {
@@ -92,6 +93,7 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
     private fun render(state: DetailsState) {
         with(state) {
             if (movieDeletedFromFavScreen && !useTwoPane) {
+                removeSharedElement()
                 activity.setResult(RS_DELETED_FROM_FAV)
                 ActivityCompat.finishAfterTransition(activity)
                 return
@@ -112,6 +114,13 @@ class DetailsFragment : BaseFragment<BaseFragment.ActivityListener>(),
                 viewModel.transientClears.accept(Unit)
             }
         }
+    }
+
+    private fun removeSharedElement() {
+        // info row will always be the first position in one pane mode, hence 0
+        val infoRow = binding.rvDetails.findViewHolderForAdapterPosition(0) as InfoViewHolder
+        infoRow.binding.viewData.transitionEnabled = false
+        infoRow.binding.executePendingBindings()
     }
 
     override fun onPosterLoaded() {

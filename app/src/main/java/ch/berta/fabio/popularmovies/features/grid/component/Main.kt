@@ -53,6 +53,7 @@ data class GridUiEvents(
 data class GridState(
         val sort: Sort,
         val movies: List<GridRowViewData> = emptyList(),
+        val diffTransition: Boolean = true,
         val empty: Boolean = false,
         val loading: Boolean = false,
         val loadingMore: Boolean = false,
@@ -61,8 +62,10 @@ data class GridState(
         val selectedMovie: SelectedMovie? = null
 )
 
-fun main(sources: GridSources, initialState: GridState, sortOptions: List<Sort>): Observable<GridState> =
-        intention(sources, sortOptions)
-                .log("grid action")
-                .publish { model(sortOptions, initialState, it, sources.movieStorage, sources.sharedPrefs) }
-                .share()
+fun main(
+        sources: GridSources,
+        initialState: GridState,
+        sortOptions: List<Sort>
+): Observable<GridState> = intention(sources, sortOptions)
+        .log("grid action")
+        .publish { model(sortOptions, initialState, it, sources.movieStorage, sources.sharedPrefs) }

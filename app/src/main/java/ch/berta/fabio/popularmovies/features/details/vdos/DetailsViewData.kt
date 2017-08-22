@@ -21,7 +21,8 @@ import android.databinding.Bindable
 import ch.berta.fabio.popularmovies.BR
 
 class DetailsViewData : BaseObservable() {
-    @get:Bindable var refreshing: Boolean = false
+    @get:Bindable
+    var refreshing: Boolean = false
         set(value) {
             field = value
             notifyPropertyChanged(BR.refreshing)

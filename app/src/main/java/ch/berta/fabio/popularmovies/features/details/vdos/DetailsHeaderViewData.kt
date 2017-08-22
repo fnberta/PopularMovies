@@ -21,19 +21,22 @@ import android.databinding.Bindable
 import ch.berta.fabio.popularmovies.BR
 
 class DetailsHeaderViewData : BaseObservable() {
-    @get:Bindable var title: String = ""
+    @get:Bindable
+    var title: String = ""
         set(value) {
             field = value
             notifyPropertyChanged(BR.title)
         }
 
-    @get:Bindable var backdrop: String? = ""
+    @get:Bindable
+    var backdrop: String? = ""
         set(value) {
             field = value
             notifyPropertyChanged(BR.backdrop)
         }
 
-    @get:Bindable var favoured: Boolean = false
+    @get:Bindable
+    var favoured: Boolean = false
         set(value) {
             field = value
             notifyPropertyChanged(BR.favoured)

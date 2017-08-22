@@ -27,7 +27,6 @@ import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
 import ch.berta.fabio.popularmovies.formatLong
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.withLatestFrom
-import timber.log.Timber
 
 typealias DetailsStateReducer = (DetailsState) -> DetailsState
 

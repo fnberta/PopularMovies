@@ -85,8 +85,7 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
 
         if (savedInstanceState == null) {
             addFragment()
-            val selectedMovie = intent.getParcelableExtra<SelectedMovie>(KEY_EXTRAS)
-            viewModel.movieSelections.accept(selectedMovie)
+            sendSelectedMovie()
         }
     }
 
@@ -109,5 +108,10 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         supportFragmentManager.beginTransaction()
                 .add(R.id.container, fragment, fragment.javaClass.canonicalName)
                 .commit()
+    }
+
+    private fun sendSelectedMovie() {
+        val selectedMovie = intent.getParcelableExtra<SelectedMovie>(KEY_EXTRAS)
+        viewModel.movieSelections.accept(selectedMovie)
     }
 }

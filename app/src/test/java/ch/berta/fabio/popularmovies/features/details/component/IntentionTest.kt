@@ -35,10 +35,12 @@ class IntentionTest {
 
     private val transientClears: PublishRelay<Unit> = PublishRelay.create()
     private val movieSelections: PublishRelay<SelectedMovie> = PublishRelay.create()
+    private val sortSelections: PublishRelay<Int> = PublishRelay.create()
     private val updateSwipes: PublishRelay<Unit> = PublishRelay.create()
     private val favClicks: PublishRelay<Unit> = PublishRelay.create()
     private val videoClicks: PublishRelay<DetailsVideoRowViewData> = PublishRelay.create()
-    private val uiEvents = DetailsUiEvents(transientClears, movieSelections, updateSwipes, favClicks, videoClicks)
+    private val uiEvents = DetailsUiEvents(transientClears, movieSelections, sortSelections, updateSwipes, favClicks,
+            videoClicks)
     private val sources = DetailsSources(uiEvents, movieStorage)
 
     @Suppress("unused")

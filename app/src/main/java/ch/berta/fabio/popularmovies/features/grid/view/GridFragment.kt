@@ -126,7 +126,7 @@ class GridFragment : BaseFragment<BaseFragment.ActivityListener>() {
             viewData.loading = loading
             viewData.refreshing = refreshing
             viewData.loadingMore = loadingMore
-            recyclerAdapter.swapData(movies)
+            recyclerAdapter.swapData(movies, diffTransition)
 
             if (message != null) {
                 Snackbar.make(binding.srlGrid, message, Snackbar.LENGTH_LONG).show()

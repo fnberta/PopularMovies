@@ -59,4 +59,3 @@ data class DetailsState(
 fun main(sources: DetailsSources, initialState: DetailsState): Observable<DetailsState> = intention(sources)
         .log("details action")
         .publish { model(initialState, it, sources.movieStorage) }
-        .share()
