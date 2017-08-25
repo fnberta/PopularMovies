@@ -69,3 +69,4 @@ fun main(
 ): Observable<GridState> = intention(sources, sortOptions)
         .log("grid action")
         .publish { model(sortOptions, initialState, it, sources.movieStorage, sources.sharedPrefs) }
+        .log("grid state")

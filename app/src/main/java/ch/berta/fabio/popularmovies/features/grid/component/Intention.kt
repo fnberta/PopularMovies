@@ -20,22 +20,24 @@ import ch.berta.fabio.popularmovies.features.details.view.RQ_DETAILS
 import ch.berta.fabio.popularmovies.features.details.view.RS_DELETED_FROM_FAV
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.SortSelectionState
+import ch.berta.fabio.popularmovies.log
 import io.reactivex.Observable
 
 fun intention(sources: GridSources, sortOptions: List<Sort>): Observable<GridAction> {
     val transientClears = sources.uiEvents.transientClears.map { GridAction.TransientClear }
 
     val sortSelectionsSharedPrefs = sources.sharedPrefs.getSortPos()
+            .distinctUntilChanged()
             .map { SortSelectionState(sortOptions[it], sortOptions[0]) }
     val sortSelectionsSpinner = sources.uiEvents.sortSelections
             .skip(1) // skip initial position 0 emission (spinner always emit this)
+            .distinctUntilChanged()
             .map { sortOptions[it] }
             .scan(SortSelectionState(sortOptions[0], sortOptions[0]),
                     { (sort), curr -> SortSelectionState(curr, sort) })
             .skip(1) // skip initial scan emission
 
     val sortSelections = Observable.merge(sortSelectionsSharedPrefs, sortSelectionsSpinner)
-            .distinctUntilChanged()
             .map { GridAction.SortSelection(it.sort, it.sortPrev) }
     val movieClicks = sources.uiEvents.movieSelections.map { GridAction.MovieSelection(it) }
     val loadMore = sources.uiEvents.loadMore
