@@ -24,18 +24,18 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import ch.berta.fabio.popularmovies.PopularMovies
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.databinding.ActivityMovieDetailsBinding
 import ch.berta.fabio.popularmovies.di.ApplicationComponent
 import ch.berta.fabio.popularmovies.features.base.BaseActivity
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
 import ch.berta.fabio.popularmovies.features.details.component.DetailsState
+import ch.berta.fabio.popularmovies.features.details.di.DaggerDetailsComponent
+import ch.berta.fabio.popularmovies.features.details.di.DetailsComponent
 import ch.berta.fabio.popularmovies.features.details.vdos.DetailsHeaderViewData
 import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModelFactory
 import ch.berta.fabio.popularmovies.features.details.viewmodel.DetailsViewModelOnePane
 import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.MoviesState
-import javax.inject.Inject
 
 const val KEY_EXTRAS = "KEY_EXTRAS"
 const val RQ_DETAILS = 1
@@ -46,16 +46,18 @@ const val RS_DELETED_FROM_FAV = 3
  */
 class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
 
-    @Inject
-    lateinit var movieStorage: MovieStorage
-    private val viewModel by lazy {
-        val factory = DetailsViewModelFactory(movieStorage)
-        ViewModelProviders.of(this, factory).get(DetailsViewModelOnePane::class.java)
-    }
-    private val component: ApplicationComponent by lazy { PopularMovies.getAppComponent(this) }
-    private val viewData = DetailsHeaderViewData()
     private val binding by lazy {
         DataBindingUtil.setContentView<ActivityMovieDetailsBinding>(this, R.layout.activity_movie_details)
+    }
+    private val viewData = DetailsHeaderViewData()
+    private val component by lazy {
+        DaggerDetailsComponent.builder()
+                .applicationComponent(PopularMovies.getAppComponent(this))
+                .build()
+    }
+    private val viewModel by lazy {
+        val factory = component.detailsViewModelFactory
+        ViewModelProviders.of(this, factory).get(DetailsViewModelOnePane::class.java)
     }
 
     companion object {
@@ -73,7 +75,6 @@ class DetailsActivity : BaseActivity(), BaseFragment.ActivityListener {
         // enter transition will start when movie poster is loaded
         supportPostponeEnterTransition()
 
-        component.inject(this)
         binding.viewData = viewData
 
         setSupportActionBar(binding.toolbar)

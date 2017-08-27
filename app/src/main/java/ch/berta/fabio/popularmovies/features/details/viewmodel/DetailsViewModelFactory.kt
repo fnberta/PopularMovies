@@ -19,8 +19,10 @@ package ch.berta.fabio.popularmovies.features.details.viewmodel
 import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProvider
 import ch.berta.fabio.popularmovies.data.MovieStorage
+import javax.inject.Inject
 
-class DetailsViewModelFactory(val movieStorage: MovieStorage) : ViewModelProvider.NewInstanceFactory() {
+class DetailsViewModelFactory @Inject constructor(val movieStorage: MovieStorage) :
+        ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")

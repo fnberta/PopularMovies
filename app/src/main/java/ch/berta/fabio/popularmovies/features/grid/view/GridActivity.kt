@@ -26,10 +26,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import ch.berta.fabio.popularmovies.PopularMovies
 import ch.berta.fabio.popularmovies.R
-import ch.berta.fabio.popularmovies.data.MovieStorage
-import ch.berta.fabio.popularmovies.data.SharedPrefs
 import ch.berta.fabio.popularmovies.databinding.ActivityMovieGridBinding
-import ch.berta.fabio.popularmovies.di.ApplicationComponent
 import ch.berta.fabio.popularmovies.features.base.ActivityResult
 import ch.berta.fabio.popularmovies.features.base.BaseActivity
 import ch.berta.fabio.popularmovies.features.base.BaseFragment
@@ -37,45 +34,49 @@ import ch.berta.fabio.popularmovies.features.details.component.DetailsState
 import ch.berta.fabio.popularmovies.features.details.view.DetailsFragment
 import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.component.GridState
+import ch.berta.fabio.popularmovies.features.grid.di.DaggerGridComponent
+import ch.berta.fabio.popularmovies.features.grid.di.modules.GridViewModelFactoryModule
 import ch.berta.fabio.popularmovies.features.grid.makeSortOptions
 import ch.berta.fabio.popularmovies.features.grid.vdos.GridHeaderViewData
-import ch.berta.fabio.popularmovies.features.grid.viewmodel.*
-import javax.inject.Inject
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModel
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelOnePane
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelTwoPane
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.MoviesState
 
 /**
  * Provides the main entry point to the app.
  */
 class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
 
-    @Inject
-    lateinit var sharedPrefs: SharedPrefs
-    @Inject
-    lateinit var movieStorage: MovieStorage
-    private val component: ApplicationComponent by lazy { PopularMovies.getAppComponent(this) }
     private val binding by lazy {
         DataBindingUtil.setContentView<ActivityMovieGridBinding>(this, R.layout.activity_movie_grid)
     }
+    private val viewData = GridHeaderViewData()
     private val useTwoPane by lazy { resources.getBoolean(R.bool.use_two_pane_layout) }
     private val sortOptions by lazy { makeSortOptions { getString(it) } }
-    private val spinnerAdapter by lazy {
-        ArrayAdapter<Sort>(this, R.layout.spinner_item_toolbar, sortOptions).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
+    private val component by lazy {
+        DaggerGridComponent.builder()
+                .applicationComponent(PopularMovies.getAppComponent(this))
+                .gridViewModelFactoryModule(GridViewModelFactoryModule(useTwoPane, sortOptions))
+                .build()
     }
-    private val viewData = GridHeaderViewData()
     private val viewModel by lazy {
-        val factory = GridViewModelFactory(useTwoPane, sharedPrefs, movieStorage, sortOptions)
+        val factory = component.gridViewModelFactory
         if (useTwoPane) {
             ViewModelProviders.of(this, factory).get(GridViewModelTwoPane::class.java) as GridViewModel
         } else {
             ViewModelProviders.of(this, factory).get(GridViewModelOnePane::class.java) as GridViewModel
         }
     }
+    private val spinnerAdapter by lazy {
+        ArrayAdapter<Sort>(this, R.layout.spinner_item_toolbar, sortOptions).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        component.inject(this)
         binding.viewData = viewData
         initViewModel()
 

@@ -67,7 +67,7 @@ class ReviewsItemDecoration(
                 .filter { parent.getChildViewHolder(it).itemViewType == dividerViewType }
                 .forEach {
                     parent.getDecoratedBoundsWithMargins(it, bounds)
-                    val bottom = bounds.bottom + Math.round(ViewCompat.getTranslationY(it))
+                    val bottom = bounds.bottom + Math.round(it.translationY)
                     val top = bottom - divider.intrinsicHeight
                     divider.setBounds(left, top, right, bottom)
                     divider.draw(canvas)

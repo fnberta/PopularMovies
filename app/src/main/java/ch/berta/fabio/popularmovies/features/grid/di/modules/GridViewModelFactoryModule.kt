@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package ch.berta.fabio.popularmovies.features.grid.viewmodel
+package ch.berta.fabio.popularmovies.features.grid.di.modules
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProvider
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
+import ch.berta.fabio.popularmovies.di.scopes.PerActivity
 import ch.berta.fabio.popularmovies.features.grid.Sort
+import ch.berta.fabio.popularmovies.features.grid.viewmodel.GridViewModelFactory
+import dagger.Module
+import dagger.Provides
 
-class GridViewModelFactory(
-        private val sharedPrefs: SharedPrefs,
-        private val movieStorage: MovieStorage,
-        private val useTwoPane: Boolean,
-        private val sortOptions: List<Sort>
-) : ViewModelProvider.NewInstanceFactory() {
+/**
+ * Defines the instantiation of the singleton targets.
+ */
+@Module
+class GridViewModelFactoryModule(private val useTwoPane: Boolean, private val sortOptions: List<Sort>) {
 
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        @Suppress("UNCHECKED_CAST")
-        if (useTwoPane) {
-            return GridViewModelTwoPane(sharedPrefs, movieStorage, sortOptions) as T
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        return GridViewModelOnePane(sharedPrefs, movieStorage, sortOptions) as T
-    }
+    @Provides
+    @PerActivity
+    internal fun providesGridViewModelFactory(
+            sharedPrefs: SharedPrefs,
+            movieStorage: MovieStorage
+    ): GridViewModelFactory = GridViewModelFactory(sharedPrefs, movieStorage, useTwoPane, sortOptions)
 }
