@@ -46,6 +46,7 @@ data class DetailsUiEvents(
 
 data class DetailsState(
         val updateEnabled: Boolean = false,
+        val movieSelected: Boolean = false,
         val updating: Boolean = false,
         val title: String = "",
         val backdrop: String? = "",

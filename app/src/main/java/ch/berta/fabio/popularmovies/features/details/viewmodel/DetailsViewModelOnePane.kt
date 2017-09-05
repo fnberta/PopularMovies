@@ -17,7 +17,6 @@
 package ch.berta.fabio.popularmovies.features.details.viewmodel
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.ViewModel
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.features.details.component.DetailsSources
@@ -27,8 +26,8 @@ import ch.berta.fabio.popularmovies.features.details.component.main
 import ch.berta.fabio.popularmovies.features.details.vdos.rows.DetailsVideoRowViewData
 import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
 import ch.berta.fabio.popularmovies.features.grid.viewmodel.MoviesState
+import ch.berta.fabio.popularmovies.toLiveData
 import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 
 fun getDetailsState(uiEvents: DetailsUiEvents, movieStorage: MovieStorage): Observable<DetailsState> {
@@ -52,9 +51,8 @@ class DetailsViewModelOnePane(movieStorage: MovieStorage) : ViewModel(), Details
         val uiEvents = DetailsUiEvents(transientClears, movieSelections, sortSelections, updateSwipes, favClicks,
                 videoClicks)
 
-        state = LiveDataReactiveStreams.fromPublisher(getDetailsState(uiEvents, movieStorage)
+        state = getDetailsState(uiEvents, movieStorage)
                 .map<MoviesState> { MoviesState.Details(it) }
-                .toFlowable(BackpressureStrategy.LATEST)
-        )
+                .toLiveData()
     }
 }

@@ -17,7 +17,6 @@
 package ch.berta.fabio.popularmovies.features.grid.viewmodel
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.LiveDataReactiveStreams
 import android.arch.lifecycle.ViewModel
 import ch.berta.fabio.popularmovies.data.MovieStorage
 import ch.berta.fabio.popularmovies.data.SharedPrefs
@@ -31,8 +30,8 @@ import ch.berta.fabio.popularmovies.features.grid.Sort
 import ch.berta.fabio.popularmovies.features.grid.component.GridState
 import ch.berta.fabio.popularmovies.features.grid.component.GridUiEvents
 import ch.berta.fabio.popularmovies.features.grid.view.SelectedMovie
+import ch.berta.fabio.popularmovies.toLiveData
 import com.jakewharton.rxrelay2.PublishRelay
-import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import ch.berta.fabio.popularmovies.features.details.component.main as detailsMain
 import ch.berta.fabio.popularmovies.features.grid.component.main as gridMain
@@ -66,12 +65,9 @@ class GridViewModelTwoPane(
                 refreshSwipes)
         val detailsUiEvents = DetailsUiEvents(transientClears, movieSelections, sortSelections, updateSwipes, favClicks,
                 videoClicks)
-
-        val moviesState = Observable.merge(
+        state = Observable.merge(
                 getGridState(gridUiEvents, sharedPrefs, movieStorage, sortOptions).map { MoviesState.Grid(it) },
                 getDetailsState(detailsUiEvents, movieStorage).map { MoviesState.Details(it) }
-        )
-
-        state = LiveDataReactiveStreams.fromPublisher(moviesState.toFlowable(BackpressureStrategy.LATEST))
+        ).toLiveData()
     }
 }

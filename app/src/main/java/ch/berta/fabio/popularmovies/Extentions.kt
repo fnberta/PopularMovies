@@ -19,8 +19,11 @@ package ch.berta.fabio.popularmovies
 import android.animation.ObjectAnimator
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleRegistry
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.LiveDataReactiveStreams
 import android.view.View
 import android.widget.TextView
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Observable
 import java.text.DateFormat
 import java.util.*
@@ -32,6 +35,10 @@ fun <T> Observable<T>.bindTo(lifecycleRegistry: LifecycleRegistry): Observable<T
             .takeWhile { lifecycleRegistry.currentState != Lifecycle.State.DESTROYED }
             .filter { lifecycleRegistry.currentState.isAtLeast(Lifecycle.State.STARTED) }
 }
+
+fun <T> Observable<T>.toLiveData(
+        backpressureStrategy: BackpressureStrategy = BackpressureStrategy.LATEST
+): LiveData<T> = LiveDataReactiveStreams.fromPublisher(toFlowable(backpressureStrategy))
 
 private const val COLLAPSE_EXPAND_ANIM_TIME: Long = 300
 private const val MAX_LINES_EXPANDED = 500

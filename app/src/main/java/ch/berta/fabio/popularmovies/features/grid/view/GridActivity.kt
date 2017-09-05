@@ -106,7 +106,7 @@ class GridActivity : BaseActivity(), BaseFragment.ActivityListener {
     }
 
     private fun renderDetails(state: DetailsState) {
-        viewData.movieSelected = true
+        viewData.movieSelected = state.movieSelected
         viewData.favoured = state.favoured
     }
 

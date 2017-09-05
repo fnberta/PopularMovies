@@ -114,6 +114,7 @@ private fun movieInfoReducer(selectedMovie: SelectedMovie): DetailsStateReducer 
             DetailsLoadingRowViewData()
     )
     it.copy(
+            movieSelected = true,
             updateEnabled = selectedMovie.fromFav,
             title = selectedMovie.title,
             backdrop = selectedMovie.backdrop,

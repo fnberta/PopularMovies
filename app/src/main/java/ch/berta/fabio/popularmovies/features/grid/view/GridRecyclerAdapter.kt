@@ -107,35 +107,29 @@ class GridRecyclerAdapter(
 
     override fun getItemCount(): Int = movies.size
 
-    fun swapData(newMovies: List<GridRowViewData>, diff: Boolean) {
-        if (diff) {
-            val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    val oldItem = movies[oldItemPosition]
-                    val newItem = newMovies[newItemPosition]
+    fun swapData(newMovies: List<GridRowViewData>) {
+        val diffResult = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                val oldItem = movies[oldItemPosition]
+                val newItem = newMovies[newItemPosition]
 
-                    return when {
-                        oldItem.viewType != newItem.viewType -> false
-                        oldItem.viewType == R.layout.row_progress -> true
-                        else -> (oldItem as GridRowMovieViewData).id == (newItem as GridRowMovieViewData).id
-                    }
+                return when {
+                    oldItem.viewType != newItem.viewType -> false
+                    oldItem.viewType == R.layout.row_progress -> true
+                    else -> (oldItem as GridRowMovieViewData).id == (newItem as GridRowMovieViewData).id
                 }
+            }
 
-                override fun getOldListSize(): Int = movies.size
+            override fun getOldListSize(): Int = movies.size
 
-                override fun getNewListSize(): Int = newMovies.size
+            override fun getNewListSize(): Int = newMovies.size
 
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                        movies[oldItemPosition] == newMovies[newItemPosition]
-            })
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+                    movies[oldItemPosition] == newMovies[newItemPosition]
+        })
 
-            movies.clear()
-            movies.addAll(newMovies)
-            diffResult.dispatchUpdatesTo(this)
-        } else {
-            movies.clear()
-            movies.addAll(newMovies)
-            notifyDataSetChanged()
-        }
+        movies.clear()
+        movies.addAll(newMovies)
+        diffResult.dispatchUpdatesTo(this)
     }
 }

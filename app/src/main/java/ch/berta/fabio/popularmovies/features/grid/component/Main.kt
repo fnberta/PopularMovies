@@ -53,7 +53,6 @@ data class GridUiEvents(
 data class GridState(
         val sort: Sort,
         val movies: List<GridRowViewData> = emptyList(),
-        val diffTransition: Boolean = true,
         val empty: Boolean = false,
         val loading: Boolean = false,
         val loadingMore: Boolean = false,

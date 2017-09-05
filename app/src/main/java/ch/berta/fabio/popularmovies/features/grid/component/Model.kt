@@ -60,9 +60,9 @@ fun model(
             }
             .switchMap {
                 if (it.option == SortOption.SORT_FAVORITE) {
-                    movieStorage.getFavMovies().map { moviesReducer(it, true, false) }
+                    movieStorage.getFavMovies().map { moviesReducer(it, true) }
                 } else {
-                    movieStorage.getOnlMovies(1, it.option, false).map { moviesReducer(it, false, false) }
+                    movieStorage.getOnlMovies(1, it.option, false).map { moviesReducer(it, false) }
                 }.startWith(sortSelectionReducer(it))
             }
 
@@ -77,7 +77,7 @@ fun model(
             .withLatestFrom(pageWithSortSelections, { _, pws -> pws })
             .switchMap {
                 movieStorage.getOnlMovies(it.page, it.sort.option, true)
-                        .map { moviesReducer(it, false, true) }
+                        .map { moviesReducer(it, false) }
                         .startWith(refreshMoviesReducer())
             }
 
@@ -111,7 +111,7 @@ private fun loadMoreMoviesReducer(loadMoreViewData: GridRowLoadMoreViewData): Gr
     it.copy(loadingMore = true, movies = it.movies.plus(loadMoreViewData))
 }
 
-private fun moviesReducer(result: GetMoviesResult, fromFav: Boolean, diffTrans: Boolean): GridStateReducer = { state ->
+private fun moviesReducer(result: GetMoviesResult, fromFav: Boolean): GridStateReducer = { state ->
     when (result) {
         is GetMoviesResult.Failure -> state.copy(
                 loading = false,
@@ -127,7 +127,6 @@ private fun moviesReducer(result: GetMoviesResult, fromFav: Boolean, diffTrans: 
             }
             state.copy(
                     movies = movies,
-                    diffTransition = diffTrans,
                     empty = movies.isEmpty(),
                     loading = false,
                     loadingMore = false,
@@ -142,7 +141,6 @@ private fun moviesOnlMoreReducer(result: GetMoviesResult): GridStateReducer = { 
         is GetMoviesResult.Failure -> state.copy(
                 loadingMore = false,
                 movies = state.movies.minus(state.movies.last()),
-                diffTransition = true,
                 message = R.string.snackbar_movies_load_failed
         )
         is GetMoviesResult.Success -> {
@@ -152,7 +150,6 @@ private fun moviesOnlMoreReducer(result: GetMoviesResult): GridStateReducer = { 
             }
             state.copy(
                     movies = state.movies.minus(state.movies.last()).plus(movies),
-                    diffTransition = true,
                     loadingMore = false
             )
         }
